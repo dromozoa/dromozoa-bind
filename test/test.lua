@@ -16,38 +16,47 @@
 -- along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
 local bind = require "dromozoa.bind"
+local test = bind.test
 
 assert(bind.get_log_level() == 0)
 assert(not bind.get_raise_error())
 
-local result, message = pcall(bind.test_throw)
+local result, message = pcall(test.throw)
 assert(not result)
 assert(message:find("exception caught"))
 assert(message:find("test"))
 
-local result, message = pcall(bind.test_throw_int)
+local result, message = pcall(test.throw_int)
 assert(not result)
 assert(message:find("exception caught"))
 
-local result, message, code = bind.test_raise3()
+local result, message, code = test.raise3()
 assert(not result)
 assert(message == "test")
 assert(code == 42)
 
 assert(bind.set_raise_error(true))
 
-local result, message = pcall(bind.test_raise0)
+local result, message = pcall(test.raise0)
+-- print(result, message)
 assert(not result)
 assert(message:find("error raised"))
 
-local result, message = pcall(bind.test_raise1)
+local result, message = pcall(test.raise1)
 assert(not result)
 assert(message:find("error raised"))
 
-local result, message = pcall(bind.test_raise2)
+local result, message = pcall(test.raise2)
 assert(not result)
 assert(message:find("test"))
 
-local result, message = pcall(bind.test_raise3)
+local result, message = pcall(test.raise3)
 assert(not result)
 assert(message:find("test"))
+
+local t = test.new()
+assert(t:get() == 0)
+assert(t:set(42):get() == 42)
+
+assert(test.zero == 0)
+assert(test.one == 1)
