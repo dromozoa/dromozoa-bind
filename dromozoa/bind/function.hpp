@@ -34,12 +34,27 @@ namespace dromozoa {
       static int value(lua_State* L) {
         try {
           int result = T(L);
+          if (get_raise_error()) {
+            if (result <= 0 || !lua_toboolean(L, -result)) {
+              if (result <= 1) {
+                lua_pushliteral(L, "error raised");
+              } else if (result > 2) {
+                lua_pop(L, result - 2);
+              }
+              return lua_error(L);
+            }
+          }
           return result;
         } catch (const std::exception& e) {
-          return luaL_error(L, "caught exception: %s", e.what());
+          return luaL_error(L, "exception caught: %s", e.what());
         } catch (...) {
-          return luaL_error(L, "caught exception");
+          return luaL_error(L, "exception caught");
         }
+      }
+
+      static void set_field(lua_State* L, const char* key) {
+        lua_pushcfunction(L, value);
+        lua_setfield(L, -2, key);
       }
     };
   }
