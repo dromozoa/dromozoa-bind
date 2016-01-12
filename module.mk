@@ -27,13 +27,13 @@ all: $(TARGET)
 clean:
 	rm -f *.o $(TARGET)
 
-bind.so: bind.o main.o
+bind.so: bind.o module.o
 	$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 bind.o: bind.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $<
 
-main.o: main.cpp
+module.o: module.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $<
 
 install:
