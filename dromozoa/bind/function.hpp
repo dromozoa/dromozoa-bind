@@ -35,13 +35,15 @@ namespace dromozoa {
     template <lua_CFunction T>
     struct function {
       static int value(lua_State* L) {
+        int result;
         try {
-          return detail::handle_result(L, T(L));
+          result = T(L);
         } catch (const std::exception& e) {
           return detail::handle_exception(L, e);
         } catch (...) {
           return detail::handle_exception(L);
         }
+        return detail::handle_result(L, result);
       }
 
       static void set_field(lua_State* L, const char* key) {

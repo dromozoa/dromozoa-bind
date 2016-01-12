@@ -38,6 +38,7 @@ assert(code == 42)
 assert(bind.set_raise_error(true))
 
 local result, message = pcall(test.raise0)
+-- print(result, message)
 assert(not result)
 assert(message:find("error raised"))
 
