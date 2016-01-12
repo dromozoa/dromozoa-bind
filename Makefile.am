@@ -15,7 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
-EXTRA_DIST = .gitignore COPYING README.md dromozoa dromozoa-bind-*.rockspec main.cpp test test.sh version
+EXTRA_DIST = \
+	.gitignore \
+	COPYING \
+	README.md \
+	dromozoa \
+	dromozoa-bind-*.rockspec \
+	module.cpp \
+	module.mk \
+	test \
+	test.sh \
+	version
 
 noinst_LTLIBRARIES = libdromozoa-bind.la
 
