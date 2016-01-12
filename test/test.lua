@@ -56,3 +56,6 @@ assert(message:find("test"))
 local t = test.new()
 assert(t:get() == 0)
 assert(t:set(42):get() == 42)
+
+assert(test.zero == 0)
+assert(test.one == 1)

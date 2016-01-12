@@ -15,13 +15,20 @@
 // You should have received a copy of the GNU General Public License
 // along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef DROMOZOA_BIND_HPP
-#define DROMOZOA_BIND_HPP
+#ifndef DROMOZOA_BIND_SET_FIELD_HPP
+#define DROMOZOA_BIND_SET_FIELD_HPP
 
-#include "bind/function.hpp"
-#include "bind/initialize.hpp"
-#include "bind/log_level.hpp"
-#include "bind/push_success.hpp"
-#include "bind/set_field.hpp"
+extern "C" {
+#include "lua.h"
+}
+
+namespace dromozoa {
+  namespace bind {
+    void set_field(lua_State* L, const char* key, lua_Integer value);
+  }
+}
+
+#define DROMOZOA_BIND_SET_FIELD(L, value) \
+  dromozoa::bind::set_field(L, #value, (value))
 
 #endif

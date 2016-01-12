@@ -90,6 +90,11 @@ namespace dromozoa {
       }
     }
 
+    void set_field(lua_State* L, const char* key, lua_Integer value) {
+      lua_pushinteger(L, value);
+      lua_setfield(L, -2, key);
+    }
+
     void initialize(lua_State* L) {
       function<impl_set_log_level>::set_field(L, "set_log_level");
       function<impl_get_log_level>::set_field(L, "get_log_level");

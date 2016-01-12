@@ -25,6 +25,9 @@ extern "C" {
 #include "dromozoa/bind.hpp"
 
 namespace dromozoa {
+  using bind::function;
+  using bind::push_success;
+
   namespace {
     int impl_throw(lua_State*) {
       throw std::runtime_error("test");
@@ -65,7 +68,7 @@ namespace dromozoa {
 
     int impl_set(lua_State* L) {
       *static_cast<int*>(luaL_checkudata(L, 1, "dromozoa.bind.test")) = luaL_checkinteger(L, 2);
-      return bind::push_success(L);
+      return push_success(L);
     }
 
     int impl_get(lua_State* L) {
@@ -76,20 +79,28 @@ namespace dromozoa {
 
   int open_test(lua_State* L) {
     lua_newtable(L);
-    bind::function<impl_throw>::set_field(L, "throw");
-    bind::function<impl_throw_int>::set_field(L, "throw_int");
-    bind::function<impl_raise0>::set_field(L, "raise0");
-    bind::function<impl_raise1>::set_field(L, "raise1");
-    bind::function<impl_raise2>::set_field(L, "raise2");
-    bind::function<impl_raise3>::set_field(L, "raise3");
-    bind::function<impl_new>::set_field(L, "new");
-    bind::function<impl_set>::set_field(L, "set");
-    bind::function<impl_get>::set_field(L, "get");
+    function<impl_throw>::set_field(L, "throw");
+    function<impl_throw_int>::set_field(L, "throw_int");
+    function<impl_raise0>::set_field(L, "raise0");
+    function<impl_raise1>::set_field(L, "raise1");
+    function<impl_raise2>::set_field(L, "raise2");
+    function<impl_raise3>::set_field(L, "raise3");
+    function<impl_new>::set_field(L, "new");
+    function<impl_set>::set_field(L, "set");
+    function<impl_get>::set_field(L, "get");
 
     luaL_newmetatable(L, "dromozoa.bind.test");
     lua_pushvalue(L, -2);
     lua_setfield(L, -2, "__index");
     lua_pop(L, 1);
+
+    enum {
+      zero = 0,
+      one = 1,
+    };
+
+    DROMOZOA_BIND_SET_FIELD(L, zero);
+    DROMOZOA_BIND_SET_FIELD(L, one);
 
     return 1;
   }
