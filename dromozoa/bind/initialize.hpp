@@ -15,12 +15,17 @@
 // You should have received a copy of the GNU General Public License
 // along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef DROMOZOA_BIND_HPP
-#define DROMOZOA_BIND_HPP
+#ifndef DROMOZOA_BIND_INITIALIZE_HPP
+#define DROMOZOA_BIND_INITIALIZE_HPP
 
-#include "bind/function.hpp"
-#include "bind/initialize.hpp"
-#include "bind/log_level.hpp"
-#include "bind/push_success.hpp"
+extern "C" {
+#include "lua.h"
+}
+
+namespace dromozoa {
+  namespace bind {
+    void initialize(lua_State* L);
+  }
+}
 
 #endif

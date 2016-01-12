@@ -21,14 +21,12 @@ extern "C" {
 }
 
 #include "dromozoa/bind.hpp"
-#include "dromozoa/bind/function.hpp"
-#include "dromozoa/bind/log_level.hpp"
-#include "dromozoa/bind/push_success.hpp"
 
 namespace dromozoa {
   namespace bind {
     namespace {
       int log_level = 0;
+      bool raise_error = false;
 
       int impl_set_log_level(lua_State* L) {
         log_level = luaL_checkinteger(L, 1);
@@ -40,8 +38,6 @@ namespace dromozoa {
         lua_pushinteger(L, log_level);
         return 1;
       }
-
-      bool raise_error = false;
 
       int impl_set_raise_error(lua_State* L) {
         raise_error = lua_toboolean(L, 1);

@@ -15,15 +15,17 @@
 // You should have received a copy of the GNU General Public License
 // along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef DROMOZOA_PUSH_SUCCESS_HPP
-#define DROMOZOA_PUSH_SUCCESS_HPP
+#ifndef DROMOZOA_BIND_PUSH_SUCCESS_HPP
+#define DROMOZOA_BIND_PUSH_SUCCESS_HPP
 
 extern "C" {
 #include "lua.h"
 }
 
 namespace dromozoa {
-  int push_success(lua_State* L);
+  namespace bind {
+    int push_success(lua_State* L);
+  }
 }
 
 #endif

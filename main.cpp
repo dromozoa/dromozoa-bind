@@ -22,7 +22,6 @@ extern "C" {
 #include <stdexcept>
 
 #include "dromozoa/bind.hpp"
-#include "dromozoa/bind/function.hpp"
 
 namespace dromozoa {
   namespace {
@@ -57,7 +56,7 @@ namespace dromozoa {
     }
   }
 
-  void initialize(lua_State* L) {
+  void test_initialize(lua_State* L) {
     bind::function<impl_test_throw>::set_field(L, "test_throw");
     bind::function<impl_test_throw_int>::set_field(L, "test_throw_int");
     bind::function<impl_test_raise0>::set_field(L, "test_raise0");
@@ -70,6 +69,6 @@ namespace dromozoa {
 extern "C" int luaopen_dromozoa_bind(lua_State* L) {
   lua_newtable(L);
   dromozoa::bind::initialize(L);
-  dromozoa::initialize(L);
+  dromozoa::test_initialize(L);
   return 1;
 }
