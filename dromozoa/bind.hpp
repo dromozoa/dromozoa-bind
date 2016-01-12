@@ -22,5 +22,6 @@
 #include "bind/initialize.hpp"
 #include "bind/log_level.hpp"
 #include "bind/push_success.hpp"
+#include "bind/set_field.hpp"
 
 #endif

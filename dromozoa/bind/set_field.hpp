@@ -15,43 +15,20 @@
 // You should have received a copy of the GNU General Public License
 // along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef DROMOZOA_BIND_FUNCTION_HPP
-#define DROMOZOA_BIND_FUNCTION_HPP
+#ifndef DROMOZOA_BIND_SET_FIELD_HPP
+#define DROMOZOA_BIND_SET_FIELD_HPP
 
 extern "C" {
 #include "lua.h"
 }
 
-#include <exception>
-
 namespace dromozoa {
   namespace bind {
-    namespace detail {
-      int handle_result(lua_State* L, int result);
-      int handle_exception(lua_State* L, const std::exception& e);
-      int handle_exception(lua_State* L);
-    }
-
-    template <lua_CFunction T>
-    struct function {
-      static int value(lua_State* L) {
-        int result;
-        try {
-          result = T(L);
-        } catch (const std::exception& e) {
-          return detail::handle_exception(L, e);
-        } catch (...) {
-          return detail::handle_exception(L);
-        }
-        return detail::handle_result(L, result);
-      }
-
-      static void set_field(lua_State* L, const char* key) {
-        lua_pushcfunction(L, value);
-        lua_setfield(L, -2, key);
-      }
-    };
+    void set_field(lua_State* L, const char* key, lua_Integer value);
   }
 }
+
+#define DROMOZOA_BIND_SET_FIELD(L, value) \
+  dromozoa::bind::set_field(L, #value, (value))
 
 #endif
