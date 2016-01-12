@@ -20,35 +20,27 @@
 
 extern "C" {
 #include "lua.h"
-#include "lauxlib.h"
 }
 
 #include <exception>
 
-#include "raise_error.hpp"
-
 namespace dromozoa {
   namespace bind {
+    namespace detail {
+      int handle_result(lua_State* L, int result);
+      int handle_exception(lua_State* L, const std::exception& e);
+      int handle_exception(lua_State* L);
+    }
+
     template <lua_CFunction T>
     struct function {
       static int value(lua_State* L) {
         try {
-          int result = T(L);
-          if (get_raise_error()) {
-            if (result <= 0 || !lua_toboolean(L, -result)) {
-              if (result <= 1) {
-                lua_pushliteral(L, "error raised");
-              } else if (result > 2) {
-                lua_pop(L, result - 2);
-              }
-              return lua_error(L);
-            }
-          }
-          return result;
+          return detail::handle_result(L, T(L));
         } catch (const std::exception& e) {
-          return luaL_error(L, "exception caught: %s", e.what());
+          return detail::handle_exception(L, e);
         } catch (...) {
-          return luaL_error(L, "exception caught");
+          return detail::handle_exception(L);
         }
       }
 

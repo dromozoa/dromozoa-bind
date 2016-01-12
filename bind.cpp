@@ -21,6 +21,9 @@ extern "C" {
 }
 
 #include "dromozoa/bind.hpp"
+#include "dromozoa/bind/function.hpp"
+#include "dromozoa/bind/log_level.hpp"
+#include "dromozoa/bind/push_success.hpp"
 
 namespace dromozoa {
   namespace bind {
@@ -50,10 +53,30 @@ namespace dromozoa {
         lua_pushboolean(L, raise_error);
         return 1;
       }
+    }
 
-      void set_cfunction(lua_State* L, const char* key, lua_CFunction cfunction) {
-        lua_pushcfunction(L, cfunction);
-        lua_setfield(L, -2, key);
+    namespace detail {
+      int handle_result(lua_State* L, int result) {
+        if (raise_error) {
+          if (result <= 0 || !lua_toboolean(L, -result)) {
+            if (result <= 1) {
+              lua_pushliteral(L, "error raised");
+            } else if (result > 2) {
+              lua_pop(L, result - 2);
+            }
+            return lua_error(L);
+          }
+        }
+        return result;
+      }
+
+      int handle_exception(lua_State* L, const std::exception& e) {
+        return luaL_error(L, "exception caught: %s", e.what());
+      }
+
+      int handle_exception(lua_State* L) {
+        lua_pushliteral(L, "exception caught");
+        return lua_error(L);
       }
     }
 
@@ -61,15 +84,21 @@ namespace dromozoa {
       return log_level;
     }
 
-    bool get_raise_error() {
-      return raise_error;
+    int push_success(lua_State* L) {
+      if (lua_toboolean(L, 1)) {
+        lua_pushvalue(L, 1);
+        return 1;
+      } else {
+        lua_pushboolean(L, true);
+        return 1;
+      }
     }
 
     void initialize(lua_State* L) {
-      set_cfunction(L, "set_log_level", impl_set_log_level);
-      set_cfunction(L, "get_log_level", impl_get_log_level);
-      set_cfunction(L, "set_raise_error", impl_set_raise_error);
-      set_cfunction(L, "get_raise_error", impl_get_raise_error);
+      function<impl_set_log_level>::set_field(L, "set_log_level");
+      function<impl_get_log_level>::set_field(L, "get_log_level");
+      function<impl_set_raise_error>::set_field(L, "set_raise_error");
+      function<impl_get_raise_error>::set_field(L, "get_raise_error");
     }
   }
 }

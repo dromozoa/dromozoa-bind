@@ -30,6 +30,10 @@ namespace dromozoa {
       throw std::runtime_error("test");
     }
 
+    int impl_test_throw_int(lua_State*) {
+      throw 42;
+    }
+
     int impl_test_raise0(lua_State*) {
       return 0;
     }
@@ -55,6 +59,7 @@ namespace dromozoa {
 
   void initialize(lua_State* L) {
     bind::function<impl_test_throw>::set_field(L, "test_throw");
+    bind::function<impl_test_throw_int>::set_field(L, "test_throw_int");
     bind::function<impl_test_raise0>::set_field(L, "test_raise0");
     bind::function<impl_test_raise1>::set_field(L, "test_raise1");
     bind::function<impl_test_raise2>::set_field(L, "test_raise2");

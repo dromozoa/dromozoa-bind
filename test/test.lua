@@ -25,12 +25,16 @@ assert(not result)
 assert(message:find("exception caught"))
 assert(message:find("test"))
 
+local result, message = pcall(bind.test_throw_int)
+assert(not result)
+assert(message:find("exception caught"))
+
 local result, message, code = bind.test_raise3()
 assert(not result)
 assert(message == "test")
 assert(code == 42)
 
-bind.set_raise_error(true)
+assert(bind.set_raise_error(true))
 
 local result, message = pcall(bind.test_raise0)
 assert(not result)
