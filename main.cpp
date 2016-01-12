@@ -60,7 +60,7 @@ namespace dromozoa {
     }
 
     int impl_new(lua_State* L) {
-      *static_cast<int*>(lua_newuserdata(L, sizeof(int))) = luaL_optinteger(L, 1, 0);
+      *static_cast<int*>(lua_newuserdata(L, sizeof(int))) = 0;
       luaL_getmetatable(L, "dromozoa.bind.test");
       lua_setmetatable(L, -2);
       return 1;
