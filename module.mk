@@ -20,6 +20,7 @@ CXXFLAGS = -Wall -W $(CFLAGS)
 LDFLAGS = -L$(LUA_LIBDIR) $(LIBFLAG)
 LDLIBS = -ldl
 
+OBJS = bind.o module.o
 TARGET = bind.so
 
 all: $(TARGET)
@@ -27,7 +28,7 @@ all: $(TARGET)
 clean:
 	rm -f *.o $(TARGET)
 
-bind.so: bind.o module.o
+bind.so: $(OBJS)
 	$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 .cpp.o:
