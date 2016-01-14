@@ -30,10 +30,7 @@ clean:
 bind.so: bind.o module.o
 	$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
-bind.o: bind.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $<
-
-module.o: module.cpp
+.cpp.o:
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $<
 
 install:
