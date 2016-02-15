@@ -96,41 +96,99 @@ namespace dromozoa {
     }
   }
 
-  int open_test(lua_State* L) {
-    lua_newtable(L);
-    function<impl_throw>::set_field(L, "throw");
-    function<impl_throw_int>::set_field(L, "throw_int");
-    function<impl_raise0>::set_field(L, "raise0");
-    function<impl_raise1>::set_field(L, "raise1");
-    function<impl_raise2>::set_field(L, "raise2");
-    function<impl_raise3>::set_field(L, "raise3");
-    function<impl_raise_false>::set_field(L, "raise_false");
-    function<impl_new>::set_field(L, "new");
-    function<impl_set>::set_field(L, "set");
-    function<impl_get>::set_field(L, "get");
-    function<impl_translate_range>::set_field(L, "translate_range");
+  template <bool T_check>
+  struct checked {
+    static int open_test(lua_State* L, const char* metaname) {
+      lua_newtable(L);
+      function<impl_throw, T_check>::set_field(L, "throw");
+      function<impl_throw_int, T_check>::set_field(L, "throw_int");
+      function<impl_raise0, T_check>::set_field(L, "raise0");
+      function<impl_raise1, T_check>::set_field(L, "raise1");
+      function<impl_raise2, T_check>::set_field(L, "raise2");
+      function<impl_raise3, T_check>::set_field(L, "raise3");
+      function<impl_raise_false, T_check>::set_field(L, "raise_false");
+      function<impl_new, T_check>::set_field(L, "new");
+      function<impl_set, T_check>::set_field(L, "set");
+      function<impl_get, T_check>::set_field(L, "get");
+      function<impl_translate_range, T_check>::set_field(L, "translate_range");
 
-    luaL_newmetatable(L, "dromozoa.bind.test");
-    lua_pushvalue(L, -2);
-    lua_setfield(L, -2, "__index");
-    lua_pop(L, 1);
+      luaL_newmetatable(L, metaname);
+      lua_pushvalue(L, -2);
+      lua_setfield(L, -2, "__index");
+      lua_pop(L, 1);
 
-    enum {
-      zero = 0,
-      one = 1,
-    };
+      enum {
+        zero = 0,
+        one = 1,
+      };
 
-    DROMOZOA_BIND_SET_FIELD(L, zero);
-    DROMOZOA_BIND_SET_FIELD(L, one);
+      DROMOZOA_BIND_SET_FIELD(L, zero);
+      DROMOZOA_BIND_SET_FIELD(L, one);
 
-    return 1;
-  }
+      return 1;
+    }
+  };
 }
 
 extern "C" int luaopen_dromozoa_bind(lua_State* L) {
   lua_newtable(L);
+
+  lua_newtable(L);
   dromozoa::bind::initialize(L);
-  dromozoa::open_test(L);
+  dromozoa::checked<true>::open_test(L, "dromozoa.bind.test");
   lua_setfield(L, -2, "test");
+
+  // table: checked
+  // table: module
+
+  lua_pushvalue(L, -1);
+
+  // table: checked
+  // table: checked
+  // table: module
+
+  lua_setfield(L, -3, "checked");
+
+  // table: checked
+  // table: module
+
+  lua_newtable(L);
+
+  // table: metatable
+  // table: checked
+  // table: module
+
+  lua_pushvalue(L, -2);
+
+  // table: checked
+  // table: metatable
+  // table: checked
+  // table: module
+
+  lua_setfield(L, -2, "__index");
+
+  // table: metatable
+  // table: checked
+  // table: module
+
+  lua_setmetatable(L, -3);
+
+  // table: checked
+  // table: module
+
+  lua_pop(L, 1);
+
+  // table: module
+
+  lua_newtable(L);
+  dromozoa::bind::initialize(L);
+  dromozoa::checked<false>::open_test(L, "dromozoa.bind.test.default");
+  lua_setfield(L, -2, "test");
+
+  // table: default
+  // table: module
+
+  lua_setfield(L, -2, "default");
+
   return 1;
 }

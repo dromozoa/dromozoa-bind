@@ -20,3 +20,8 @@ local test = bind.test
 
 assert(type(test.throw) == "function")
 assert(type(function () end) == "function")
+
+bind.set_raise_error(true)
+assert(not pcall(test.raise1))
+assert(not pcall(bind.checked.test.raise1))
+assert(bind.default.test.raise1() == nil)
