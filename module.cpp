@@ -138,56 +138,16 @@ extern "C" int luaopen_dromozoa_bind(lua_State* L) {
   dromozoa::checked<true>::open_test(L, "dromozoa.bind.test");
   lua_setfield(L, -2, "test");
 
-  // table: checked
-  // table: module
-
-  lua_pushvalue(L, -1);
-
-  // table: checked
-  // table: checked
-  // table: module
-
-  lua_setfield(L, -3, "checked");
-
-  // table: checked
-  // table: module
-
   lua_newtable(L);
-
-  // table: metatable
-  // table: checked
-  // table: module
-
   lua_pushvalue(L, -2);
-
-  // table: checked
-  // table: metatable
-  // table: checked
-  // table: module
-
   lua_setfield(L, -2, "__index");
-
-  // table: metatable
-  // table: checked
-  // table: module
-
   lua_setmetatable(L, -3);
-
-  // table: checked
-  // table: module
-
-  lua_pop(L, 1);
-
-  // table: module
+  lua_setfield(L, -2, "checked");
 
   lua_newtable(L);
   dromozoa::bind::initialize(L);
   dromozoa::checked<false>::open_test(L, "dromozoa.bind.test.default");
   lua_setfield(L, -2, "test");
-
-  // table: default
-  // table: module
-
   lua_setfield(L, -2, "default");
 
   return 1;
