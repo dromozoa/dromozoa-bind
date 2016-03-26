@@ -22,9 +22,12 @@ extern "C" {
 
 #include <stddef.h>
 
+#include <iostream>
 #include <stdexcept>
+#include <string>
 
 #include "dromozoa/bind.hpp"
+#include "dromozoa/luaX_push.hpp"
 
 namespace dromozoa {
   using bind::function;
@@ -128,6 +131,48 @@ namespace dromozoa {
       return 1;
     }
   };
+
+  namespace {
+    int impl_luaX_function(lua_State*) {
+      throw 42;
+    }
+
+    int impl_luaX_push(lua_State* L) {
+      luaX_push(L, luaX_nil);
+      luaX_push(L, true);
+      luaX_push(L, false);
+      luaX_push(L, impl_luaX_function);
+      return 4;
+    }
+
+    int impl_luaX_push_integer(lua_State* L) {
+      int i = 42;
+      size_t s = 42;
+      lua_Integer l = 42;
+      luaX_push(L, i);
+      luaX_push(L, s);
+      luaX_push(L, l);
+      return 3;
+    }
+
+    int impl_luaX_push_string(lua_State* L) {
+      char a[] = { 'f', 'o', 'o', '\0' };
+      char* p = a;
+      const char* c = a;
+      luaX_push(L, a);
+      luaX_push(L, p);
+      luaX_push(L, c);
+      luaX_push(L, "foo");
+      luaX_push(L, std::string("foo"));
+      return 5;
+    }
+  }
+
+  void initialize_luaX(lua_State* L) {
+    function<impl_luaX_push>::set_field(L, "luaX_push");
+    function<impl_luaX_push_integer>::set_field(L, "luaX_push_integer");
+    function<impl_luaX_push_string>::set_field(L, "luaX_push_string");
+  }
 }
 
 extern "C" int luaopen_dromozoa_bind(lua_State* L) {
@@ -136,6 +181,7 @@ extern "C" int luaopen_dromozoa_bind(lua_State* L) {
   lua_newtable(L);
   dromozoa::bind::initialize(L);
   dromozoa::checked<true>::open_test(L, "dromozoa.bind.test");
+  dromozoa::initialize_luaX(L);
   lua_setfield(L, -2, "test");
 
   lua_newtable(L);
