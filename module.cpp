@@ -27,7 +27,7 @@ extern "C" {
 #include <string>
 
 #include "dromozoa/bind.hpp"
-#include "dromozoa/luaX_push.hpp"
+#include "dromozoa/luaX.hpp"
 
 namespace dromozoa {
   using bind::function;
@@ -138,33 +138,37 @@ namespace dromozoa {
     }
 
     int impl_luaX_push(lua_State* L) {
-      luaX_push(L, luaX_nil);
-      luaX_push(L, true);
-      luaX_push(L, false);
-      luaX_push(L, impl_luaX_function);
-      return 4;
+      return luaX_State(L)
+        .push(luaX_nil)
+        .new_table()
+        .set_field("t", true)
+        .set_field(1, false)
+        .set_field("f", impl_luaX_function)
+        .end();
     }
 
     int impl_luaX_push_integer(lua_State* L) {
       int i = 42;
       size_t s = 42;
       lua_Integer l = 42;
-      luaX_push(L, i);
-      luaX_push(L, s);
-      luaX_push(L, l);
-      return 3;
+      return luaX_State(L)
+        .push(i)
+        .push(s)
+        .push(l)
+        .end();
     }
 
     int impl_luaX_push_string(lua_State* L) {
       char a[] = { 'f', 'o', 'o', '\0' };
       char* p = a;
       const char* c = a;
-      luaX_push(L, a);
-      luaX_push(L, p);
-      luaX_push(L, c);
-      luaX_push(L, "foo");
-      luaX_push(L, std::string("foo"));
-      return 5;
+      return luaX_State(L)
+        .push(a)
+        .push(p)
+        .push(c)
+        .push("foo")
+        .push(std::string("foo"))
+        .end();
     }
   }
 
