@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef DROMOZOA_LUAX_SET_FIELD_HPP
-#define DROMOZOA_LUAX_SET_FIELD_HPP
+#ifndef DROMOZOA_LUAX_SET_TABLE_HPP
+#define DROMOZOA_LUAX_SET_TABLE_HPP
 
 extern "C" {
 #include <lua.h>
@@ -27,14 +27,14 @@ extern "C" {
 namespace dromozoa {
   namespace detail {
     template <class T1, class T2>
-    inline void luaX_set_field(lua_State* L, const T1& key, const T2& value) {
+    inline void luaX_set_table(lua_State* L, const T1& key, const T2& value) {
       luaX_push(L, key);
       luaX_push(L, value);
       lua_settable(L, -3);
     }
   }
 
-  using detail::luaX_set_field;
+  using detail::luaX_set_table;
 }
 
 #endif

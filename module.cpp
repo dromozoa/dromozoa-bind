@@ -137,17 +137,17 @@ namespace dromozoa {
       throw 42;
     }
 
-    int impl_luaX_push(lua_State* L) {
+    int impl_luaX_test(lua_State* L) {
       return luaX_State(L)
         .push(luaX_nil)
         .new_table()
-        .set_field("t", true)
-        .set_field(1, false)
-        .set_field("f", impl_luaX_function)
+        .set_table("t", true)
+        .set_table(1, false)
+        .set_table("f", impl_luaX_function)
         .end();
     }
 
-    int impl_luaX_push_integer(lua_State* L) {
+    int impl_luaX_test_integer(lua_State* L) {
       int i = 42;
       size_t s = 42;
       lua_Integer l = 42;
@@ -158,7 +158,7 @@ namespace dromozoa {
         .end();
     }
 
-    int impl_luaX_push_string(lua_State* L) {
+    int impl_luaX_test_string(lua_State* L) {
       char a[] = { 'f', 'o', 'o', '\0' };
       char* p = a;
       const char* c = a;
@@ -173,9 +173,10 @@ namespace dromozoa {
   }
 
   void initialize_luaX(lua_State* L) {
-    function<impl_luaX_push>::set_field(L, "luaX_push");
-    function<impl_luaX_push_integer>::set_field(L, "luaX_push_integer");
-    function<impl_luaX_push_string>::set_field(L, "luaX_push_string");
+    luaX_State(L)
+      .set_table("luaX_test", impl_luaX_test)
+      .set_table("luaX_test_integer", impl_luaX_test_integer)
+      .set_table("luaX_test_string", impl_luaX_test_string);
   }
 }
 

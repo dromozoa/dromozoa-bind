@@ -19,7 +19,7 @@
 #define DROMOZOA_LUAX_HPP
 
 #include "luaX_push.hpp"
-#include "luaX_set_field.hpp"
+#include "luaX_set_table.hpp"
 
 namespace dromozoa {
   namespace detail {
@@ -28,20 +28,20 @@ namespace dromozoa {
       explicit luaX_State(lua_State* L)
         : L_(L), top_(lua_gettop(L)) {}
 
-      luaX_State& new_table() {
-        lua_newtable(L_);
-        return *this;
-      }
-
       template <class U>
       luaX_State& push(const U& value) {
         luaX_push(L_, value);
         return *this;
       }
 
+      luaX_State& new_table() {
+        lua_newtable(L_);
+        return *this;
+      }
+
       template <class U1, class U2>
-      luaX_State& set_field(const U1& key, const U2& value) {
-        luaX_set_field(L_, key, value);
+      luaX_State& set_table(const U1& key, const U2& value) {
+        luaX_set_table(L_, key, value);
         return *this;
       }
 
