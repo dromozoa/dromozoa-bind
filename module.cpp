@@ -27,7 +27,7 @@ extern "C" {
 #include <string>
 
 #include "dromozoa/bind.hpp"
-#include "dromozoa/luaX.hpp"
+#include "dromozoa/luacxx.hpp"
 
 namespace dromozoa {
   using bind::function;

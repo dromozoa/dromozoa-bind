@@ -18,6 +18,9 @@
 #ifndef DROMOZOA_LUAX_HPP
 #define DROMOZOA_LUAX_HPP
 
+#include "luacxx.hpp"
+
+/*
 #include "luaX_push.hpp"
 #include "luaX_set_table.hpp"
 
@@ -57,5 +60,6 @@ namespace dromozoa {
 
   using detail::luaX_State;
 }
+*/
 
 #endif
