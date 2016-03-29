@@ -128,8 +128,7 @@ namespace dromozoa {
         } catch (const std::exception& e) {
           return luaL_error(L, "exception caught: %s", e.what());
         } catch (...) {
-          lua_pushliteral(L, "exception caught");
-          return lua_error(L);
+          return luaL_error(L, "exception caught");
         }
       }
 

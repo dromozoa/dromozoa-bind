@@ -135,16 +135,15 @@ namespace dromozoa {
   namespace {
     int impl_luaX_function(lua_State*) {
       throw 42;
+      // throw std::runtime_error("a runtime_error");
     }
 
-    int impl_luaX_test(lua_State* L) {
-      return luaX_State(L)
-        .push(luaX_nil)
+    void impl_luaX_test(luaX_State& LX) {
+      LX.push(luaX_nil)
         .new_table()
         .set_table("t", true)
         .set_table(1, false)
-        .set_table("f", impl_luaX_function)
-        .end();
+        .set_table("f", impl_luaX_function);
     }
 
     int impl_luaX_test_integer(lua_State* L) {
