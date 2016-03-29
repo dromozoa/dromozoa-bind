@@ -187,10 +187,10 @@ namespace dromozoa {
   }
 
   using luacxx::luaX_Nil;
-  using luacxx::luaX_State;
   using luacxx::luaX_nil;
   using luacxx::luaX_push;
   using luacxx::luaX_set_table;
+  using luacxx::luaX_State;
 }
 
 #endif
