@@ -32,18 +32,36 @@ namespace dromozoa {
       int handle_exception(lua_State* L);
     }
 
-    template <lua_CFunction T>
+    template <lua_CFunction T_function, bool T_check = true>
     struct function {
       static int value(lua_State* L) {
         int result;
         try {
-          result = T(L);
+          result = T_function(L);
         } catch (const std::exception& e) {
           return detail::handle_exception(L, e);
         } catch (...) {
           return detail::handle_exception(L);
         }
         return detail::handle_result(L, result);
+      }
+
+      static void set_field(lua_State* L, const char* key) {
+        lua_pushcfunction(L, value);
+        lua_setfield(L, -2, key);
+      }
+    };
+
+    template <lua_CFunction T_function>
+    struct function<T_function, false> {
+      static int value(lua_State* L) {
+        try {
+          return T_function(L);
+        } catch (const std::exception& e) {
+          return detail::handle_exception(L, e);
+        } catch (...) {
+          return detail::handle_exception(L);
+        }
       }
 
       static void set_field(lua_State* L, const char* key) {

@@ -22,9 +22,12 @@ extern "C" {
 
 #include <stddef.h>
 
+#include <iostream>
 #include <stdexcept>
+#include <string>
 
 #include "dromozoa/bind.hpp"
+#include "dromozoa/luacxx.hpp"
 
 namespace dromozoa {
   using bind::function;
@@ -96,41 +99,106 @@ namespace dromozoa {
     }
   }
 
-  int open_test(lua_State* L) {
-    lua_newtable(L);
-    function<impl_throw>::set_field(L, "throw");
-    function<impl_throw_int>::set_field(L, "throw_int");
-    function<impl_raise0>::set_field(L, "raise0");
-    function<impl_raise1>::set_field(L, "raise1");
-    function<impl_raise2>::set_field(L, "raise2");
-    function<impl_raise3>::set_field(L, "raise3");
-    function<impl_raise_false>::set_field(L, "raise_false");
-    function<impl_new>::set_field(L, "new");
-    function<impl_set>::set_field(L, "set");
-    function<impl_get>::set_field(L, "get");
-    function<impl_translate_range>::set_field(L, "translate_range");
+  template <bool T_check>
+  struct checked {
+    static int open_test(lua_State* L, const char* metaname) {
+      lua_newtable(L);
+      function<impl_throw, T_check>::set_field(L, "throw");
+      function<impl_throw_int, T_check>::set_field(L, "throw_int");
+      function<impl_raise0, T_check>::set_field(L, "raise0");
+      function<impl_raise1, T_check>::set_field(L, "raise1");
+      function<impl_raise2, T_check>::set_field(L, "raise2");
+      function<impl_raise3, T_check>::set_field(L, "raise3");
+      function<impl_raise_false, T_check>::set_field(L, "raise_false");
+      function<impl_new, T_check>::set_field(L, "new");
+      function<impl_set, T_check>::set_field(L, "set");
+      function<impl_get, T_check>::set_field(L, "get");
+      function<impl_translate_range, T_check>::set_field(L, "translate_range");
 
-    luaL_newmetatable(L, "dromozoa.bind.test");
-    lua_pushvalue(L, -2);
-    lua_setfield(L, -2, "__index");
-    lua_pop(L, 1);
+      luaL_newmetatable(L, metaname);
+      lua_pushvalue(L, -2);
+      lua_setfield(L, -2, "__index");
+      lua_pop(L, 1);
 
-    enum {
-      zero = 0,
-      one = 1,
-    };
+      enum {
+        zero = 0,
+        one = 1,
+      };
 
-    DROMOZOA_BIND_SET_FIELD(L, zero);
-    DROMOZOA_BIND_SET_FIELD(L, one);
+      DROMOZOA_BIND_SET_FIELD(L, zero);
+      DROMOZOA_BIND_SET_FIELD(L, one);
 
-    return 1;
+      return 1;
+    }
+  };
+
+  namespace {
+    int impl_luaX_function(lua_State*) {
+      throw 42;
+      // throw std::runtime_error("a runtime_error");
+    }
+
+    void impl_luaX_test(luaX_State& LX) {
+      LX.push(luaX_nil)
+        .new_table()
+        .set_table("t", true)
+        .set_table(1, false)
+        .set_table("f", impl_luaX_function);
+    }
+
+    int impl_luaX_test_integer(lua_State* L) {
+      int i = 42;
+      size_t s = 42;
+      lua_Integer l = 42;
+      return luaX_State(L)
+        .push(i)
+        .push(s)
+        .push(l)
+        .end();
+    }
+
+    int impl_luaX_test_string(lua_State* L) {
+      char a[] = { 'f', 'o', 'o', '\0' };
+      char* p = a;
+      const char* c = a;
+      return luaX_State(L)
+        .push(a)
+        .push(p)
+        .push(c)
+        .push("foo")
+        .push(std::string("foo"))
+        .end();
+    }
+  }
+
+  void initialize_luaX(lua_State* L) {
+    luaX_State(L)
+      .set_table("luaX_test", impl_luaX_test)
+      .set_table("luaX_test_integer", impl_luaX_test_integer)
+      .set_table("luaX_test_string", impl_luaX_test_string);
   }
 }
 
 extern "C" int luaopen_dromozoa_bind(lua_State* L) {
   lua_newtable(L);
+
+  lua_newtable(L);
   dromozoa::bind::initialize(L);
-  dromozoa::open_test(L);
+  dromozoa::checked<true>::open_test(L, "dromozoa.bind.test");
+  dromozoa::initialize_luaX(L);
   lua_setfield(L, -2, "test");
+
+  lua_newtable(L);
+  lua_pushvalue(L, -2);
+  lua_setfield(L, -2, "__index");
+  lua_setmetatable(L, -3);
+  lua_setfield(L, -2, "checked");
+
+  lua_newtable(L);
+  dromozoa::bind::initialize(L);
+  dromozoa::checked<false>::open_test(L, "dromozoa.bind.test.default");
+  lua_setfield(L, -2, "test");
+  lua_setfield(L, -2, "default");
+
   return 1;
 }
