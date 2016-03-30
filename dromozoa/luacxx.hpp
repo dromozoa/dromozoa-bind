@@ -34,35 +34,69 @@ namespace dromozoa {
     static const luaX_Nil luaX_nil = 0;
 
     template <class T>
-    struct luaX_push_impl {};
+    struct luaX_Push {};
 
     template <class T>
     inline void luaX_push(lua_State* L, const T& value) {
-      luaX_push_impl<T>::apply(L, value);
+      luaX_Push<T>::apply(L, value);
+    }
+
+    template <class T1, class T2>
+    inline void luaX_push(lua_State* L, const T1& v1, const T2& v2) {
+      luaX_push(L, v1);
+      luaX_push(L, v2);
+    }
+
+    template <class T1, class T2, class T3>
+    inline void luaX_push(lua_State* L, const T1& v1, const T2& v2, const T3& v3) {
+      luaX_push(L, v1);
+      luaX_push(L, v2);
+      luaX_push(L, v3);
+    }
+
+    template <class T1, class T2, class T3, class T4>
+    inline void luaX_push(lua_State* L, const T1& v1, const T2& v2, const T3& v3, const T4& v4) {
+      luaX_push(L, v1);
+      luaX_push(L, v2);
+      luaX_push(L, v3);
+      luaX_push(L, v4);
     }
 
     template <class T, class T_key>
     inline void luaX_set_table(lua_State* L, const T_key& key, const T& value) {
-      luaX_push(L, key);
-      luaX_push(L, value);
+      luaX_push(L, key, value);
       lua_settable(L, -3);
     }
 
     class luaX_State {
     public:
-      explicit luaX_State(lua_State* L) : L_(L), top_(lua_gettop(L)) {}
+      explicit luaX_State(lua_State* L) : L_(L) {}
 
       lua_State* get() {
         return L_;
       }
 
-      int end() {
-        return lua_gettop(L_) - top_;
-      }
-
       template <class U>
       luaX_State& push(const U& value) {
         luaX_push(L_, value);
+        return *this;
+      }
+
+      template <class U1, class U2>
+      luaX_State& push(const U1& v1, const U2& v2) {
+        luaX_push(L_, v1, v2);
+        return *this;
+      }
+
+      template <class U1, class U2, class U3>
+      luaX_State& push(const U1& v1, const U2& v2, const U3& v3) {
+        luaX_push(L_, v1, v2, v3);
+        return *this;
+      }
+
+      template <class U1, class U2, class U3, class U4>
+      luaX_State& push(const U1& v1, const U2& v2, const U3& v3, const U4& v4) {
+        luaX_push(L_, v1, v2, v3, v4);
         return *this;
       }
 
@@ -89,13 +123,10 @@ namespace dromozoa {
 
     private:
       lua_State* L_;
-      int top_;
     };
 
-    typedef void (*luaX_CxxFunction)(luaX_State&);
-
     template <>
-    struct luaX_push_impl<luaX_Nil> {
+    struct luaX_Push<luaX_Nil> {
       template <class U>
       static void apply(lua_State* L, const U&) {
         lua_pushnil(L);
@@ -103,7 +134,7 @@ namespace dromozoa {
     };
 
     template <size_t T>
-    struct luaX_push_impl<char[T]> {
+    struct luaX_Push<char[T]> {
       template <class U>
       static void apply(lua_State* L, const U& value) {
         lua_pushstring(L, value);
@@ -111,20 +142,31 @@ namespace dromozoa {
     };
 
     template <>
-    struct luaX_push_impl<std::string> {
+    struct luaX_Push<std::string> {
       template <class U>
       static void apply(lua_State* L, const U& value) {
         lua_pushlstring(L, value.data(), value.size());
       }
     };
 
-    typedef int (*luaX_Closure)(lua_State*, void*);
+    inline int luaX_closure(lua_State* L, lua_CFunction function) {
+      return function(L);
+    }
 
-    template <luaX_Closure T>
-    struct luaX_push_closure {
+    inline int luaX_closure(lua_State* L, void (*function)(luaX_State&)) {
+      int top = lua_gettop(L);
+      luaX_State LX(L);
+      function(LX);
+      return lua_gettop(L) - top;
+    }
+
+    template <class T_result, class T>
+    struct luaX_Push<T_result(T)> {
+      typedef T_result (*function_type)(T);
+
       static int closure(lua_State* L) {
         try {
-          return T(L, lua_touserdata(L, lua_upvalueindex(1)));
+          return luaX_closure(L, reinterpret_cast<function_type>(lua_touserdata(L, lua_upvalueindex(1))));
         } catch (const std::exception& e) {
           return luaL_error(L, "exception caught: %s", e.what());
         } catch (...) {
@@ -139,54 +181,33 @@ namespace dromozoa {
       }
     };
 
-    inline int luaX_closure_lua_CFunction(lua_State* L, void* data) {
-      lua_CFunction f = reinterpret_cast<lua_CFunction>(data);
-      return f(L);
-    }
-
-    inline int luaX_closure_luaX_CxxFunction(lua_State* L, void* data) {
-      luaX_State state(L);
-      luaX_CxxFunction f = reinterpret_cast<luaX_CxxFunction>(data);
-      f(state);
-      return state.end();
-    }
-
-    template <>
-    struct luaX_push_impl<int(lua_State*)>
-      : luaX_push_closure<luaX_closure_lua_CFunction> {};
-
-    template <>
-    struct luaX_push_impl<void(luaX_State&)>
-      : luaX_push_closure<luaX_closure_luaX_CxxFunction> {} ;
-
-#define DROMOZOA_DETAIL_LUAX_PUSH_IMPL(PP_lua_type, PP_cxx_type) \
+#define DROMOZOA_LUACXX_LUAX_PUSH(PP_lua_type, PP_cxx_type) \
     template <> \
-    struct luaX_push_impl<PP_cxx_type> { \
+    struct luaX_Push<PP_cxx_type> { \
       template <class U> \
       static void apply(lua_State* L, const U& value) { \
         lua_push##PP_lua_type(L, value); \
       } \
     };
 
-    DROMOZOA_DETAIL_LUAX_PUSH_IMPL(boolean, bool)
-    DROMOZOA_DETAIL_LUAX_PUSH_IMPL(integer, char)
-    DROMOZOA_DETAIL_LUAX_PUSH_IMPL(integer, signed char)
-    DROMOZOA_DETAIL_LUAX_PUSH_IMPL(integer, unsigned char)
-    DROMOZOA_DETAIL_LUAX_PUSH_IMPL(integer, short)
-    DROMOZOA_DETAIL_LUAX_PUSH_IMPL(integer, unsigned short)
-    DROMOZOA_DETAIL_LUAX_PUSH_IMPL(integer, int)
-    DROMOZOA_DETAIL_LUAX_PUSH_IMPL(integer, unsigned int)
-    DROMOZOA_DETAIL_LUAX_PUSH_IMPL(integer, long)
-    DROMOZOA_DETAIL_LUAX_PUSH_IMPL(integer, unsigned long)
-    DROMOZOA_DETAIL_LUAX_PUSH_IMPL(integer, long long)
-    DROMOZOA_DETAIL_LUAX_PUSH_IMPL(integer, unsigned long long)
-    DROMOZOA_DETAIL_LUAX_PUSH_IMPL(string, char*)
-    DROMOZOA_DETAIL_LUAX_PUSH_IMPL(string, const char*)
+    DROMOZOA_LUACXX_LUAX_PUSH(boolean, bool)
+    DROMOZOA_LUACXX_LUAX_PUSH(integer, char)
+    DROMOZOA_LUACXX_LUAX_PUSH(integer, signed char)
+    DROMOZOA_LUACXX_LUAX_PUSH(integer, unsigned char)
+    DROMOZOA_LUACXX_LUAX_PUSH(integer, short)
+    DROMOZOA_LUACXX_LUAX_PUSH(integer, unsigned short)
+    DROMOZOA_LUACXX_LUAX_PUSH(integer, int)
+    DROMOZOA_LUACXX_LUAX_PUSH(integer, unsigned int)
+    DROMOZOA_LUACXX_LUAX_PUSH(integer, long)
+    DROMOZOA_LUACXX_LUAX_PUSH(integer, unsigned long)
+    DROMOZOA_LUACXX_LUAX_PUSH(integer, long long)
+    DROMOZOA_LUACXX_LUAX_PUSH(integer, unsigned long long)
+    DROMOZOA_LUACXX_LUAX_PUSH(string, char*)
+    DROMOZOA_LUACXX_LUAX_PUSH(string, const char*)
 
-#undef DROMOZOA_DETAIL_LUAX_PUSH_IMPL
+#undef DROMOZOA_LUACXX_LUAX_PUSH
   }
 
-  using luacxx::luaX_Nil;
   using luacxx::luaX_nil;
   using luacxx::luaX_push;
   using luacxx::luaX_set_table;
