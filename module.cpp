@@ -138,38 +138,37 @@ namespace dromozoa {
       // throw std::runtime_error("a runtime_error");
     }
 
-    void impl_luaX_test(luaX_State& LX) {
-      LX.push(luaX_nil)
-        .new_table()
-        .set_table("t", true)
-        .set_table(1, false)
-        .set_table("f", impl_luaX_function);
+    void impl_luaX_test(lua_State* L) {
+      luaX_push(L, luaX_nil);
+      lua_newtable(L);
+      luaX_set_table(L, "t", true);
+      luaX_set_table(L, 1, false);
+      luaX_set_table(L, "f", impl_luaX_function);
     }
 
-    void impl_luaX_test_integer(luaX_State& LX) {
+    void impl_luaX_test_integer(lua_State* L) {
       int i = 42;
       size_t s = 42;
       lua_Integer l = 42;
-      LX.push(i, s, l);
+      luaX_push(L, i, s, l);
     }
 
-    void impl_luaX_test_string(luaX_State& LX) {
+    void impl_luaX_test_string(lua_State* L) {
       char a[] = { 'f', 'o', 'o', '\0' };
       char* p = a;
       const char* c = a;
-      LX.push(a)
-        .push(p)
-        .push(c)
-        .push("foo")
-        .push(std::string("foo"));
+      luaX_push(L, a);
+      luaX_push(L, p);
+      luaX_push(L, c);
+      luaX_push(L, "foo");
+      luaX_push(L, std::string("foo"));
     }
   }
 
   void initialize_luaX(lua_State* L) {
-    luaX_State(L)
-      .set_table("luaX_test", impl_luaX_test)
-      .set_table("luaX_test_integer", impl_luaX_test_integer)
-      .set_table("luaX_test_string", impl_luaX_test_string);
+    luaX_set_table(L, "luaX_test", impl_luaX_test);
+    luaX_set_table(L, "luaX_test_integer", impl_luaX_test_integer);
+    luaX_set_table(L, "luaX_test_string", impl_luaX_test_string);
   }
 }
 
