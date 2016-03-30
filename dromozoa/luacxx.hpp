@@ -105,6 +105,15 @@ namespace dromozoa {
         return *this;
       }
 
+      luaX_State& push_success() {
+        if (lua_toboolean(L_, 1)) {
+          lua_pushvalue(L_, 1);
+        } else {
+          lua_pushboolean(L_, 1);
+        }
+        return *this;
+      }
+
       luaX_State& pop(int n = 1) {
         lua_pop(L_, n);
         return *this;
@@ -124,6 +133,17 @@ namespace dromozoa {
     private:
       lua_State* L_;
     };
+
+    inline int luaX_closure(lua_State* L, lua_CFunction function) {
+      return function(L);
+    }
+
+    inline int luaX_closure(lua_State* L, void (*function)(luaX_State&)) {
+      int top = lua_gettop(L);
+      luaX_State LX(L);
+      function(LX);
+      return lua_gettop(L) - top;
+    }
 
     template <>
     struct luaX_Push<luaX_Nil> {
@@ -148,17 +168,6 @@ namespace dromozoa {
         lua_pushlstring(L, value.data(), value.size());
       }
     };
-
-    inline int luaX_closure(lua_State* L, lua_CFunction function) {
-      return function(L);
-    }
-
-    inline int luaX_closure(lua_State* L, void (*function)(luaX_State&)) {
-      int top = lua_gettop(L);
-      luaX_State LX(L);
-      function(LX);
-      return lua_gettop(L) - top;
-    }
 
     template <class T_result, class T>
     struct luaX_Push<T_result(T)> {
