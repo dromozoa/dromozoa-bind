@@ -140,10 +140,19 @@ namespace dromozoa {
 
     void impl_luaX_test(lua_State* L) {
       luaX_push(L, luaX_nil);
-      lua_newtable(L);
-      luaX_set_table(L, "t", true);
-      luaX_set_table(L, 1, false);
-      luaX_set_table(L, "f", impl_luaX_function);
+      lua_newtable(L); {
+        luaX_set_field(L, "t", true);
+        luaX_set_field(L, 1, false);
+        luaX_set_field(L, "f", impl_luaX_function);
+
+        lua_newtable(L); {
+          luaX_set_field(L, 1, 17);
+          luaX_set_field(L, 2, 23);
+          luaX_set_field(L, 3, 37);
+          luaX_set_field(L, 4, 42);
+        }
+        luaX_set_field(L, "sequence");
+      }
     }
 
     void impl_luaX_test_integer(lua_State* L) {
@@ -166,9 +175,9 @@ namespace dromozoa {
   }
 
   void initialize_luaX(lua_State* L) {
-    luaX_set_table(L, "luaX_test", impl_luaX_test);
-    luaX_set_table(L, "luaX_test_integer", impl_luaX_test_integer);
-    luaX_set_table(L, "luaX_test_string", impl_luaX_test_string);
+    luaX_set_field(L, "luaX_test", impl_luaX_test);
+    luaX_set_field(L, "luaX_test_integer", impl_luaX_test_integer);
+    luaX_set_field(L, "luaX_test_string", impl_luaX_test_string);
   }
 }
 
