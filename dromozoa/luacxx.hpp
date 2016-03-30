@@ -23,6 +23,8 @@ extern "C" {
 #include <lauxlib.h>
 }
 
+#include <stddef.h>
+
 #include <exception>
 #include <string>
 
@@ -113,6 +115,29 @@ namespace dromozoa {
 #endif
     }
 
+    inline size_t luaX_range_i(lua_State* L, int index, size_t size) {
+      lua_Integer i = luaL_optinteger(L, index, 0);
+      if (i < 0) {
+        i += size;
+        if (i < 0) {
+          i = 0;
+        }
+      } else if (i > 0) {
+        --i;
+      }
+      return i;
+    }
+
+    inline size_t luaX_range_j(lua_State* L, int index, size_t size) {
+      lua_Integer j = luaL_optinteger(L, index, size);
+      if (j < 0) {
+        j += size;
+      } else if (j > static_cast<lua_Integer>(size)) {
+        j = size;
+      }
+      return j;
+    }
+
     inline int luaX_closure(lua_State* L, lua_CFunction function) {
       return function(L);
     }
@@ -198,6 +223,8 @@ namespace dromozoa {
   using luacxx::luaX_nil;
   using luacxx::luaX_push;
   using luacxx::luaX_push_success;
+  using luacxx::luaX_range_i;
+  using luacxx::luaX_range_j;
   using luacxx::luaX_set_metafield;
   using luacxx::luaX_set_metatable;
   using luacxx::luaX_set_table;
