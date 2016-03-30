@@ -146,28 +146,22 @@ namespace dromozoa {
         .set_table("f", impl_luaX_function);
     }
 
-    int impl_luaX_test_integer(lua_State* L) {
+    void impl_luaX_test_integer(luaX_State& LX) {
       int i = 42;
       size_t s = 42;
       lua_Integer l = 42;
-      return luaX_State(L)
-        .push(i)
-        .push(s)
-        .push(l)
-        .end();
+      LX.push(i, s, l);
     }
 
-    int impl_luaX_test_string(lua_State* L) {
+    void impl_luaX_test_string(luaX_State& LX) {
       char a[] = { 'f', 'o', 'o', '\0' };
       char* p = a;
       const char* c = a;
-      return luaX_State(L)
-        .push(a)
+      LX.push(a)
         .push(p)
         .push(c)
         .push("foo")
-        .push(std::string("foo"))
-        .end();
+        .push(std::string("foo"));
     }
   }
 
