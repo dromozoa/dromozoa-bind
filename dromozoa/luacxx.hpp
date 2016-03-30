@@ -139,7 +139,7 @@ namespace dromozoa {
     inline size_t luaX_range_j(lua_State* L, int index, size_t size) {
       lua_Integer j = luaL_optinteger(L, index, size);
       if (j < 0) {
-        j += size;
+        j += size + 1;
       } else if (j > static_cast<lua_Integer>(size)) {
         j = size;
       }
