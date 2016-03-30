@@ -73,9 +73,17 @@ namespace dromozoa {
     }
 
     template <class T, class T_key>
-    inline void luaX_set_table(lua_State* L, const T_key& key, const T& value) {
+    inline void luaX_set_field(lua_State* L, const T_key& key, const T& value) {
       luaX_push(L, key, value);
       lua_settable(L, -3);
+    }
+
+    template <class T_key>
+    inline void luaX_set_field(lua_State* L, const T_key& key) {
+      luaX_push(L, key);
+      lua_pushvalue(L, -2);
+      lua_settable(L, -4);
+      lua_pop(L, 1);
     }
 
     inline void luaX_set_metatable(lua_State* L, const char* name) {
@@ -92,7 +100,7 @@ namespace dromozoa {
       if (!lua_getmetatable(L, -1)) {
         lua_newtable(L);
       }
-      luaX_set_table(L, key, value);
+      luaX_set_field(L, key, value);
       lua_setmetatable(L, -2);
     }
 
@@ -225,9 +233,9 @@ namespace dromozoa {
   using luacxx::luaX_push_success;
   using luacxx::luaX_range_i;
   using luacxx::luaX_range_j;
+  using luacxx::luaX_set_field;
   using luacxx::luaX_set_metafield;
   using luacxx::luaX_set_metatable;
-  using luacxx::luaX_set_table;
   using luacxx::luaX_test_udata;
 }
 
