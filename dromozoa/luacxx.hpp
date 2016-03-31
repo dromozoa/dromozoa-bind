@@ -86,15 +86,6 @@ namespace dromozoa {
       lua_pop(L, 1);
     }
 
-    inline void luaX_set_metatable(lua_State* L, const char* name) {
-#if LUA_VERSION_NUM+0 >= 502
-      return luaL_setmetatable(L, name);
-#else
-      luaL_getmetatable(L, name);
-      lua_setmetatable(L, -2);
-#endif
-    }
-
     template <class T, class T_key>
     inline void luaX_set_metafield(lua_State* L, const T_key& key, const T& value) {
       if (!lua_getmetatable(L, -1)) {
@@ -104,11 +95,21 @@ namespace dromozoa {
       lua_setmetatable(L, -2);
     }
 
-    inline void* luaX_test_udata(lua_State* L, int index, const char* name) {
+    inline void luaX_set_metatable(lua_State* L, const char* name) {
 #if LUA_VERSION_NUM+0 >= 502
-      return luaL_testudata(L, index, name);
+      return luaL_setmetatable(L, name);
 #else
-      if (void* data = lua_touserdata(L, index)) {
+      luaL_getmetatable(L, name);
+      lua_setmetatable(L, -2);
+#endif
+    }
+
+    template <class T>
+    inline T* luaX_test_udata(lua_State* L, int index, const char* name) {
+#if LUA_VERSION_NUM+0 >= 502
+      return static_cast<T*>(luaL_testudata(L, index, name));
+#else
+      if (T* data = static_cast<T*>(lua_touserdata(L, index))) {
         if (lua_getmetatable(L, index)) {
           luaL_getmetatable(L, name);
           if (!lua_rawequal(L, -1, -2)) {
@@ -121,6 +122,73 @@ namespace dromozoa {
         return 0;
       }
 #endif
+    }
+
+    template <class T>
+    inline T* luaX_check_udata(lua_State* L, int index, const char* name) {
+      return static_cast<T*>(luaL_checkudata(L, index, name));
+    }
+
+    template <class T>
+    inline T* luaX_check_udata(lua_State* L, int index, const char* name1, const char* name2) {
+      if (T* data = luaX_test_udata<T>(L, index, name1)) {
+        return data;
+      } else {
+        return luaX_check_udata<T>(L, index, name2);
+      }
+    }
+
+    template <class T>
+    inline T* luaX_check_udata(lua_State* L, int index, const char* name1, const char* name2, const char* name3) {
+      if (T* data = luaX_test_udata<T>(L, index, name1)) {
+        return data;
+      } else {
+        return luaX_check_udata<T>(L, index, name2, name3);
+      }
+    }
+
+    template <class T>
+    inline T* luaX_check_udata(lua_State* L, int index, const char* name1, const char* name2, const char* name3, const char* name4) {
+      if (T* data = luaX_test_udata<T>(L, index, name1)) {
+        return data;
+      } else {
+        return luaX_check_udata<T>(L, index, name2, name3, name4);
+      }
+    }
+
+    template <class T>
+    inline T* luaX_new(lua_State* L) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T();
+      return data;
+    }
+
+    template <class T, class T1>
+    inline T* luaX_new(lua_State* L, const T1& v1) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1);
+      return data;
+    }
+
+    template <class T, class T1, class T2>
+    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1, v2);
+      return data;
+    }
+
+    template <class T, class T1, class T2, class T3>
+    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1, v2, v3);
+      return data;
+    }
+
+    template <class T, class T1, class T2, class T3, class T4>
+    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3, const T4& v4) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1, v2, v3, v4);
+      return data;
     }
 
     inline size_t luaX_range_i(lua_State* L, int index, size_t size) {
@@ -228,6 +296,8 @@ namespace dromozoa {
 #undef DROMOZOA_LUACXX_LUAX_PUSH_IMPL
   }
 
+  using luacxx::luaX_check_udata;
+  using luacxx::luaX_new;
   using luacxx::luaX_nil;
   using luacxx::luaX_push;
   using luacxx::luaX_push_success;
