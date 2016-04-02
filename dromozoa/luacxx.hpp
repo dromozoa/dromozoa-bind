@@ -26,6 +26,7 @@ extern "C" {
 #include <stddef.h>
 
 #include <exception>
+#include <new>
 #include <string>
 
 namespace dromozoa {
