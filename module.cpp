@@ -183,7 +183,7 @@ namespace dromozoa {
 extern "C" int luaopen_dromozoa_bind(lua_State* L) {
   lua_newtable(L);
 
-  lua_newtable(L);
+//  lua_newtable(L);
 //  dromozoa::bind::initialize(L);
 //  dromozoa::checked<true>::open_test(L, "dromozoa.bind.test");
   dromozoa::initialize_luaX(L);
