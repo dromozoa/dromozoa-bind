@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef DROMOZOA_LUACXX_HPP
-#define DROMOZOA_LUACXX_HPP
+#ifndef DROMOZOA_BIND_HPP
+#define DROMOZOA_BIND_HPP
 
 extern "C" {
 #include <lua.h>
@@ -30,7 +30,7 @@ extern "C" {
 #include <string>
 
 namespace dromozoa {
-  namespace luacxx {
+  namespace bind {
     struct luaX_nil_impl {};
     typedef int luaX_nil_impl::*luaX_nil_t;
 
@@ -270,7 +270,7 @@ namespace dromozoa {
       }
     };
 
-#define DROMOZOA_LUACXX_LUAX_PUSH_IMPL(PP_lua_type, PP_cxx_type) \
+#define DROMOZOA_BIND_LUAX_PUSH_IMPL(PP_lua_type, PP_cxx_type) \
     template <> \
     struct luaX_push_impl<PP_cxx_type> { \
       template <class U> \
@@ -279,35 +279,35 @@ namespace dromozoa {
       } \
     };
 
-    DROMOZOA_LUACXX_LUAX_PUSH_IMPL(boolean, bool)
-    DROMOZOA_LUACXX_LUAX_PUSH_IMPL(integer, char)
-    DROMOZOA_LUACXX_LUAX_PUSH_IMPL(integer, signed char)
-    DROMOZOA_LUACXX_LUAX_PUSH_IMPL(integer, unsigned char)
-    DROMOZOA_LUACXX_LUAX_PUSH_IMPL(integer, short)
-    DROMOZOA_LUACXX_LUAX_PUSH_IMPL(integer, unsigned short)
-    DROMOZOA_LUACXX_LUAX_PUSH_IMPL(integer, int)
-    DROMOZOA_LUACXX_LUAX_PUSH_IMPL(integer, unsigned int)
-    DROMOZOA_LUACXX_LUAX_PUSH_IMPL(integer, long)
-    DROMOZOA_LUACXX_LUAX_PUSH_IMPL(integer, unsigned long)
-    DROMOZOA_LUACXX_LUAX_PUSH_IMPL(integer, long long)
-    DROMOZOA_LUACXX_LUAX_PUSH_IMPL(integer, unsigned long long)
-    DROMOZOA_LUACXX_LUAX_PUSH_IMPL(string, char*)
-    DROMOZOA_LUACXX_LUAX_PUSH_IMPL(string, const char*)
+    DROMOZOA_BIND_LUAX_PUSH_IMPL(boolean, bool)
+    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, char)
+    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, signed char)
+    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, unsigned char)
+    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, short)
+    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, unsigned short)
+    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, int)
+    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, unsigned int)
+    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, long)
+    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, unsigned long)
+    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, long long)
+    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, unsigned long long)
+    DROMOZOA_BIND_LUAX_PUSH_IMPL(string, char*)
+    DROMOZOA_BIND_LUAX_PUSH_IMPL(string, const char*)
 
-#undef DROMOZOA_LUACXX_LUAX_PUSH_IMPL
+#undef DROMOZOA_BIND_LUAX_PUSH_IMPL
   }
 
-  using luacxx::luaX_check_udata;
-  using luacxx::luaX_new;
-  using luacxx::luaX_nil;
-  using luacxx::luaX_push;
-  using luacxx::luaX_push_success;
-  using luacxx::luaX_range_i;
-  using luacxx::luaX_range_j;
-  using luacxx::luaX_set_field;
-  using luacxx::luaX_set_metafield;
-  using luacxx::luaX_set_metatable;
-  using luacxx::luaX_test_udata;
+  using bind::luaX_check_udata;
+  using bind::luaX_new;
+  using bind::luaX_nil;
+  using bind::luaX_push;
+  using bind::luaX_push_success;
+  using bind::luaX_range_i;
+  using bind::luaX_range_j;
+  using bind::luaX_set_field;
+  using bind::luaX_set_metafield;
+  using bind::luaX_set_metatable;
+  using bind::luaX_test_udata;
 }
 
 #endif
