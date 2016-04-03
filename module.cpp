@@ -22,184 +22,111 @@ extern "C" {
 
 #include <stddef.h>
 
-#include <iostream>
 #include <stdexcept>
 #include <string>
 
 #include "dromozoa/bind.hpp"
 
 namespace dromozoa {
-//  using bind::function;
-//  using bind::push_success;
-//  using bind::translate_range_i;
-//  using bind::translate_range_j;
-
-//  namespace {
-//    int impl_throw(lua_State*) {
-//      throw std::runtime_error("test");
-//    }
-//
-//    int impl_throw_int(lua_State*) {
-//      throw 42;
-//    }
-//
-//    int impl_raise0(lua_State*) {
-//      return 0;
-//    }
-//
-//    int impl_raise1(lua_State* L) {
-//      lua_pushnil(L);
-//      return 1;
-//    }
-//
-//    int impl_raise2(lua_State* L) {
-//      lua_pushnil(L);
-//      lua_pushliteral(L, "test");
-//      return 2;
-//    }
-//
-//    int impl_raise3(lua_State* L) {
-//      lua_pushnil(L);
-//      lua_pushliteral(L, "test");
-//      lua_pushinteger(L, 42);
-//      return 3;
-//    }
-//
-//    int impl_raise_false(lua_State* L) {
-//      lua_pushboolean(L, false);
-//      lua_pushstring(L, "test");
-//      return 2;
-//    }
-//
-//    int impl_new(lua_State* L) {
-//      *static_cast<int*>(lua_newuserdata(L, sizeof(int))) = 0;
-//      luaL_getmetatable(L, "dromozoa.bind.test");
-//      lua_setmetatable(L, -2);
-//      return 1;
-//    }
-//
-//    int impl_set(lua_State* L) {
-//      *static_cast<int*>(luaL_checkudata(L, 1, "dromozoa.bind.test")) = luaL_checkinteger(L, 2);
-//      return push_success(L);
-//    }
-//
-//    int impl_get(lua_State* L) {
-//      lua_pushinteger(L, *static_cast<const int*>(luaL_checkudata(L, 1, "dromozoa.bind.test")));
-//      return 1;
-//    }
-//
-//    int impl_translate_range(lua_State* L) {
-//      size_t size = luaL_checkinteger(L, 1);
-//      size_t i = translate_range_i(L, 2, size);
-//      size_t j = translate_range_j(L, 3, size);
-//      lua_pushinteger(L, i);
-//      lua_pushinteger(L, j);
-//      return 2;
-//    }
-//  }
-//
-//  template <bool T_check>
-//  struct checked {
-//    static int open_test(lua_State* L, const char* metaname) {
-//      lua_newtable(L);
-//      function<impl_throw, T_check>::set_field(L, "throw");
-//      function<impl_throw_int, T_check>::set_field(L, "throw_int");
-//      function<impl_raise0, T_check>::set_field(L, "raise0");
-//      function<impl_raise1, T_check>::set_field(L, "raise1");
-//      function<impl_raise2, T_check>::set_field(L, "raise2");
-//      function<impl_raise3, T_check>::set_field(L, "raise3");
-//      function<impl_raise_false, T_check>::set_field(L, "raise_false");
-//      function<impl_new, T_check>::set_field(L, "new");
-//      function<impl_set, T_check>::set_field(L, "set");
-//      function<impl_get, T_check>::set_field(L, "get");
-//      function<impl_translate_range, T_check>::set_field(L, "translate_range");
-//
-//      luaL_newmetatable(L, metaname);
-//      lua_pushvalue(L, -2);
-//      lua_setfield(L, -2, "__index");
-//      lua_pop(L, 1);
-//
-//      enum {
-//        zero = 0,
-//        one = 1,
-//      };
-//
-//      DROMOZOA_BIND_SET_FIELD(L, zero);
-//      DROMOZOA_BIND_SET_FIELD(L, one);
-//
-//      return 1;
-//    }
-//  };
-
   namespace {
-    int impl_luaX_function(lua_State*) {
+    void impl_throw_int(lua_State*) {
       throw 42;
-      // throw std::runtime_error("a runtime_error");
     }
 
-    void impl_luaX_test(lua_State* L) {
-      luaX_push(L, luaX_nil);
-      lua_newtable(L); {
-        luaX_set_field(L, "t", true);
-        luaX_set_field(L, 1, false);
-        luaX_set_field(L, "f", impl_luaX_function);
-
-        lua_newtable(L); {
-          luaX_set_field(L, 1, 17);
-          luaX_set_field(L, 2, 23);
-          luaX_set_field(L, 3, 37);
-          luaX_set_field(L, 4, 42);
-        }
-        luaX_set_field(L, "sequence");
-      }
+    void impl_throw_runtime_error(lua_State*) {
+      throw std::runtime_error("runtime_error");
     }
 
-    void impl_luaX_test_integer(lua_State* L) {
-      int i = 42;
-      size_t s = 42;
-      lua_Integer l = 42;
-      luaX_push(L, i, s, l);
-    }
-
-    void impl_luaX_test_string(lua_State* L) {
-      char a[] = { 'f', 'o', 'o', '\0' };
-      char* p = a;
-      const char* c = a;
-      luaX_push(L, a);
-      luaX_push(L, p);
-      luaX_push(L, c);
+    int impl_result_int(lua_State* L) {
+      luaX_push(L, true);
+      luaX_push(L, 42);
       luaX_push(L, "foo");
+      return 3;
+    }
+
+    void impl_result_void(lua_State* L) {
+      luaX_push(L, true);
+      luaX_push(L, 42);
+      luaX_push(L, "foo");
+    }
+
+    void impl_push_nil(lua_State* L) {
+      luaX_push(L, luaX_nil);
+    }
+
+    void impl_push_string(lua_State* L) {
+      char data[] = { 'f', 'o', 'o', 0 };
+      luaX_push(L, "foo");
+      luaX_push(L, data);
+      luaX_push(L, static_cast<char*>(data));
+      luaX_push(L, static_cast<const char*>(data));
       luaX_push(L, std::string("foo"));
+    }
+
+    void impl_push_success(lua_State* L) {
+      luaX_push_success(L);
+    }
+
+    void impl_set_field(lua_State* L) {
+      luaX_set_field(L, 1, 17);
+      luaX_set_field(L, 2, 23);
+      luaX_set_field(L, 3, 37);
+      luaX_set_field(L, 4, 42);
+      luaX_set_field(L, 5, luaX_nil);
+      luaX_push(L, "foo");
+      luaX_set_field(L, "s");
+    }
+
+    void impl_range(lua_State* L) {
+      size_t size = luaL_checkinteger(L, 1);
+      size_t i = luaX_range_i(L, 2, size);
+      size_t j = luaX_range_j(L, 3, size);
+      luaX_push(L, i);
+      luaX_push(L, j);
+    }
+
+    void impl_new(lua_State* L) {
+      if (lua_isnoneornil(L, 2)) {
+        luaX_new<int>(L);
+      } else {
+        luaX_new<int>(L, luaL_checkinteger(L, 2));
+      }
+      luaX_set_metatable(L, "dromozoa.bind.int");
+    }
+
+    void impl_set(lua_State* L) {
+      *luaX_check_udata<int>(L, 1, "dromozoa.bind.int") = luaL_checkinteger(L, 2);
+      luaX_push_success(L);
+    }
+
+    void impl_get(lua_State* L) {
+      luaX_push(L, *luaX_check_udata<int>(L, 1, "dromozoa.bind.int"));
     }
   }
 
-  void initialize_luaX(lua_State* L) {
-    luaX_set_field(L, "luaX_test", impl_luaX_test);
-    luaX_set_field(L, "luaX_test_integer", impl_luaX_test_integer);
-    luaX_set_field(L, "luaX_test_string", impl_luaX_test_string);
+  void initialize(lua_State* L) {
+    luaX_set_field(L, "throw_int", impl_throw_int);
+    luaX_set_field(L, "throw_runtime_error", impl_throw_runtime_error);
+    luaX_set_field(L, "result_int", impl_result_int);
+    luaX_set_field(L, "result_void", impl_result_void);
+    luaX_set_field(L, "push_nil", impl_push_nil);
+    luaX_set_field(L, "push_string", impl_push_string);
+    luaX_set_field(L, "push_success", impl_push_success);
+    luaX_set_field(L, "set_field", impl_set_field);
+    luaX_set_field(L, "range", impl_range);
+    luaX_set_metafield(L, "__call", impl_new);
+
+    luaL_newmetatable(L, "dromozoa.bind.int");
+    lua_newtable(L);
+    luaX_set_field(L, "set", impl_set);
+    luaX_set_field(L, "get", impl_get);
+    luaX_set_field(L, "__index");
+    lua_pop(L, 1);
   }
 }
 
 extern "C" int luaopen_dromozoa_bind(lua_State* L) {
   lua_newtable(L);
-
-//  lua_newtable(L);
-//  dromozoa::bind::initialize(L);
-//  dromozoa::checked<true>::open_test(L, "dromozoa.bind.test");
-  dromozoa::initialize_luaX(L);
-//  lua_setfield(L, -2, "test");
-//
-//  lua_newtable(L);
-//  lua_pushvalue(L, -2);
-//  lua_setfield(L, -2, "__index");
-//  lua_setmetatable(L, -3);
-//  lua_setfield(L, -2, "checked");
-//
-//  lua_newtable(L);
-//  dromozoa::bind::initialize(L);
-//  dromozoa::checked<false>::open_test(L, "dromozoa.bind.test.default");
-//  lua_setfield(L, -2, "test");
-//  lua_setfield(L, -2, "default");
-
+  dromozoa::initialize(L);
   return 1;
 }

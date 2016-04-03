@@ -16,91 +16,81 @@
 -- along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
 local bind = require "dromozoa.bind"
--- local test = bind.test
 
--- assert(bind.get_log_level() == 0)
--- assert(not bind.get_raise_error())
--- 
--- local result, message = pcall(test.throw)
--- assert(not result)
--- assert(message:find("exception caught"))
--- assert(message:find("test"))
--- 
--- local result, message = pcall(test.throw_int)
--- assert(not result)
--- assert(message:find("exception caught"))
--- 
--- local result, message, code = test.raise3()
--- assert(not result)
--- assert(message == "test")
--- assert(code == 42)
--- 
--- assert(bind.set_raise_error(true))
--- 
--- local result, message = pcall(test.raise0)
--- -- print(result, message)
--- assert(result)
--- 
--- local result, message = pcall(test.raise1)
--- assert(not result)
--- assert(message:find("error raised"))
--- 
--- local result, message = pcall(test.raise2)
--- assert(not result)
--- assert(message:find("test"))
--- 
--- local result, message = pcall(test.raise3)
--- assert(not result)
--- assert(message:find("test"))
--- 
--- local result, message = pcall(test.raise_false)
--- -- print(result, message)
--- assert(result)
--- assert(message == false)
--- 
--- local t = test.new()
--- assert(t:get() == 0)
--- assert(t:set(42):get() == 42)
--- 
--- assert(test.zero == 0)
--- assert(test.one == 1)
--- 
--- assert(bind.band(0x11, 0x33, 0x77, 0xff) == 0x11)
--- assert(bind.band(0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80) == 0x00)
--- assert(bind.bor(0x11, 0x33, 0x77, 0xff) == 0xff)
--- assert(bind.bor(0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80) == 0xff)
--- 
--- local function test_translate_range(a, b, i, j)
---   assert(a == i)
---   assert(b == j)
--- end
--- 
--- test_translate_range(0, 3, test.translate_range(3))
--- 
--- test_translate_range(3, 3, test.translate_range(3, 4))
--- test_translate_range(2, 3, test.translate_range(3, 3))
--- test_translate_range(1, 3, test.translate_range(3, 2))
--- test_translate_range(0, 3, test.translate_range(3, 1))
--- test_translate_range(0, 3, test.translate_range(3, 0))
--- test_translate_range(2, 3, test.translate_range(3, -1))
--- test_translate_range(1, 3, test.translate_range(3, -2))
--- test_translate_range(0, 3, test.translate_range(3, -3))
--- test_translate_range(0, 3, test.translate_range(3, -4))
--- 
--- test_translate_range(0, 3, test.translate_range(3, 1, 4))
--- test_translate_range(0, 3, test.translate_range(3, 1, 3))
--- test_translate_range(0, 2, test.translate_range(3, 1, 2))
--- test_translate_range(0, 1, test.translate_range(3, 1, 1))
--- test_translate_range(0, 0, test.translate_range(3, 1, 0))
--- test_translate_range(0, 3, test.translate_range(3, 1, -1))
--- test_translate_range(0, 2, test.translate_range(3, 1, -2))
--- test_translate_range(0, 1, test.translate_range(3, 1, -3))
--- test_translate_range(0, 0, test.translate_range(3, 1, -4))
--- 
--- bind.set_raise_error(false)
-local a, b = bind.luaX_test()
-print(a, b.t, b[1])
-print(pcall(b.f))
-print(b.sequence[4])
-print(bind.luaX_test_integer())
-print(bind.luaX_test_string())
+local result, message = pcall(bind.throw_int)
+assert(not result)
+assert(message == "exception caught")
+
+local result, message = pcall(bind.throw_runtime_error)
+assert(not result)
+assert(message:find("exception caught:") == 1)
+assert(message:find("runtime_error"))
+
+local a, b, c = bind.result_int()
+assert(a == true)
+assert(b == 42)
+assert(c == "foo")
+
+local a, b, c = bind.result_void()
+assert(a == true)
+assert(b == 42)
+assert(c == "foo")
+
+assert(bind.push_nil() == nil)
+
+local a, b, c, d, e = bind.push_string()
+assert(a == "foo")
+assert(b == "foo")
+assert(c == "foo")
+assert(d == "foo")
+assert(e == "foo")
+
+assert(bind.push_success() == true)
+assert(bind.push_success(42) == 42)
+
+local t = {}
+bind.set_field(t)
+assert(t[1] == 17)
+assert(t[2] == 23)
+assert(t[3] == 37)
+assert(t[4] == 42)
+assert(t[5] == nil)
+assert(t.s == "foo")
+
+local t = { 42, 42, 42, 42, 42, s = "bar" }
+bind.set_field(t)
+assert(t[1] == 17)
+assert(t[2] == 23)
+assert(t[3] == 37)
+assert(t[4] == 42)
+assert(t[5] == nil)
+assert(t.s == "foo")
+
+local function test_range(a, b, i, j)
+  assert(a == i)
+  assert(b == j)
+end
+
+test_range(0, 3, bind.range(3))
+test_range(3, 3, bind.range(3, 4))
+test_range(2, 3, bind.range(3, 3))
+test_range(1, 3, bind.range(3, 2))
+test_range(0, 3, bind.range(3, 1))
+test_range(0, 3, bind.range(3, 0))
+test_range(2, 3, bind.range(3, -1))
+test_range(1, 3, bind.range(3, -2))
+test_range(0, 3, bind.range(3, -3))
+test_range(0, 3, bind.range(3, -4))
+test_range(0, 3, bind.range(3, 1, 4))
+test_range(0, 3, bind.range(3, 1, 3))
+test_range(0, 2, bind.range(3, 1, 2))
+test_range(0, 1, bind.range(3, 1, 1))
+test_range(0, 0, bind.range(3, 1, 0))
+test_range(0, 3, bind.range(3, 1, -1))
+test_range(0, 2, bind.range(3, 1, -2))
+test_range(0, 1, bind.range(3, 1, -3))
+test_range(0, 0, bind.range(3, 1, -4))
+
+assert(bind():get() == 0)
+assert(bind():set(42):get() == 42)
+assert(bind(42):get() == 42)
