@@ -102,6 +102,19 @@ namespace dromozoa {
     void impl_get(lua_State* L) {
       luaX_push(L, *luaX_check_udata<int>(L, 1, "dromozoa.bind.int"));
     }
+
+    void impl_to(lua_State* L) {
+      int* data = luaX_to_udata<int>(L, 1,
+          luaL_optstring(L, 2, "dromozoa.bind.none"),
+          luaL_optstring(L, 3, "dromozoa.bind.none"),
+          luaL_optstring(L, 4, "dromozoa.bind.none"),
+          luaL_optstring(L, 5, "dromozoa.bind.none"));
+      if (data) {
+        luaX_push(L, *data);
+      } else {
+        luaX_push(L, luaX_nil);
+      }
+    }
   }
 
   void initialize(lua_State* L) {
@@ -120,6 +133,7 @@ namespace dromozoa {
     lua_newtable(L);
     luaX_set_field(L, "set", impl_set);
     luaX_set_field(L, "get", impl_get);
+    luaX_set_field(L, "to", impl_to);
     luaX_set_field(L, "__index");
     lua_pop(L, 1);
   }

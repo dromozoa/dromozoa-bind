@@ -106,12 +106,9 @@ namespace dromozoa {
     }
 
     template <class T>
-    inline T* luaX_test_udata(lua_State* L, int n, const char* name) {
-#if LUA_VERSION_NUM+0 >= 502
-      return static_cast<T*>(luaL_testudata(L, n, name));
-#else
-      if (T* data = static_cast<T*>(lua_touserdata(L, n))) {
-        if (lua_getmetatable(L, n)) {
+    inline T* luaX_to_udata(lua_State* L, int index, const char* name) {
+      if (T* data = static_cast<T*>(lua_touserdata(L, index))) {
+        if (lua_getmetatable(L, index)) {
           luaL_getmetatable(L, name);
           if (!lua_rawequal(L, -1, -2)) {
             data = 0;
@@ -122,6 +119,41 @@ namespace dromozoa {
       } else {
         return 0;
       }
+    }
+
+    template <class T>
+    inline T* luaX_to_udata(lua_State* L, int index, const char* name1, const char* name2) {
+      if (T* data = luaX_to_udata<T>(L, index, name1)) {
+        return data;
+      } else {
+        return luaX_to_udata<T>(L, index, name2);
+      }
+    }
+
+    template <class T>
+    inline T* luaX_to_udata(lua_State* L, int index, const char* name1, const char* name2, const char* name3) {
+      if (T* data = luaX_to_udata<T>(L, index, name1)) {
+        return data;
+      } else {
+        return luaX_to_udata<T>(L, index, name2, name3);
+      }
+    }
+
+    template <class T>
+    inline T* luaX_to_udata(lua_State* L, int index, const char* name1, const char* name2, const char* name3, const char* name4) {
+      if (T* data = luaX_to_udata<T>(L, index, name1)) {
+        return data;
+      } else {
+        return luaX_to_udata<T>(L, index, name2, name3, name4);
+      }
+    }
+
+    template <class T>
+    inline T* luaX_test_udata(lua_State* L, int n, const char* name) {
+#if LUA_VERSION_NUM+0 >= 502
+      return static_cast<T*>(luaL_testudata(L, n, name));
+#else
+      return luaX_to_udata<T>(L, n, name);
 #endif
     }
 
@@ -308,6 +340,7 @@ namespace dromozoa {
   using bind::luaX_set_metafield;
   using bind::luaX_set_metatable;
   using bind::luaX_test_udata;
+  using bind::luaX_to_udata;
 }
 
 #endif
