@@ -105,56 +105,67 @@ namespace dromozoa {
 #endif
     }
 
+    inline bool luaX_to_udata_impl(lua_State* L, const char* name) {
+      luaL_getmetatable(L, name);
+      bool result = lua_rawequal(L, -1, -2);
+      lua_pop(L, 1);
+      return result;
+    }
+
     template <class T>
     inline T* luaX_to_udata(lua_State* L, int index, const char* name) {
       if (T* data = static_cast<T*>(lua_touserdata(L, index))) {
         if (lua_getmetatable(L, index)) {
-          luaL_getmetatable(L, name);
-          if (!lua_rawequal(L, -1, -2)) {
+          if (!luaX_to_udata_impl(L, name)) {
             data = 0;
           }
+          lua_pop(L, 1);
+          return data;
         }
-        lua_pop(L, 2);
-        return data;
-      } else {
-        return 0;
       }
+      return 0;
     }
 
     template <class T>
     inline T* luaX_to_udata(lua_State* L, int index, const char* name1, const char* name2) {
-      if (T* data = luaX_to_udata<T>(L, index, name1)) {
-        return data;
-      } else {
-        return luaX_to_udata<T>(L, index, name2);
+      if (T* data = static_cast<T*>(lua_touserdata(L, index))) {
+        if (lua_getmetatable(L, index)) {
+          if (!(luaX_to_udata_impl(L, name1) || luaX_to_udata_impl(L, name2))) {
+            data = 0;
+          }
+          lua_pop(L, 1);
+          return data;
+        }
       }
+      return 0;
     }
 
     template <class T>
     inline T* luaX_to_udata(lua_State* L, int index, const char* name1, const char* name2, const char* name3) {
-      if (T* data = luaX_to_udata<T>(L, index, name1)) {
-        return data;
-      } else {
-        return luaX_to_udata<T>(L, index, name2, name3);
+      if (T* data = static_cast<T*>(lua_touserdata(L, index))) {
+        if (lua_getmetatable(L, index)) {
+          if (!(luaX_to_udata_impl(L, name1) || luaX_to_udata_impl(L, name2) || luaX_to_udata_impl(L, name3))) {
+            data = 0;
+          }
+          lua_pop(L, 1);
+          return data;
+        }
       }
+      return 0;
     }
 
     template <class T>
     inline T* luaX_to_udata(lua_State* L, int index, const char* name1, const char* name2, const char* name3, const char* name4) {
-      if (T* data = luaX_to_udata<T>(L, index, name1)) {
-        return data;
-      } else {
-        return luaX_to_udata<T>(L, index, name2, name3, name4);
+      if (T* data = static_cast<T*>(lua_touserdata(L, index))) {
+        if (lua_getmetatable(L, index)) {
+          if (!(luaX_to_udata_impl(L, name1) || luaX_to_udata_impl(L, name2) || luaX_to_udata_impl(L, name3) || luaX_to_udata_impl(L, name4))) {
+            data = 0;
+          }
+          lua_pop(L, 1);
+          return data;
+        }
       }
-    }
-
-    template <class T>
-    inline T* luaX_test_udata(lua_State* L, int n, const char* name) {
-#if LUA_VERSION_NUM+0 >= 502
-      return static_cast<T*>(luaL_testudata(L, n, name));
-#else
-      return luaX_to_udata<T>(L, n, name);
-#endif
+      return 0;
     }
 
     template <class T>
@@ -164,7 +175,7 @@ namespace dromozoa {
 
     template <class T>
     inline T* luaX_check_udata(lua_State* L, int n, const char* name1, const char* name2) {
-      if (T* data = luaX_test_udata<T>(L, n, name1)) {
+      if (T* data = luaX_to_udata<T>(L, n, name1)) {
         return data;
       } else {
         return luaX_check_udata<T>(L, n, name2);
@@ -173,19 +184,19 @@ namespace dromozoa {
 
     template <class T>
     inline T* luaX_check_udata(lua_State* L, int n, const char* name1, const char* name2, const char* name3) {
-      if (T* data = luaX_test_udata<T>(L, n, name1)) {
+      if (T* data = luaX_to_udata<T>(L, n, name1, name2)) {
         return data;
       } else {
-        return luaX_check_udata<T>(L, n, name2, name3);
+        return luaX_check_udata<T>(L, n, name3);
       }
     }
 
     template <class T>
     inline T* luaX_check_udata(lua_State* L, int n, const char* name1, const char* name2, const char* name3, const char* name4) {
-      if (T* data = luaX_test_udata<T>(L, n, name1)) {
+      if (T* data = luaX_to_udata<T>(L, n, name1, name2, name3)) {
         return data;
       } else {
-        return luaX_check_udata<T>(L, n, name2, name3, name4);
+        return luaX_check_udata<T>(L, n, name4);
       }
     }
 
@@ -339,7 +350,6 @@ namespace dromozoa {
   using bind::luaX_set_field;
   using bind::luaX_set_metafield;
   using bind::luaX_set_metatable;
-  using bind::luaX_test_udata;
   using bind::luaX_to_udata;
 }
 
