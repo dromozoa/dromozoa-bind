@@ -77,10 +77,10 @@ namespace dromozoa {
       luaX_set_field(L, "s");
     }
 
-    void impl_range(lua_State* L) {
+    void impl_opt_range(lua_State* L) {
       size_t size = luaL_checkinteger(L, 1);
-      size_t i = luaX_range_i(L, 2, size);
-      size_t j = luaX_range_j(L, 3, size);
+      size_t i = luaX_opt_range_i(L, 2, size);
+      size_t j = luaX_opt_range_j(L, 3, size);
       luaX_push(L, i);
       luaX_push(L, j);
     }
@@ -102,6 +102,19 @@ namespace dromozoa {
     void impl_get(lua_State* L) {
       luaX_push(L, *luaX_check_udata<int>(L, 1, "dromozoa.bind.int"));
     }
+
+    void impl_to(lua_State* L) {
+      int* data = luaX_to_udata<int>(L, 1,
+          luaL_optstring(L, 2, "dromozoa.bind.none"),
+          luaL_optstring(L, 3, "dromozoa.bind.none"),
+          luaL_optstring(L, 4, "dromozoa.bind.none"),
+          luaL_optstring(L, 5, "dromozoa.bind.none"));
+      if (data) {
+        luaX_push(L, *data);
+      } else {
+        luaX_push(L, luaX_nil);
+      }
+    }
   }
 
   void initialize(lua_State* L) {
@@ -113,13 +126,14 @@ namespace dromozoa {
     luaX_set_field(L, "push_string", impl_push_string);
     luaX_set_field(L, "push_success", impl_push_success);
     luaX_set_field(L, "set_field", impl_set_field);
-    luaX_set_field(L, "range", impl_range);
+    luaX_set_field(L, "opt_range", impl_opt_range);
     luaX_set_metafield(L, "__call", impl_new);
 
     luaL_newmetatable(L, "dromozoa.bind.int");
     lua_newtable(L);
     luaX_set_field(L, "set", impl_set);
     luaX_set_field(L, "get", impl_get);
+    luaX_set_field(L, "to", impl_to);
     luaX_set_field(L, "__index");
     lua_pop(L, 1);
   }
