@@ -15,15 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
-extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
-}
-
-#include <stddef.h>
-
 #include <stdexcept>
-#include <string>
 
 #include "dromozoa/bind.hpp"
 
@@ -85,6 +77,12 @@ namespace dromozoa {
       luaX_push(L, j);
     }
 
+    void impl_check_integer(lua_State* L) {
+      luaX_check_integer<int16_t>(L, 1);
+      luaX_check_integer<uint16_t>(L, 2);
+      luaX_check_integer<size_t>(L, 3);
+    }
+
     void impl_new(lua_State* L) {
       if (lua_isnoneornil(L, 2)) {
         luaX_new<int>(L);
@@ -127,6 +125,8 @@ namespace dromozoa {
     luaX_set_field(L, "push_success", impl_push_success);
     luaX_set_field(L, "set_field", impl_set_field);
     luaX_set_field(L, "opt_range", impl_opt_range);
+    luaX_set_field(L, "check_integer", impl_check_integer);
+
     luaX_set_metafield(L, "__call", impl_new);
 
     luaL_newmetatable(L, "dromozoa.bind.int");

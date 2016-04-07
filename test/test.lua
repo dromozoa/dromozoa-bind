@@ -91,6 +91,12 @@ test_opt_range(0, 2, bind.opt_range(3, 1, -2))
 test_opt_range(0, 1, bind.opt_range(3, 1, -3))
 test_opt_range(0, 0, bind.opt_range(3, 1, -4))
 
+bind.check_integer(0, 0, 0)
+assert(not pcall(bind.check_integer, 0, -1, -1))
+assert(not pcall(bind.check_integer, 0, 0, -1))
+assert(not pcall(bind.check_integer, -32769, 0, 0))
+assert(not pcall(bind.check_integer, 0, 65536, 0))
+
 assert(bind():get() == 0)
 assert(bind():set(42):get() == 42)
 assert(bind(42):get() == 42)
