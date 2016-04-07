@@ -24,6 +24,7 @@ extern "C" {
 }
 
 #include <stddef.h>
+#include <stdint.h>
 
 #include <exception>
 #include <new>
@@ -235,6 +236,14 @@ namespace dromozoa {
       return data;
     }
 
+    template <class T, bool T_is_integer, bool T_is_signed>
+    struct luaX_check_integer_impl {};
+
+    template <class T>
+    inline T luaX_check_integer(lua_State* L, int n) {
+      return luaX_check_integer_impl<T, std::numeric_limits<T>::is_integer, std::numeric_limits<T>::is_signed>::apply(L, n);
+    }
+
     inline size_t luaX_opt_range_i(lua_State* L, int n, size_t size) {
       lua_Integer i = luaL_optinteger(L, n, 0);
       if (i < 0) {
@@ -338,8 +347,45 @@ namespace dromozoa {
     DROMOZOA_BIND_LUAX_PUSH_IMPL(string, const char*)
 
 #undef DROMOZOA_BIND_LUAX_PUSH_IMPL
+
+    template <>
+    struct luaX_check_integer_impl<bool, true, false> {
+      static bool apply(lua_State* L, int n) {
+        return luaL_checkinteger(L, n);
+      }
+    };
+
+    template <class T>
+    struct luaX_check_integer_impl<T, true, true> {
+      static T apply(lua_State* L, int n) {
+        static const intmax_t min = std::numeric_limits<T>::min();
+        static const intmax_t max = std::numeric_limits<T>::max();
+        intmax_t v = luaL_checkinteger(L, n);
+        if (min <= v && v <= max) {
+          return v;
+        }
+        return luaL_argerror(L, n, "out of range");
+      }
+    };
+
+    template <class T>
+    struct luaX_check_integer_impl<T, true, false> {
+      static T apply(lua_State* L, int n) {
+        static const uintmax_t min = std::numeric_limits<T>::min();
+        static const uintmax_t max = std::numeric_limits<T>::max();
+        intmax_t v = luaL_checkinteger(L, n);
+        if (0 <= v) {
+          uintmax_t u = v;
+          if (min <= u && u <= max) {
+            return u;
+          }
+        }
+        return luaL_argerror(L, n, "out of range");
+      }
+    };
   }
 
+  using bind::luaX_check_integer;
   using bind::luaX_check_udata;
   using bind::luaX_new;
   using bind::luaX_nil;
