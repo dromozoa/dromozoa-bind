@@ -83,6 +83,12 @@ namespace dromozoa {
       luaX_check_integer<size_t>(L, 3);
     }
 
+    void impl_opt_integer(lua_State* L) {
+      luaX_opt_integer<int16_t>(L, 1, 0);
+      luaX_opt_integer<uint16_t>(L, 2, 0);
+      luaX_opt_integer<size_t>(L, 3, 0);
+    }
+
     void impl_new(lua_State* L) {
       if (lua_isnoneornil(L, 2)) {
         luaX_new<int>(L);
@@ -126,6 +132,7 @@ namespace dromozoa {
     luaX_set_field(L, "set_field", impl_set_field);
     luaX_set_field(L, "opt_range", impl_opt_range);
     luaX_set_field(L, "check_integer", impl_check_integer);
+    luaX_set_field(L, "opt_integer", impl_opt_integer);
 
     luaX_set_metafield(L, "__call", impl_new);
 
