@@ -27,6 +27,7 @@ extern "C" {
 #include <stdint.h>
 
 #include <exception>
+#include <limits>
 #include <new>
 #include <string>
 
@@ -236,12 +237,17 @@ namespace dromozoa {
       return data;
     }
 
-    template <class T, bool T_is_integer, bool T_is_signed>
+    template <class T, bool T_is_integer = std::numeric_limits<T>::is_integer, bool T_is_signed = std::numeric_limits<T>::is_signed>
     struct luaX_check_integer_impl {};
 
     template <class T>
     inline T luaX_check_integer(lua_State* L, int n) {
-      return luaX_check_integer_impl<T, std::numeric_limits<T>::is_integer, std::numeric_limits<T>::is_signed>::apply(L, n);
+      return luaX_check_integer_impl<T>::apply(L, n, luaL_checkinteger(L, n));
+    }
+
+    template <class T>
+    inline T luaX_opt_integer(lua_State* L, int n, lua_Integer d) {
+      return luaX_check_integer_impl<T>::apply(L, n, luaL_optinteger(L, n, d));
     }
 
     inline size_t luaX_opt_range_i(lua_State* L, int n, size_t size) {
@@ -350,17 +356,16 @@ namespace dromozoa {
 
     template <>
     struct luaX_check_integer_impl<bool, true, false> {
-      static bool apply(lua_State* L, int n) {
-        return luaL_checkinteger(L, n);
+      static bool apply(lua_State*, int, intmax_t v) {
+        return v;
       }
     };
 
     template <class T>
     struct luaX_check_integer_impl<T, true, true> {
-      static T apply(lua_State* L, int n) {
+      static T apply(lua_State* L, int n, intmax_t v) {
         static const intmax_t min = std::numeric_limits<T>::min();
         static const intmax_t max = std::numeric_limits<T>::max();
-        intmax_t v = luaL_checkinteger(L, n);
         if (min <= v && v <= max) {
           return v;
         }
@@ -370,10 +375,9 @@ namespace dromozoa {
 
     template <class T>
     struct luaX_check_integer_impl<T, true, false> {
-      static T apply(lua_State* L, int n) {
+      static T apply(lua_State* L, int n, intmax_t v) {
         static const uintmax_t min = std::numeric_limits<T>::min();
         static const uintmax_t max = std::numeric_limits<T>::max();
-        intmax_t v = luaL_checkinteger(L, n);
         if (0 <= v) {
           uintmax_t u = v;
           if (min <= u && u <= max) {
@@ -389,6 +393,7 @@ namespace dromozoa {
   using bind::luaX_check_udata;
   using bind::luaX_new;
   using bind::luaX_nil;
+  using bind::luaX_opt_integer;
   using bind::luaX_opt_range_i;
   using bind::luaX_opt_range_j;
   using bind::luaX_push;
