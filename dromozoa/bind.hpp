@@ -27,6 +27,7 @@ extern "C" {
 #include <stdint.h>
 
 #include <exception>
+#include <limits>
 #include <new>
 #include <string>
 
