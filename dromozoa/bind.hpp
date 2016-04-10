@@ -29,6 +29,7 @@ extern "C" {
 #include <exception>
 #include <limits>
 #include <new>
+#include <sstream>
 #include <string>
 
 namespace dromozoa {
@@ -238,16 +239,58 @@ namespace dromozoa {
     }
 
     template <class T, bool T_is_integer = std::numeric_limits<T>::is_integer, bool T_is_signed = std::numeric_limits<T>::is_signed>
-    struct luaX_check_integer_impl {};
+    struct luaX_cast_integer_impl {};
 
     template <class T>
     inline T luaX_check_integer(lua_State* L, int n) {
-      return luaX_check_integer_impl<T>::apply(L, n, luaL_checkinteger(L, n));
+      T target;
+      if (luaX_cast_integer_impl<T>::apply(luaL_checkinteger(L, n), target)) {
+        return target;
+      }
+      return luaL_argerror(L, n, "out-of-bounds");
     }
 
     template <class T>
     inline T luaX_opt_integer(lua_State* L, int n, lua_Integer d) {
-      return luaX_check_integer_impl<T>::apply(L, n, luaL_optinteger(L, n, d));
+      T target;
+      if (luaX_cast_integer_impl<T>::apply(luaL_optinteger(L, n, d), target)) {
+        return target;
+      }
+      return luaL_argerror(L, n, "out-of-bounds");
+    }
+
+    template <class T_key, class T>
+    inline int luaX_field_error(lua_State* L, const T_key& key, const T& what) {
+      {
+        std::ostringstream out;
+        out << "field '" << key << "' " << what;
+        std::string message = out.str();
+        lua_pushlstring(L, message.data(), message.size());
+      }
+      return lua_error(L);
+    }
+
+    template <class T, class T_key>
+    inline T luaX_opt_integer_field(lua_State* L, const T_key& key, lua_Integer d) {
+      luaX_push(L, key);
+      int type = lua_gettable(L, -2);
+      intmax_t source;
+      if (lua_isnumber(L, -1)) {
+        source = lua_tointeger(L, -1);
+        lua_pop(L, 1);
+      } else {
+        lua_pop(L, 1);
+        if (type == LUA_TNIL) {
+          source = d;
+        } else {
+          return luaX_field_error(L, key, "not an integer");
+        }
+      }
+      T target;
+      if (luaX_cast_integer_impl<T>::apply(source, target)) {
+        return target;
+      }
+      return luaX_field_error(L, key, "out-of-bounds");
     }
 
     inline size_t luaX_opt_range_i(lua_State* L, int n, size_t size) {
@@ -355,45 +398,50 @@ namespace dromozoa {
 #undef DROMOZOA_BIND_LUAX_PUSH_IMPL
 
     template <>
-    struct luaX_check_integer_impl<bool, true, false> {
-      static bool apply(lua_State*, int, intmax_t v) {
-        return v;
+    struct luaX_cast_integer_impl<bool, true, false> {
+      static bool apply(intmax_t source, bool& target) {
+        target = source;
+        return true;
       }
     };
 
     template <class T>
-    struct luaX_check_integer_impl<T, true, true> {
-      static T apply(lua_State* L, int n, intmax_t v) {
+    struct luaX_cast_integer_impl<T, true, true> {
+      static T apply(intmax_t source, T& target) {
         static const intmax_t min = std::numeric_limits<T>::min();
         static const intmax_t max = std::numeric_limits<T>::max();
-        if (min <= v && v <= max) {
-          return v;
+        if (min <= source && source <= max) {
+          target = source;
+          return true;
         }
-        return luaL_argerror(L, n, "out of range");
+        return false;
       }
     };
 
     template <class T>
-    struct luaX_check_integer_impl<T, true, false> {
-      static T apply(lua_State* L, int n, intmax_t v) {
+    struct luaX_cast_integer_impl<T, true, false> {
+      static T apply(intmax_t source, T& target) {
         static const uintmax_t min = std::numeric_limits<T>::min();
         static const uintmax_t max = std::numeric_limits<T>::max();
-        if (0 <= v) {
-          uintmax_t u = v;
-          if (min <= u && u <= max) {
-            return u;
+        if (0 <= source) {
+          uintmax_t value = source;
+          if (min <= value && value <= max) {
+            target = value;
+            return true;
           }
         }
-        return luaL_argerror(L, n, "out of range");
+        return false;
       }
     };
   }
 
   using bind::luaX_check_integer;
   using bind::luaX_check_udata;
+  using bind::luaX_field_error;
   using bind::luaX_new;
   using bind::luaX_nil;
   using bind::luaX_opt_integer;
+  using bind::luaX_opt_integer_field;
   using bind::luaX_opt_range_i;
   using bind::luaX_opt_range_j;
   using bind::luaX_push;

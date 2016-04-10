@@ -109,6 +109,11 @@ assert(not pcall(bind.opt_integer, 0, 0, -1))
 assert(not pcall(bind.opt_integer, -32769, 0, 0))
 assert(not pcall(bind.opt_integer, 0, 65536, 0))
 
+assert(bind.opt_integer_field({}) == 0)
+assert(bind.opt_integer_field({ foo = 42 }) == 42)
+assert(not pcall(bind.opt_integer_field, { foo = "bar" }))
+assert(not pcall(bind.opt_integer_field, { foo = -1 }))
+
 assert(bind():get() == 0)
 assert(bind():set(42):get() == 42)
 assert(bind(42):get() == 42)
