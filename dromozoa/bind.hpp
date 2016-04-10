@@ -243,52 +243,55 @@ namespace dromozoa {
 
     template <class T>
     inline T luaX_check_integer(lua_State* L, int n) {
-      T value;
-      if (luaX_cast_integer_impl<T>::apply(luaL_checkinteger(L, n), value)) {
-        return value;
+      T target;
+      if (luaX_cast_integer_impl<T>::apply(luaL_checkinteger(L, n), target)) {
+        return target;
       }
-      return luaL_argerror(L, n, "out of range");
+      return luaL_argerror(L, n, "out-of-bounds");
     }
 
     template <class T>
     inline T luaX_opt_integer(lua_State* L, int n, lua_Integer d) {
-      T value;
-      if (luaX_cast_integer_impl<T>::apply(luaL_optinteger(L, n, d), value)) {
-        return value;
+      T target;
+      if (luaX_cast_integer_impl<T>::apply(luaL_optinteger(L, n, d), target)) {
+        return target;
       }
-      return luaL_argerror(L, n, "out of range");
+      return luaL_argerror(L, n, "out-of-bounds");
     }
 
-/*
+    template <class T_key, class T>
+    inline int luaX_field_error(lua_State* L, const T_key& key, const T& what) {
+      {
+        std::ostringstream out;
+        out << "field '" << key << "' " << what;
+        std::string message = out.str();
+        lua_pushlstring(L, message.data(), message.size());
+      }
+      return lua_error(L);
+    }
+
     template <class T, class T_key>
-    T luaX_opt_integer_field(lua_State* L, const T_key& key, lua_Integer d) {
+    inline T luaX_opt_integer_field(lua_State* L, const T_key& key, lua_Integer d) {
       luaX_push(L, key);
       int type = lua_gettable(L, -2);
-      if (type == LUAT_NIL) {
+      intmax_t source;
+      if (lua_isnumber(L, -1)) {
+        source = lua_tointeger(L, -1);
         lua_pop(L, 1);
-        return d;
-      } else if (lua_isnumber(L, -1)) {
-        intmax_t v = lua_tointeger(L, -1);
-        lua_pop(L, 1);
-        if (luaX_cast_integer_impl<T>::apply(v)) {
-        } else {
-          luaL_error(L, "");
-        }
-      }
-      if (lua_isnoneornil(L, -1) {
-        // ???
-      } else if (lua_isnumber(L, -1)) {
-        intmax_t v = lua_tointeger(L, -1);
-        lua_pop(L, 1);
-        return v;
       } else {
         lua_pop(L, 1);
-        if (type == LUAT_NIL) {
+        if (type == LUA_TNIL) {
+          source = d;
         } else {
+          return luaX_field_error(L, key, "not an integer");
         }
       }
+      T target;
+      if (luaX_cast_integer_impl<T>::apply(source, target)) {
+        return target;
+      }
+      return luaX_field_error(L, key, "out-of-bounds");
     }
-*/
 
     inline size_t luaX_opt_range_i(lua_State* L, int n, size_t size) {
       lua_Integer i = luaL_optinteger(L, n, 0);
@@ -434,9 +437,11 @@ namespace dromozoa {
 
   using bind::luaX_check_integer;
   using bind::luaX_check_udata;
+  using bind::luaX_field_error;
   using bind::luaX_new;
   using bind::luaX_nil;
   using bind::luaX_opt_integer;
+  using bind::luaX_opt_integer_field;
   using bind::luaX_opt_range_i;
   using bind::luaX_opt_range_j;
   using bind::luaX_push;
