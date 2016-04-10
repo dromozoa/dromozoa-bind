@@ -239,12 +239,12 @@ namespace dromozoa {
     }
 
     template <class T, bool T_is_integer = std::numeric_limits<T>::is_integer, bool T_is_signed = std::numeric_limits<T>::is_signed>
-    struct luaX_check_integer_impl {};
+    struct luaX_cast_integer_impl {};
 
     template <class T>
     inline T luaX_check_integer(lua_State* L, int n) {
       T value;
-      if (luaX_check_integer_impl<T>::apply(luaL_checkinteger(L, n), value)) {
+      if (luaX_cast_integer_impl<T>::apply(luaL_checkinteger(L, n), value)) {
         return value;
       }
       return luaL_argerror(L, n, "out of range");
@@ -253,7 +253,7 @@ namespace dromozoa {
     template <class T>
     inline T luaX_opt_integer(lua_State* L, int n, lua_Integer d) {
       T value;
-      if (luaX_check_integer_impl<T>::apply(luaL_optinteger(L, n, d), value)) {
+      if (luaX_cast_integer_impl<T>::apply(luaL_optinteger(L, n, d), value)) {
         return value;
       }
       return luaL_argerror(L, n, "out of range");
@@ -270,7 +270,7 @@ namespace dromozoa {
       } else if (lua_isnumber(L, -1)) {
         intmax_t v = lua_tointeger(L, -1);
         lua_pop(L, 1);
-        if (luaX_check_integer_impl<T>::apply(v)) {
+        if (luaX_cast_integer_impl<T>::apply(v)) {
         } else {
           luaL_error(L, "");
         }
@@ -395,7 +395,7 @@ namespace dromozoa {
 #undef DROMOZOA_BIND_LUAX_PUSH_IMPL
 
     template <>
-    struct luaX_check_integer_impl<bool, true, false> {
+    struct luaX_cast_integer_impl<bool, true, false> {
       static bool apply(intmax_t source, bool& target) {
         target = source;
         return true;
@@ -403,7 +403,7 @@ namespace dromozoa {
     };
 
     template <class T>
-    struct luaX_check_integer_impl<T, true, true> {
+    struct luaX_cast_integer_impl<T, true, true> {
       static T apply(intmax_t source, T& target) {
         static const intmax_t min = std::numeric_limits<T>::min();
         static const intmax_t max = std::numeric_limits<T>::max();
@@ -416,7 +416,7 @@ namespace dromozoa {
     };
 
     template <class T>
-    struct luaX_check_integer_impl<T, true, false> {
+    struct luaX_cast_integer_impl<T, true, false> {
       static T apply(intmax_t source, T& target) {
         static const uintmax_t min = std::numeric_limits<T>::min();
         static const uintmax_t max = std::numeric_limits<T>::max();
