@@ -29,6 +29,7 @@ extern "C" {
 #include <exception>
 #include <limits>
 #include <new>
+#include <sstream>
 #include <string>
 
 namespace dromozoa {
@@ -242,13 +243,52 @@ namespace dromozoa {
 
     template <class T>
     inline T luaX_check_integer(lua_State* L, int n) {
-      return luaX_check_integer_impl<T>::apply(L, n, luaL_checkinteger(L, n));
+      T value;
+      if (luaX_check_integer_impl<T>::apply(luaL_checkinteger(L, n), value)) {
+        return value;
+      }
+      return luaL_argerror(L, n, "out of range");
     }
 
     template <class T>
     inline T luaX_opt_integer(lua_State* L, int n, lua_Integer d) {
-      return luaX_check_integer_impl<T>::apply(L, n, luaL_optinteger(L, n, d));
+      T value;
+      if (luaX_check_integer_impl<T>::apply(luaL_optinteger(L, n, d), value)) {
+        return value;
+      }
+      return luaL_argerror(L, n, "out of range");
     }
+
+/*
+    template <class T, class T_key>
+    T luaX_opt_integer_field(lua_State* L, const T_key& key, lua_Integer d) {
+      luaX_push(L, key);
+      int type = lua_gettable(L, -2);
+      if (type == LUAT_NIL) {
+        lua_pop(L, 1);
+        return d;
+      } else if (lua_isnumber(L, -1)) {
+        intmax_t v = lua_tointeger(L, -1);
+        lua_pop(L, 1);
+        if (luaX_check_integer_impl<T>::apply(v)) {
+        } else {
+          luaL_error(L, "");
+        }
+      }
+      if (lua_isnoneornil(L, -1) {
+        // ???
+      } else if (lua_isnumber(L, -1)) {
+        intmax_t v = lua_tointeger(L, -1);
+        lua_pop(L, 1);
+        return v;
+      } else {
+        lua_pop(L, 1);
+        if (type == LUAT_NIL) {
+        } else {
+        }
+      }
+    }
+*/
 
     inline size_t luaX_opt_range_i(lua_State* L, int n, size_t size) {
       lua_Integer i = luaL_optinteger(L, n, 0);
@@ -356,35 +396,38 @@ namespace dromozoa {
 
     template <>
     struct luaX_check_integer_impl<bool, true, false> {
-      static bool apply(lua_State*, int, intmax_t v) {
-        return v;
+      static bool apply(intmax_t source, bool& target) {
+        target = source;
+        return true;
       }
     };
 
     template <class T>
     struct luaX_check_integer_impl<T, true, true> {
-      static T apply(lua_State* L, int n, intmax_t v) {
+      static T apply(intmax_t source, T& target) {
         static const intmax_t min = std::numeric_limits<T>::min();
         static const intmax_t max = std::numeric_limits<T>::max();
-        if (min <= v && v <= max) {
-          return v;
+        if (min <= source && source <= max) {
+          target = source;
+          return true;
         }
-        return luaL_argerror(L, n, "out of range");
+        return false;
       }
     };
 
     template <class T>
     struct luaX_check_integer_impl<T, true, false> {
-      static T apply(lua_State* L, int n, intmax_t v) {
+      static T apply(intmax_t source, T& target) {
         static const uintmax_t min = std::numeric_limits<T>::min();
         static const uintmax_t max = std::numeric_limits<T>::max();
-        if (0 <= v) {
-          uintmax_t u = v;
-          if (min <= u && u <= max) {
-            return u;
+        if (0 <= source) {
+          uintmax_t value = source;
+          if (min <= value && value <= max) {
+            target = value;
+            return true;
           }
         }
-        return luaL_argerror(L, n, "out of range");
+        return false;
       }
     };
   }
