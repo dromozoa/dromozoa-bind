@@ -374,8 +374,6 @@ namespace dromozoa {
           return luaX_closure(L, reinterpret_cast<function_type>(lua_touserdata(L, lua_upvalueindex(1))));
         } catch (const std::exception& e) {
           return luaL_error(L, "exception caught: %s", e.what());
-        } catch (...) {
-          return luaL_error(L, "exception caught");
         }
       }
 

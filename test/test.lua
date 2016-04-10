@@ -17,11 +17,7 @@
 
 local bind = require "dromozoa.bind"
 
-local result, message = pcall(bind.throw_int)
-assert(not result)
-assert(message == "exception caught")
-
-local result, message = pcall(bind.throw_runtime_error)
+local result, message = pcall(bind.throw)
 assert(not result)
 assert(message:find("exception caught:") == 1)
 assert(message:find("runtime_error"))
