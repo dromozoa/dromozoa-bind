@@ -90,7 +90,7 @@ namespace dromozoa {
     }
 
     void impl_opt_integer_field(lua_State* L) {
-      luaX_push(L, luaX_opt_integer_field<uint16_t>(L, "foo", 0));
+      luaX_push(L, luaX_opt_integer_field<uint16_t>(L, 1, "foo", 0));
     }
 
     void impl_new(lua_State* L) {

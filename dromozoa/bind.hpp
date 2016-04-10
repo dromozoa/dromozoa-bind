@@ -271,9 +271,9 @@ namespace dromozoa {
     }
 
     template <class T, class T_key>
-    inline T luaX_opt_integer_field(lua_State* L, const T_key& key, lua_Integer d) {
+    inline T luaX_opt_integer_field(lua_State* L, int n, const T_key& key, lua_Integer d) {
       luaX_push(L, key);
-      int type = lua_gettable(L, -2);
+      int type = lua_gettable(L, n);
       intmax_t source;
       if (lua_isnumber(L, -1)) {
         source = lua_tointeger(L, -1);
@@ -410,6 +410,10 @@ namespace dromozoa {
       static T apply(intmax_t source, T& target) {
         static const intmax_t min = std::numeric_limits<T>::min();
         static const intmax_t max = std::numeric_limits<T>::max();
+        return apply(source, target, min, max);
+      }
+
+      static T apply(intmax_t source, T& target, intmax_t min, intmax_t max) {
         if (min <= source && source <= max) {
           target = source;
           return true;
@@ -423,6 +427,10 @@ namespace dromozoa {
       static T apply(intmax_t source, T& target) {
         static const uintmax_t min = std::numeric_limits<T>::min();
         static const uintmax_t max = std::numeric_limits<T>::max();
+        return apply(source, target, min, max);
+      }
+
+      static T apply(intmax_t source, T& target, uintmax_t min, uintmax_t max) {
         if (0 <= source) {
           uintmax_t value = source;
           if (min <= value && value <= max) {
