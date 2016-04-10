@@ -270,24 +270,39 @@ namespace dromozoa {
       return lua_error(L);
     }
 
-    template <class T, class T_key>
-    inline T luaX_opt_integer_field(lua_State* L, const T_key& key, lua_Integer d) {
+    template <class T_key>
+    inline intmax_t luaX_opt_integer_field_impl(lua_State* L, int n, const T_key& key, lua_Integer d) {
       luaX_push(L, key);
-      int type = lua_gettable(L, -2);
-      intmax_t source;
+      int type = lua_gettable(L, n);
       if (lua_isnumber(L, -1)) {
-        source = lua_tointeger(L, -1);
+        intmax_t value = lua_tointeger(L, -1);
         lua_pop(L, 1);
+        return value;
       } else {
         lua_pop(L, 1);
         if (type == LUA_TNIL) {
-          source = d;
+          return d;
         } else {
           return luaX_field_error(L, key, "not an integer");
         }
       }
+    }
+
+    template <class T, class T_key>
+    inline T luaX_opt_integer_field(lua_State* L, int n, const T_key& key, lua_Integer d) {
+      intmax_t source = luaX_opt_integer_field_impl(L, n, key, d);
       T target;
       if (luaX_cast_integer_impl<T>::apply(source, target)) {
+        return target;
+      }
+      return luaX_field_error(L, key, "out-of-bounds");
+    }
+
+    template <class T, class T_key>
+    inline T luaX_opt_integer_field(lua_State* L, int n, const T_key& key, lua_Integer d, T min, T max) {
+      intmax_t source = luaX_opt_integer_field_impl(L, n, key, d);
+      T target;
+      if (luaX_cast_integer_impl<T>::apply(source, target, min, max)) {
         return target;
       }
       return luaX_field_error(L, key, "out-of-bounds");
@@ -359,8 +374,6 @@ namespace dromozoa {
           return luaX_closure(L, reinterpret_cast<function_type>(lua_touserdata(L, lua_upvalueindex(1))));
         } catch (const std::exception& e) {
           return luaL_error(L, "exception caught: %s", e.what());
-        } catch (...) {
-          return luaL_error(L, "exception caught");
         }
       }
 
@@ -410,6 +423,10 @@ namespace dromozoa {
       static T apply(intmax_t source, T& target) {
         static const intmax_t min = std::numeric_limits<T>::min();
         static const intmax_t max = std::numeric_limits<T>::max();
+        return apply(source, target, min, max);
+      }
+
+      static T apply(intmax_t source, T& target, intmax_t min, intmax_t max) {
         if (min <= source && source <= max) {
           target = source;
           return true;
@@ -423,6 +440,10 @@ namespace dromozoa {
       static T apply(intmax_t source, T& target) {
         static const uintmax_t min = std::numeric_limits<T>::min();
         static const uintmax_t max = std::numeric_limits<T>::max();
+        return apply(source, target, min, max);
+      }
+
+      static T apply(intmax_t source, T& target, uintmax_t min, uintmax_t max) {
         if (0 <= source) {
           uintmax_t value = source;
           if (min <= value && value <= max) {
