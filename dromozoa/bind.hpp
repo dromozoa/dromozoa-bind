@@ -243,7 +243,7 @@ namespace dromozoa {
 
     template <class T>
     inline T luaX_check_integer(lua_State* L, int n) {
-      T target;
+      T target = 0;
       if (luaX_cast_integer_impl<T>::apply(luaL_checkinteger(L, n), target)) {
         return target;
       }
@@ -252,7 +252,7 @@ namespace dromozoa {
 
     template <class T>
     inline T luaX_opt_integer(lua_State* L, int n, lua_Integer d) {
-      T target;
+      T target = 0;
       if (luaX_cast_integer_impl<T>::apply(luaL_optinteger(L, n, d), target)) {
         return target;
       }
@@ -291,7 +291,7 @@ namespace dromozoa {
     template <class T, class T_key>
     inline T luaX_opt_integer_field(lua_State* L, int n, const T_key& key, lua_Integer d) {
       intmax_t source = luaX_opt_integer_field_impl(L, n, key, d);
-      T target;
+      T target = 0;
       if (luaX_cast_integer_impl<T>::apply(source, target)) {
         return target;
       }
@@ -301,7 +301,7 @@ namespace dromozoa {
     template <class T, class T_key>
     inline T luaX_opt_integer_field(lua_State* L, int n, const T_key& key, lua_Integer d, T min, T max) {
       intmax_t source = luaX_opt_integer_field_impl(L, n, key, d);
-      T target;
+      T target = 0;
       if (luaX_cast_integer_impl<T>::apply(source, target, min, max)) {
         return target;
       }
