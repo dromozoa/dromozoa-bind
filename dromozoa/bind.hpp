@@ -247,7 +247,7 @@ namespace dromozoa {
       if (luaX_cast_integer_impl<T>::apply(luaL_checkinteger(L, n), target)) {
         return target;
       }
-      return luaL_argerror(L, n, "out-of-bounds");
+      return luaL_argerror(L, n, "out of bounds");
     }
 
     template <class T>
@@ -256,7 +256,7 @@ namespace dromozoa {
       if (luaX_cast_integer_impl<T>::apply(luaL_optinteger(L, n, d), target)) {
         return target;
       }
-      return luaL_argerror(L, n, "out-of-bounds");
+      return luaL_argerror(L, n, "out of bounds");
     }
 
     template <class T_key, class T>
@@ -295,7 +295,7 @@ namespace dromozoa {
       if (luaX_cast_integer_impl<T>::apply(source, target)) {
         return target;
       }
-      return luaX_field_error(L, key, "out-of-bounds");
+      return luaX_field_error(L, key, "out of bounds");
     }
 
     template <class T, class T_key>
@@ -305,7 +305,7 @@ namespace dromozoa {
       if (luaX_cast_integer_impl<T>::apply(source, target, min, max)) {
         return target;
       }
-      return luaX_field_error(L, key, "out-of-bounds");
+      return luaX_field_error(L, key, "out of bounds");
     }
 
     inline size_t luaX_opt_range_i(lua_State* L, int n, size_t size) {
