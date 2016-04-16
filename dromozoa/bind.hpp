@@ -76,64 +76,60 @@ namespace dromozoa {
       }
     }
 
-    inline int luaX_abs_index(lua_State* L, int index) {
-#if LUA_VERSION_NUM+0 >= 502
-      return lua_absindex(L, index);
-#else
-      if (LUA_REGISTRYINDEX < index && index < 0) {
-        int top = lua_gettop(L);
-        if (top >= -index) {
-          return top + index + 1;
-        }
+    template <class T>
+    inline T* luaX_new(lua_State* L) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T();
+      return data;
+    }
+
+    template <class T, class T1>
+    inline T* luaX_new(lua_State* L, const T1& v1) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1);
+      return data;
+    }
+
+    template <class T, class T1, class T2>
+    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1, v2);
+      return data;
+    }
+
+    template <class T, class T1, class T2, class T3>
+    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1, v2, v3);
+      return data;
+    }
+
+    template <class T, class T1, class T2, class T3, class T4>
+    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3, const T4& v4) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1, v2, v3, v4);
+      return data;
+    }
+
+    template <class T, bool T_is_integer = std::numeric_limits<T>::is_integer, bool T_is_signed = std::numeric_limits<T>::is_signed>
+    struct luaX_cast_integer_impl {};
+
+    template <class T>
+    inline T luaX_check_integer(lua_State* L, int arg) {
+      T target = 0;
+      if (luaX_cast_integer_impl<T>::apply(luaL_checkinteger(L, arg), target)) {
+        return target;
       }
-      return index;
-#endif
+      return luaL_argerror(L, arg, "out of bounds");
     }
 
-    template <class T_key>
-    inline int luaX_get_field(lua_State* L, int index, const T_key& key) {
-      index = luaX_abs_index(L, index);
-      luaX_push(L, key);
-#if LUA_VERSION_NUM+0 >= 503
-      return lua_gettable(L, index);
-#else
-      lua_gettable(L, index);
-      return lua_type(L, -1);
-#endif
-    }
-
-    template <class T, class T_key>
-    inline void luaX_set_field(lua_State* L, int index, const T_key& key, const T& value) {
-      index = luaX_abs_index(L, index);
-      luaX_push(L, key, value);
-      lua_settable(L, index);
-    }
-
-    template <class T_key>
-    inline void luaX_set_field(lua_State* L, int index, const T_key& key) {
-      index = luaX_abs_index(L, index);
-      luaX_push(L, key);
-      lua_pushvalue(L, -2);
-      lua_settable(L, index);
-      lua_pop(L, 1);
-    }
-
-    template <class T, class T_key>
-    inline void luaX_set_metafield(lua_State* L, const T_key& key, const T& value) {
-      if (!lua_getmetatable(L, -1)) {
-        lua_newtable(L);
+    template <class T>
+    inline T luaX_opt_integer(lua_State* L, int arg, lua_Integer d) {
+      T target = 0;
+      if (luaX_cast_integer_impl<T>::apply(luaL_optinteger(L, arg, d), target)) {
+        return target;
       }
-      luaX_set_field(L, -1, key, value);
-      lua_setmetatable(L, -2);
-    }
-
-    inline void luaX_set_metatable(lua_State* L, const char* name) {
-#if LUA_VERSION_NUM+0 >= 502
-      return luaL_setmetatable(L, name);
-#else
-      luaL_getmetatable(L, name);
-      lua_setmetatable(L, -2);
-#endif
+      return luaL_argerror(L, arg, "out of bounds");
     }
 
     inline bool luaX_to_udata_impl(lua_State* L, const char* name) {
@@ -231,60 +227,18 @@ namespace dromozoa {
       }
     }
 
-    template <class T>
-    inline T* luaX_new(lua_State* L) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T();
-      return data;
-    }
-
-    template <class T, class T1>
-    inline T* luaX_new(lua_State* L, const T1& v1) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T(v1);
-      return data;
-    }
-
-    template <class T, class T1, class T2>
-    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T(v1, v2);
-      return data;
-    }
-
-    template <class T, class T1, class T2, class T3>
-    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T(v1, v2, v3);
-      return data;
-    }
-
-    template <class T, class T1, class T2, class T3, class T4>
-    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3, const T4& v4) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T(v1, v2, v3, v4);
-      return data;
-    }
-
-    template <class T, bool T_is_integer = std::numeric_limits<T>::is_integer, bool T_is_signed = std::numeric_limits<T>::is_signed>
-    struct luaX_cast_integer_impl {};
-
-    template <class T>
-    inline T luaX_check_integer(lua_State* L, int arg) {
-      T target = 0;
-      if (luaX_cast_integer_impl<T>::apply(luaL_checkinteger(L, arg), target)) {
-        return target;
+    inline int luaX_abs_index(lua_State* L, int index) {
+#if LUA_VERSION_NUM+0 >= 502
+      return lua_absindex(L, index);
+#else
+      if (LUA_REGISTRYINDEX < index && index < 0) {
+        int top = lua_gettop(L);
+        if (top >= -index) {
+          return top + index + 1;
+        }
       }
-      return luaL_argerror(L, arg, "out of bounds");
-    }
-
-    template <class T>
-    inline T luaX_opt_integer(lua_State* L, int arg, lua_Integer d) {
-      T target = 0;
-      if (luaX_cast_integer_impl<T>::apply(luaL_optinteger(L, arg, d), target)) {
-        return target;
-      }
-      return luaL_argerror(L, arg, "out of bounds");
+      return index;
+#endif
     }
 
     template <class T_key, class T>
@@ -296,6 +250,34 @@ namespace dromozoa {
         lua_pushlstring(L, message.data(), message.size());
       }
       return lua_error(L);
+    }
+
+    template <class T_key>
+    inline void luaX_set_field(lua_State* L, int index, const T_key& key) {
+      index = luaX_abs_index(L, index);
+      luaX_push(L, key);
+      lua_pushvalue(L, -2);
+      lua_settable(L, index);
+      lua_pop(L, 1);
+    }
+
+    template <class T, class T_key>
+    inline void luaX_set_field(lua_State* L, int index, const T_key& key, const T& value) {
+      index = luaX_abs_index(L, index);
+      luaX_push(L, key, value);
+      lua_settable(L, index);
+    }
+
+    template <class T_key>
+    inline int luaX_get_field(lua_State* L, int index, const T_key& key) {
+      index = luaX_abs_index(L, index);
+      luaX_push(L, key);
+#if LUA_VERSION_NUM+0 >= 503
+      return lua_gettable(L, index);
+#else
+      lua_gettable(L, index);
+      return lua_type(L, -1);
+#endif
     }
 
     template <class T_key>
@@ -339,6 +321,24 @@ namespace dromozoa {
         return target;
       }
       return luaX_field_error(L, key, "out of bounds");
+    }
+
+    inline void luaX_set_metatable(lua_State* L, const char* name) {
+#if LUA_VERSION_NUM+0 >= 502
+      return luaL_setmetatable(L, name);
+#else
+      luaL_getmetatable(L, name);
+      lua_setmetatable(L, -2);
+#endif
+    }
+
+    template <class T, class T_key>
+    inline void luaX_set_metafield(lua_State* L, const T_key& key, const T& value) {
+      if (!lua_getmetatable(L, -1)) {
+        lua_newtable(L);
+      }
+      luaX_set_field(L, -1, key, value);
+      lua_setmetatable(L, -2);
     }
 
     inline size_t luaX_opt_range_i(lua_State* L, int arg, size_t size) {
