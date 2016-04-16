@@ -77,12 +77,14 @@ namespace dromozoa {
       luaX_check_integer<int16_t>(L, 1);
       luaX_check_integer<uint16_t>(L, 2);
       luaX_check_integer<size_t>(L, 3);
+      luaX_check_integer<int>(L, 4, 0, 255);
     }
 
     void impl_opt_integer(lua_State* L) {
       luaX_opt_integer<int16_t>(L, 1, 0);
       luaX_opt_integer<uint16_t>(L, 2, 0);
       luaX_opt_integer<size_t>(L, 3, 0);
+      luaX_opt_integer<int>(L, 4, 0, 0, 255);
     }
 
     void impl_opt_integer_field(lua_State* L) {

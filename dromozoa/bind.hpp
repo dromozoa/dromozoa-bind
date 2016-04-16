@@ -124,9 +124,27 @@ namespace dromozoa {
     }
 
     template <class T>
+    inline T luaX_check_integer(lua_State* L, int arg, T min, T max) {
+      T target = 0;
+      if (luaX_cast_integer_impl<T>::apply(luaL_checkinteger(L, arg), target, min, max)) {
+        return target;
+      }
+      return luaL_argerror(L, arg, "out of bounds");
+    }
+
+    template <class T>
     inline T luaX_opt_integer(lua_State* L, int arg, lua_Integer d) {
       T target = 0;
       if (luaX_cast_integer_impl<T>::apply(luaL_optinteger(L, arg, d), target)) {
+        return target;
+      }
+      return luaL_argerror(L, arg, "out of bounds");
+    }
+
+    template <class T>
+    inline T luaX_opt_integer(lua_State* L, int arg, lua_Integer d, T min, T max) {
+      T target = 0;
+      if (luaX_cast_integer_impl<T>::apply(luaL_optinteger(L, arg, d), target, min, max)) {
         return target;
       }
       return luaL_argerror(L, arg, "out of bounds");
