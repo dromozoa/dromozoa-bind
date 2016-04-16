@@ -273,14 +273,19 @@ namespace dromozoa {
     template <class T_key>
     inline intmax_t luaX_opt_integer_field_impl(lua_State* L, int n, const T_key& key, lua_Integer d) {
       luaX_push(L, key);
-      int type = lua_gettable(L, n);
+#if LUA_VERSION_NUM+0 >= 503
+      bool is_nil = lua_gettable(L, n) == LUA_TNIL;
+#else
+      lua_gettable(L, n);
+      bool is_nil = lua_isnil(L, -1);
+#endif
       if (lua_isnumber(L, -1)) {
         intmax_t value = lua_tointeger(L, -1);
         lua_pop(L, 1);
         return value;
       } else {
         lua_pop(L, 1);
-        if (type == LUA_TNIL) {
+        if (is_nil) {
           return d;
         } else {
           return luaX_field_error(L, key, "not an integer");
