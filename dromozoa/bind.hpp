@@ -76,17 +76,45 @@ namespace dromozoa {
       }
     }
 
-    template <class T, class T_key>
-    inline void luaX_set_field(lua_State* L, const T_key& key, const T& value) {
-      luaX_push(L, key, value);
-      lua_settable(L, -3);
+    inline int luaX_abs_index(lua_State* L, int index) {
+#if LUA_VERSION_NUM+0 >= 502
+      return lua_absindex(L, index);
+#else
+      if (LUA_REGISTRYINDEX < index && index < 0) {
+        int top = lua_gettop(L);
+        if (top >= -index) {
+          return top + index + 1;
+        }
+      }
+      return index;
+#endif
     }
 
     template <class T_key>
-    inline void luaX_set_field(lua_State* L, const T_key& key) {
+    inline int luaX_get_field(lua_State* L, int index, const T_key& key) {
+      index = luaX_abs_index(L, index);
+      luaX_push(L, key);
+#if LUA_VERSION_NUM+0 >= 503
+      return lua_gettable(L, index);
+#else
+      lua_gettable(L, index);
+      return lua_type(L, -1);
+#endif
+    }
+
+    template <class T, class T_key>
+    inline void luaX_set_field(lua_State* L, int index, const T_key& key, const T& value) {
+      index = luaX_abs_index(L, index);
+      luaX_push(L, key, value);
+      lua_settable(L, index);
+    }
+
+    template <class T_key>
+    inline void luaX_set_field(lua_State* L, int index, const T_key& key) {
+      index = luaX_abs_index(L, index);
       luaX_push(L, key);
       lua_pushvalue(L, -2);
-      lua_settable(L, -4);
+      lua_settable(L, index);
       lua_pop(L, 1);
     }
 
@@ -95,7 +123,7 @@ namespace dromozoa {
       if (!lua_getmetatable(L, -1)) {
         lua_newtable(L);
       }
-      luaX_set_field(L, key, value);
+      luaX_set_field(L, -1, key, value);
       lua_setmetatable(L, -2);
     }
 
@@ -461,9 +489,11 @@ namespace dromozoa {
     };
   }
 
+  using bind::luaX_abs_index;
   using bind::luaX_check_integer;
   using bind::luaX_check_udata;
   using bind::luaX_field_error;
+  using bind::luaX_get_field;
   using bind::luaX_new;
   using bind::luaX_nil;
   using bind::luaX_opt_integer;
