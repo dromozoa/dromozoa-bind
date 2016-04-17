@@ -39,14 +39,22 @@ namespace dromozoa {
 
     static const luaX_nil_t luaX_nil = 0;
 
+    struct luaX_type_nil {};
+    struct luaX_type_number {};
+    struct luaX_type_numflt : luaX_type_number {};
+    struct luaX_type_numint : luaX_type_number {};
+    struct luaX_type_boolean {};
+    struct luaX_type_string {};
+    struct luaX_type_function {};
+
     template <class T>
     struct luaX_type {};
 
-    template <class T, int T_value>
+    template <class T, class T_type>
     struct luaX_type_traits_impl {};
 
     template <class T>
-    struct luaX_type_traits : luaX_type_traits_impl<typename luaX_type<T>::type, luaX_type<T>::value> {};
+    struct luaX_type_traits : luaX_type_traits_impl<typename luaX_type<T>::decay, typename luaX_type<T>::type> {};
 
     template <class T>
     inline void luaX_push(lua_State* L, const T& value) {
@@ -401,77 +409,74 @@ namespace dromozoa {
 #define DROMOZOA_BIND_LUAX_TYPE(PP_lua_type, PP_cxx_type) \
     template <> \
     struct luaX_type<PP_cxx_type> { \
-      typedef PP_cxx_type type; \
-      static const int value = PP_lua_type; \
+      typedef PP_cxx_type decay; \
+      typedef PP_lua_type type; \
     };
 
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TNIL, luaX_nil_t)
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TNUMBER, float)
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TNUMBER, double)
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TNUMBER, long double)
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TNUMBER, char)
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TNUMBER, signed char)
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TNUMBER, unsigned char)
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TNUMBER, short)
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TNUMBER, unsigned short)
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TNUMBER, int)
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TNUMBER, unsigned int)
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TNUMBER, long)
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TNUMBER, unsigned long)
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TNUMBER, long long)
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TNUMBER, unsigned long long)
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TBOOLEAN, bool)
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TSTRING, char*)
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TSTRING, const char*)
-    DROMOZOA_BIND_LUAX_TYPE(LUA_TSTRING, std::string)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_nil, luaX_nil_t)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numflt, float)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numflt, double)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, long double)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, char)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, signed char)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, unsigned char)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, short)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, unsigned short)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, int)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, unsigned int)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, long)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, unsigned long)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, long long)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, unsigned long long)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_boolean, bool)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_string, char*)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_string, const char*)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_string, std::string)
 
 #undef DROMOZOA_BIND_LUAX_TYPE
 
     template <size_t T>
     struct luaX_type<char[T]> {
-      typedef char* type;
-      static const int value = LUA_TSTRING;
+      typedef char* decay;
+      typedef luaX_type_string type;
     };
 
     template <class T_result, class T>
     struct luaX_type<T_result(T)> {
-      typedef T_result (*type)(T);
-      static const int value = LUA_TFUNCTION;
+      typedef T_result (*decay)(T);
+      typedef luaX_type_function type;
     };
 
     template <class T>
-    struct luaX_type_traits_impl<T, LUA_TNIL> {
+    struct luaX_type_traits_impl<T, luaX_type_nil> {
       static void push(lua_State* L, const T&) {
         lua_pushnil(L);
       }
     };
 
-    template <class T, bool T_is_integer = std::numeric_limits<T>::is_integer>
-    struct luaX_push_number {
+    template <class T>
+    struct luaX_type_traits_impl<T, luaX_type_numflt> {
       static void push(lua_State* L, const T& value) {
         lua_pushnumber(L, value);
       }
     };
 
     template <class T>
-    struct luaX_push_number<T, true> {
+    struct luaX_type_traits_impl<T, luaX_type_numint> {
       static void push(lua_State* L, const T& value) {
         lua_pushinteger(L, value);
       }
     };
 
     template <class T>
-    struct luaX_type_traits_impl<T, LUA_TNUMBER> : luaX_push_number<T> {};
-
-    template <class T>
-    struct luaX_type_traits_impl<T, LUA_TBOOLEAN> {
+    struct luaX_type_traits_impl<T, luaX_type_boolean> {
       static void push(lua_State* L, const T& value) {
         lua_pushboolean(L, value);
       }
     };
 
     template <class T>
-    struct luaX_type_traits_impl<T, LUA_TSTRING> {
+    struct luaX_type_traits_impl<T, luaX_type_string> {
       static void push(lua_State* L, const char* value) {
         lua_pushstring(L, value);
       }
@@ -482,7 +487,7 @@ namespace dromozoa {
     };
 
     template <class T>
-    struct luaX_type_traits_impl<T, LUA_TFUNCTION> {
+    struct luaX_type_traits_impl<T, luaX_type_function> {
       static int closure(lua_State* L) {
         try {
           return luaX_closure(L, reinterpret_cast<T>(lua_touserdata(L, lua_upvalueindex(1))));
