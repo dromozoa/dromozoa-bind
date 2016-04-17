@@ -36,7 +36,6 @@ namespace dromozoa {
   namespace bind {
     struct luaX_nil_impl {};
     typedef int luaX_nil_impl::*luaX_nil_t;
-
     static const luaX_nil_t luaX_nil = 0;
 
     struct luaX_type_nil {};
@@ -396,16 +395,6 @@ namespace dromozoa {
       return j;
     }
 
-    inline int luaX_closure(lua_State* L, lua_CFunction function) {
-      return function(L);
-    }
-
-    inline int luaX_closure(lua_State* L, void (*function)(lua_State*)) {
-      int top = lua_gettop(L);
-      function(L);
-      return lua_gettop(L) - top;
-    }
-
 #define DROMOZOA_BIND_LUAX_TYPE(PP_lua_type, PP_cxx_type) \
     template <> \
     struct luaX_type<PP_cxx_type> { \
@@ -441,9 +430,9 @@ namespace dromozoa {
       typedef luaX_type_string type;
     };
 
-    template <class T_result, class T>
-    struct luaX_type<T_result(T)> {
-      typedef T_result (*decay)(T);
+    template <class T>
+    struct luaX_type<T(lua_State* L)> {
+      typedef T (*decay)(lua_State* L);
       typedef luaX_type_function type;
     };
 
@@ -488,9 +477,19 @@ namespace dromozoa {
 
     template <class T>
     struct luaX_type_traits_impl<T, luaX_type_function> {
+      static int call(lua_State* L, lua_CFunction function) {
+        return function(L);
+      }
+
+      static int call(lua_State* L, void (*function)(lua_State*)) {
+        int top = lua_gettop(L);
+        function(L);
+        return lua_gettop(L) - top;
+      }
+
       static int closure(lua_State* L) {
         try {
-          return luaX_closure(L, reinterpret_cast<T>(lua_touserdata(L, lua_upvalueindex(1))));
+          return call(L, reinterpret_cast<T>(lua_touserdata(L, lua_upvalueindex(1))));
         } catch (const std::exception& e) {
           return luaL_error(L, "exception caught: %s", e.what());
         }
