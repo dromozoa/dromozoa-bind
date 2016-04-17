@@ -115,14 +115,18 @@ assert(not pcall(bind.opt_integer, 0, 0, 0, 256))
 
 assert(bind.opt_integer_field({}) == 0)
 assert(bind.opt_integer_field({ foo = 42 }) == 42)
-assert(not pcall(bind.opt_integer_field, { foo = "bar" }))
-assert(not pcall(bind.opt_integer_field, { foo = -1 }))
+print(pcall(bind.opt_integer_field, { foo = "bar" }))
+print(pcall(bind.opt_integer_field, { foo = -1 }))
+print(pcall(bind.opt_integer_field, { [42] = -1 }))
 
 assert(bind.opt_integer_field_range({}) == 0)
 assert(bind.opt_integer_field_range({ tv_usec = 42 }) == 42)
 assert(not pcall(bind.opt_integer_field_range, { tv_usec = "foo" }))
 assert(not pcall(bind.opt_integer_field_range, { tv_usec = -1 }))
 assert(not pcall(bind.opt_integer_field_range, { tv_usec = 1000000 }))
+
+print(pcall(bind.field_error1))
+print(pcall(bind.field_error2))
 
 assert(bind():get() == 0)
 assert(bind():set(42):get() == 42)

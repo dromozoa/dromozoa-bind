@@ -249,7 +249,7 @@ namespace dromozoa {
 #if LUA_VERSION_NUM+0 >= 502
       return lua_absindex(L, index);
 #else
-      if (LUA_REGISTRYINDEX < index && index < 0) {
+      if (index < 0) {
         int top = lua_gettop(L);
         if (top >= -index) {
           return top + index + 1;
