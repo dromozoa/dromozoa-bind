@@ -55,6 +55,15 @@ namespace dromozoa {
     template <class T>
     struct luaX_type_traits : luaX_type_traits_impl<typename luaX_type<T>::decay, typename luaX_type<T>::type> {};
 
+    template <class T, bool is_signed>
+    struct luaX_integer_traits_impl {};
+
+    template <class T, class T_type = typename luaX_type<T>::type>
+    struct luaX_integer_traits {};
+
+    template <class T>
+    struct luaX_integer_traits<T, luaX_type_numint> : luaX_integer_traits_impl<T, std::numeric_limits<T>::is_signed> {};
+
     template <class T>
     inline void luaX_push(lua_State* L, const T& value) {
       luaX_type_traits<T>::push(L, value);
@@ -124,13 +133,10 @@ namespace dromozoa {
       return data;
     }
 
-    template <class T, bool T_is_integer = std::numeric_limits<T>::is_integer, bool T_is_signed = std::numeric_limits<T>::is_signed>
-    struct luaX_cast_integer_impl {};
-
     template <class T>
     inline T luaX_check_integer(lua_State* L, int arg) {
       T target = 0;
-      if (luaX_cast_integer_impl<T>::apply(luaL_checkinteger(L, arg), target)) {
+      if (luaX_integer_traits<T>::convert(luaL_checkinteger(L, arg), target)) {
         return target;
       }
       return luaL_argerror(L, arg, "out of bounds");
@@ -139,7 +145,7 @@ namespace dromozoa {
     template <class T>
     inline T luaX_check_integer(lua_State* L, int arg, T min, T max) {
       T target = 0;
-      if (luaX_cast_integer_impl<T>::apply(luaL_checkinteger(L, arg), target, min, max)) {
+      if (luaX_integer_traits<T>::convert(luaL_checkinteger(L, arg), target, min, max)) {
         return target;
       }
       return luaL_argerror(L, arg, "out of bounds");
@@ -148,7 +154,7 @@ namespace dromozoa {
     template <class T>
     inline T luaX_opt_integer(lua_State* L, int arg, lua_Integer d) {
       T target = 0;
-      if (luaX_cast_integer_impl<T>::apply(luaL_optinteger(L, arg, d), target)) {
+      if (luaX_integer_traits<T>::convert(luaL_optinteger(L, arg, d), target)) {
         return target;
       }
       return luaL_argerror(L, arg, "out of bounds");
@@ -157,7 +163,7 @@ namespace dromozoa {
     template <class T>
     inline T luaX_opt_integer(lua_State* L, int arg, lua_Integer d, T min, T max) {
       T target = 0;
-      if (luaX_cast_integer_impl<T>::apply(luaL_optinteger(L, arg, d), target, min, max)) {
+      if (luaX_integer_traits<T>::convert(luaL_optinteger(L, arg, d), target, min, max)) {
         return target;
       }
       return luaL_argerror(L, arg, "out of bounds");
@@ -338,7 +344,7 @@ namespace dromozoa {
     inline T luaX_opt_integer_field(lua_State* L, int arg, const T_key& key, lua_Integer d) {
       intmax_t source = luaX_opt_integer_field_impl(L, arg, key, d);
       T target = 0;
-      if (luaX_cast_integer_impl<T>::apply(source, target)) {
+      if (luaX_integer_traits<T>::convert(source, target)) {
         return target;
       }
       return luaX_field_error(L, key, "out of bounds");
@@ -348,7 +354,7 @@ namespace dromozoa {
     inline T luaX_opt_integer_field(lua_State* L, int arg, const T_key& key, lua_Integer d, T min, T max) {
       intmax_t source = luaX_opt_integer_field_impl(L, arg, key, d);
       T target = 0;
-      if (luaX_cast_integer_impl<T>::apply(source, target, min, max)) {
+      if (luaX_integer_traits<T>::convert(source, target, min, max)) {
         return target;
       }
       return luaX_field_error(L, key, "out of bounds");
@@ -501,23 +507,15 @@ namespace dromozoa {
       }
     };
 
-    template <>
-    struct luaX_cast_integer_impl<bool, true, false> {
-      static bool apply(intmax_t source, bool& target) {
-        target = source;
-        return true;
-      }
-    };
-
     template <class T>
-    struct luaX_cast_integer_impl<T, true, true> {
-      static T apply(intmax_t source, T& target) {
+    struct luaX_integer_traits_impl<T, true> {
+      static T convert(intmax_t source, T& target) {
         static const intmax_t min = std::numeric_limits<T>::min();
         static const intmax_t max = std::numeric_limits<T>::max();
-        return apply(source, target, min, max);
+        return convert(source, target, min, max);
       }
 
-      static T apply(intmax_t source, T& target, intmax_t min, intmax_t max) {
+      static T convert(intmax_t source, T& target, intmax_t min, intmax_t max) {
         if (min <= source && source <= max) {
           target = source;
           return true;
@@ -527,14 +525,14 @@ namespace dromozoa {
     };
 
     template <class T>
-    struct luaX_cast_integer_impl<T, true, false> {
-      static T apply(intmax_t source, T& target) {
+    struct luaX_integer_traits_impl<T, false> {
+      static T convert(intmax_t source, T& target) {
         static const uintmax_t min = std::numeric_limits<T>::min();
         static const uintmax_t max = std::numeric_limits<T>::max();
-        return apply(source, target, min, max);
+        return convert(source, target, min, max);
       }
 
-      static T apply(intmax_t source, T& target, uintmax_t min, uintmax_t max) {
+      static T convert(intmax_t source, T& target, uintmax_t min, uintmax_t max) {
         if (0 <= source) {
           uintmax_t value = source;
           if (min <= value && value <= max) {
