@@ -34,6 +34,10 @@ assert(c == "foo")
 
 assert(bind.push_nil() == nil)
 
+local a, b = bind.push_enum()
+assert(a == 42)
+assert(b == -42)
+
 local a, b, c, d, e = bind.push_string()
 assert(a == "foo")
 assert(b == "foo")

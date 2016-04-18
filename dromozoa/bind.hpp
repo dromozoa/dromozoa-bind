@@ -46,7 +46,11 @@ namespace dromozoa {
     struct luaX_type_function {};
 
     template <class T>
-    struct luaX_type {};
+    struct luaX_type {
+      // fallback for enum
+      typedef lua_Integer decay;
+      typedef luaX_type_numint type;
+    };
 
     template <class T, class T_type>
     struct luaX_type_traits_impl {};
