@@ -48,8 +48,8 @@ namespace dromozoa {
     };
 
     void impl_push_enum(lua_State* L) {
-      luaX_push(L, static_cast<int>(ENUM1));
-      luaX_push(L, static_cast<int>(ENUM2));
+      luaX_push<int>(L, ENUM1);
+      luaX_push<int>(L, ENUM2);
     }
 
     void impl_push_string(lua_State* L) {
