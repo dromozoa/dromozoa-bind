@@ -505,10 +505,6 @@ namespace dromozoa {
           luaX_push(L, "\"");
           lua_concat(L, 3);
         } else {
-
-
-
-
           lua_getglobal(L, "string");
           luaX_get_field(L, -1, "format");
           luaX_push(L, "%q");
