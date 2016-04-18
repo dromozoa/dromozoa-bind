@@ -56,13 +56,13 @@ namespace dromozoa {
     }
 
     void impl_set_field(lua_State* L) {
-      luaX_set_field(L, 1, 17);
-      luaX_set_field(L, 2, 23);
-      luaX_set_field(L, 3, 37);
-      luaX_set_field(L, 4, 42);
-      luaX_set_field(L, 5, luaX_nil);
+      luaX_set_field(L, -1, 1, 17);
+      luaX_set_field(L, -1, 2, 23);
+      luaX_set_field(L, -1, 3, 37);
+      luaX_set_field(L, -1, 4, 42);
+      luaX_set_field(L, -1, 5, luaX_nil);
       luaX_push(L, "foo");
-      luaX_set_field(L, "s");
+      luaX_set_field(L, -2, "s");
     }
 
     void impl_opt_range(lua_State* L) {
@@ -77,20 +77,35 @@ namespace dromozoa {
       luaX_check_integer<int16_t>(L, 1);
       luaX_check_integer<uint16_t>(L, 2);
       luaX_check_integer<size_t>(L, 3);
+      luaX_check_integer<int>(L, 4, 0, 255);
     }
 
     void impl_opt_integer(lua_State* L) {
       luaX_opt_integer<int16_t>(L, 1, 0);
       luaX_opt_integer<uint16_t>(L, 2, 0);
       luaX_opt_integer<size_t>(L, 3, 0);
+      luaX_opt_integer<int>(L, 4, 0, 0, 255);
     }
 
     void impl_opt_integer_field(lua_State* L) {
       luaX_push(L, luaX_opt_integer_field<uint16_t>(L, 1, "foo", 0));
+      luaX_push(L, luaX_opt_integer_field<uint16_t>(L, 1, 42, 0));
     }
 
     void impl_opt_integer_field_range(lua_State* L) {
       luaX_push(L, luaX_opt_integer_field<int32_t>(L, 1, "tv_usec", 0, 0, 999999));
+    }
+
+    void impl_field_error1(lua_State* L) {
+      luaX_field_error(L, luaX_nil, "what");
+    }
+
+    void impl_field_error2(lua_State* L) {
+      luaX_field_error(L, impl_field_error2, "what");
+    }
+
+    void impl_field_error3(lua_State* L) {
+      luaX_field_error(L, "foo\"bar\\baz", "what");
     }
 
     void impl_new(lua_State* L) {
@@ -126,27 +141,30 @@ namespace dromozoa {
   }
 
   void initialize(lua_State* L) {
-    luaX_set_field(L, "throw", impl_throw);
-    luaX_set_field(L, "result_int", impl_result_int);
-    luaX_set_field(L, "result_void", impl_result_void);
-    luaX_set_field(L, "push_nil", impl_push_nil);
-    luaX_set_field(L, "push_string", impl_push_string);
-    luaX_set_field(L, "push_success", impl_push_success);
-    luaX_set_field(L, "set_field", impl_set_field);
-    luaX_set_field(L, "opt_range", impl_opt_range);
-    luaX_set_field(L, "check_integer", impl_check_integer);
-    luaX_set_field(L, "opt_integer", impl_opt_integer);
-    luaX_set_field(L, "opt_integer_field", impl_opt_integer_field);
-    luaX_set_field(L, "opt_integer_field_range", impl_opt_integer_field_range);
+    luaX_set_field(L, -1, "throw", impl_throw);
+    luaX_set_field(L, -1, "result_int", impl_result_int);
+    luaX_set_field(L, -1, "result_void", impl_result_void);
+    luaX_set_field(L, -1, "push_nil", impl_push_nil);
+    luaX_set_field(L, -1, "push_string", impl_push_string);
+    luaX_set_field(L, -1, "push_success", impl_push_success);
+    luaX_set_field(L, -1, "set_field", impl_set_field);
+    luaX_set_field(L, -1, "opt_range", impl_opt_range);
+    luaX_set_field(L, -1, "check_integer", impl_check_integer);
+    luaX_set_field(L, -1, "opt_integer", impl_opt_integer);
+    luaX_set_field(L, -1, "opt_integer_field", impl_opt_integer_field);
+    luaX_set_field(L, -1, "opt_integer_field_range", impl_opt_integer_field_range);
+    luaX_set_field(L, -1, "field_error1", impl_field_error1);
+    luaX_set_field(L, -1, "field_error2", impl_field_error2);
+    luaX_set_field(L, -1, "field_error3", impl_field_error3);
 
     luaX_set_metafield(L, "__call", impl_new);
 
     luaL_newmetatable(L, "dromozoa.bind.int");
     lua_newtable(L);
-    luaX_set_field(L, "set", impl_set);
-    luaX_set_field(L, "get", impl_get);
-    luaX_set_field(L, "to", impl_to);
-    luaX_set_field(L, "__index");
+    luaX_set_field(L, -1, "set", impl_set);
+    luaX_set_field(L, -1, "get", impl_get);
+    luaX_set_field(L, -1, "to", impl_to);
+    luaX_set_field(L, -2, "__index");
     lua_pop(L, 1);
   }
 }

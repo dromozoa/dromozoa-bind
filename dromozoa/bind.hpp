@@ -29,22 +29,43 @@ extern "C" {
 #include <exception>
 #include <limits>
 #include <new>
-#include <sstream>
 #include <string>
 
 namespace dromozoa {
   namespace bind {
     struct luaX_nil_impl {};
     typedef int luaX_nil_impl::*luaX_nil_t;
-
     static const luaX_nil_t luaX_nil = 0;
 
+    struct luaX_type_nil {};
+    struct luaX_type_number {};
+    struct luaX_type_numflt : luaX_type_number {};
+    struct luaX_type_numint : luaX_type_number {};
+    struct luaX_type_boolean {};
+    struct luaX_type_string {};
+    struct luaX_type_function {};
+
     template <class T>
-    struct luaX_push_impl {};
+    struct luaX_type {};
+
+    template <class T, class T_type>
+    struct luaX_type_traits_impl {};
+
+    template <class T>
+    struct luaX_type_traits : luaX_type_traits_impl<typename luaX_type<T>::decay, typename luaX_type<T>::type> {};
+
+    template <class T, bool is_signed>
+    struct luaX_integer_traits_impl {};
+
+    template <class T, class T_type = typename luaX_type<T>::type>
+    struct luaX_integer_traits {};
+
+    template <class T>
+    struct luaX_integer_traits<T, luaX_type_numint> : luaX_integer_traits_impl<T, std::numeric_limits<T>::is_signed> {};
 
     template <class T>
     inline void luaX_push(lua_State* L, const T& value) {
-      luaX_push_impl<T>::apply(L, value);
+      luaX_type_traits<T>::push(L, value);
     }
 
     template <class T1, class T2>
@@ -76,36 +97,75 @@ namespace dromozoa {
       }
     }
 
-    template <class T, class T_key>
-    inline void luaX_set_field(lua_State* L, const T_key& key, const T& value) {
-      luaX_push(L, key, value);
-      lua_settable(L, -3);
+    template <class T>
+    inline T* luaX_new(lua_State* L) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T();
+      return data;
     }
 
-    template <class T_key>
-    inline void luaX_set_field(lua_State* L, const T_key& key) {
-      luaX_push(L, key);
-      lua_pushvalue(L, -2);
-      lua_settable(L, -4);
-      lua_pop(L, 1);
+    template <class T, class T1>
+    inline T* luaX_new(lua_State* L, const T1& v1) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1);
+      return data;
     }
 
-    template <class T, class T_key>
-    inline void luaX_set_metafield(lua_State* L, const T_key& key, const T& value) {
-      if (!lua_getmetatable(L, -1)) {
-        lua_newtable(L);
+    template <class T, class T1, class T2>
+    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1, v2);
+      return data;
+    }
+
+    template <class T, class T1, class T2, class T3>
+    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1, v2, v3);
+      return data;
+    }
+
+    template <class T, class T1, class T2, class T3, class T4>
+    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3, const T4& v4) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1, v2, v3, v4);
+      return data;
+    }
+
+    template <class T>
+    inline T luaX_check_integer(lua_State* L, int arg) {
+      T target = 0;
+      if (luaX_integer_traits<T>::convert(luaL_checkinteger(L, arg), target)) {
+        return target;
       }
-      luaX_set_field(L, key, value);
-      lua_setmetatable(L, -2);
+      return luaL_argerror(L, arg, "out of bounds");
     }
 
-    inline void luaX_set_metatable(lua_State* L, const char* name) {
-#if LUA_VERSION_NUM+0 >= 502
-      return luaL_setmetatable(L, name);
-#else
-      luaL_getmetatable(L, name);
-      lua_setmetatable(L, -2);
-#endif
+    template <class T>
+    inline T luaX_check_integer(lua_State* L, int arg, T min, T max) {
+      T target = 0;
+      if (luaX_integer_traits<T>::convert(luaL_checkinteger(L, arg), target, min, max)) {
+        return target;
+      }
+      return luaL_argerror(L, arg, "out of bounds");
+    }
+
+    template <class T>
+    inline T luaX_opt_integer(lua_State* L, int arg, lua_Integer d) {
+      T target = 0;
+      if (luaX_integer_traits<T>::convert(luaL_optinteger(L, arg, d), target)) {
+        return target;
+      }
+      return luaL_argerror(L, arg, "out of bounds");
+    }
+
+    template <class T>
+    inline T luaX_opt_integer(lua_State* L, int arg, lua_Integer d, T min, T max) {
+      T target = 0;
+      if (luaX_integer_traits<T>::convert(luaL_optinteger(L, arg, d), target, min, max)) {
+        return target;
+      }
+      return luaL_argerror(L, arg, "out of bounds");
     }
 
     inline bool luaX_to_udata_impl(lua_State* L, const char* name) {
@@ -172,115 +232,105 @@ namespace dromozoa {
     }
 
     template <class T>
-    inline T* luaX_check_udata(lua_State* L, int n, const char* name) {
-      return static_cast<T*>(luaL_checkudata(L, n, name));
+    inline T* luaX_check_udata(lua_State* L, int arg, const char* name) {
+      return static_cast<T*>(luaL_checkudata(L, arg, name));
     }
 
     template <class T>
-    inline T* luaX_check_udata(lua_State* L, int n, const char* name1, const char* name2) {
-      if (T* data = luaX_to_udata<T>(L, n, name1)) {
+    inline T* luaX_check_udata(lua_State* L, int arg, const char* name1, const char* name2) {
+      if (T* data = luaX_to_udata<T>(L, arg, name1)) {
         return data;
       } else {
-        return luaX_check_udata<T>(L, n, name2);
+        return luaX_check_udata<T>(L, arg, name2);
       }
     }
 
     template <class T>
-    inline T* luaX_check_udata(lua_State* L, int n, const char* name1, const char* name2, const char* name3) {
-      if (T* data = luaX_to_udata<T>(L, n, name1, name2)) {
+    inline T* luaX_check_udata(lua_State* L, int arg, const char* name1, const char* name2, const char* name3) {
+      if (T* data = luaX_to_udata<T>(L, arg, name1, name2)) {
         return data;
       } else {
-        return luaX_check_udata<T>(L, n, name3);
+        return luaX_check_udata<T>(L, arg, name3);
       }
     }
 
     template <class T>
-    inline T* luaX_check_udata(lua_State* L, int n, const char* name1, const char* name2, const char* name3, const char* name4) {
-      if (T* data = luaX_to_udata<T>(L, n, name1, name2, name3)) {
+    inline T* luaX_check_udata(lua_State* L, int arg, const char* name1, const char* name2, const char* name3, const char* name4) {
+      if (T* data = luaX_to_udata<T>(L, arg, name1, name2, name3)) {
         return data;
       } else {
-        return luaX_check_udata<T>(L, n, name4);
+        return luaX_check_udata<T>(L, arg, name4);
       }
     }
 
-    template <class T>
-    inline T* luaX_new(lua_State* L) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T();
-      return data;
-    }
-
-    template <class T, class T1>
-    inline T* luaX_new(lua_State* L, const T1& v1) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T(v1);
-      return data;
-    }
-
-    template <class T, class T1, class T2>
-    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T(v1, v2);
-      return data;
-    }
-
-    template <class T, class T1, class T2, class T3>
-    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T(v1, v2, v3);
-      return data;
-    }
-
-    template <class T, class T1, class T2, class T3, class T4>
-    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3, const T4& v4) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T(v1, v2, v3, v4);
-      return data;
-    }
-
-    template <class T, bool T_is_integer = std::numeric_limits<T>::is_integer, bool T_is_signed = std::numeric_limits<T>::is_signed>
-    struct luaX_cast_integer_impl {};
-
-    template <class T>
-    inline T luaX_check_integer(lua_State* L, int n) {
-      T target = 0;
-      if (luaX_cast_integer_impl<T>::apply(luaL_checkinteger(L, n), target)) {
-        return target;
+    inline int luaX_abs_index(lua_State* L, int index) {
+#if LUA_VERSION_NUM+0 >= 502
+      return lua_absindex(L, index);
+#else
+      if (index < 0) {
+        int top = lua_gettop(L);
+        if (top >= -index) {
+          return top + index + 1;
+        }
       }
-      return luaL_argerror(L, n, "out of bounds");
-    }
-
-    template <class T>
-    inline T luaX_opt_integer(lua_State* L, int n, lua_Integer d) {
-      T target = 0;
-      if (luaX_cast_integer_impl<T>::apply(luaL_optinteger(L, n, d), target)) {
-        return target;
-      }
-      return luaL_argerror(L, n, "out of bounds");
+      return index;
+#endif
     }
 
     template <class T_key, class T>
     inline int luaX_field_error(lua_State* L, const T_key& key, const T& what) {
-      {
-        std::ostringstream out;
-        out << "field '" << key << "' " << what;
-        std::string message = out.str();
-        lua_pushlstring(L, message.data(), message.size());
-      }
+      luaX_push(L, "field ");
+      luaX_type_traits<T_key>::quote(L, key);
+      luaX_push(L, " ");
+      luaX_push(L, what);
+      lua_concat(L, 4);
       return lua_error(L);
     }
 
     template <class T_key>
-    inline intmax_t luaX_opt_integer_field_impl(lua_State* L, int n, const T_key& key, lua_Integer d) {
+    inline void luaX_set_field(lua_State* L, int index, const T_key& key) {
+      index = luaX_abs_index(L, index);
       luaX_push(L, key);
-      int type = lua_gettable(L, n);
+      lua_pushvalue(L, -2);
+      lua_settable(L, index);
+      lua_pop(L, 1);
+    }
+
+    template <class T, class T_key>
+    inline void luaX_set_field(lua_State* L, int index, const T_key& key, const T& value) {
+      index = luaX_abs_index(L, index);
+      luaX_push(L, key, value);
+      lua_settable(L, index);
+    }
+
+    template <class T_key>
+    inline int luaX_get_field(lua_State* L, int index, const T_key& key) {
+      index = luaX_abs_index(L, index);
+      luaX_push(L, key);
+#if LUA_VERSION_NUM+0 >= 503
+      return lua_gettable(L, index);
+#else
+      lua_gettable(L, index);
+      return lua_type(L, -1);
+#endif
+    }
+
+    template <class T_key>
+    inline intmax_t luaX_opt_integer_field_impl(lua_State* L, int arg, const T_key& key, lua_Integer d) {
+      luaX_push(L, key);
+#if LUA_VERSION_NUM+0 >= 503
+      bool is_nil = lua_gettable(L, arg) == LUA_TNIL;
+#else
+      lua_gettable(L, arg);
+      bool is_nil = lua_isnil(L, -1);
+#endif
       if (lua_isnumber(L, -1)) {
         intmax_t value = lua_tointeger(L, -1);
         lua_pop(L, 1);
         return value;
       } else {
         lua_pop(L, 1);
-        if (type == LUA_TNIL) {
+        if (is_nil) {
           return d;
         } else {
           return luaX_field_error(L, key, "not an integer");
@@ -289,27 +339,45 @@ namespace dromozoa {
     }
 
     template <class T, class T_key>
-    inline T luaX_opt_integer_field(lua_State* L, int n, const T_key& key, lua_Integer d) {
-      intmax_t source = luaX_opt_integer_field_impl(L, n, key, d);
+    inline T luaX_opt_integer_field(lua_State* L, int arg, const T_key& key, lua_Integer d) {
+      intmax_t source = luaX_opt_integer_field_impl(L, arg, key, d);
       T target = 0;
-      if (luaX_cast_integer_impl<T>::apply(source, target)) {
+      if (luaX_integer_traits<T>::convert(source, target)) {
         return target;
       }
       return luaX_field_error(L, key, "out of bounds");
     }
 
     template <class T, class T_key>
-    inline T luaX_opt_integer_field(lua_State* L, int n, const T_key& key, lua_Integer d, T min, T max) {
-      intmax_t source = luaX_opt_integer_field_impl(L, n, key, d);
+    inline T luaX_opt_integer_field(lua_State* L, int arg, const T_key& key, lua_Integer d, T min, T max) {
+      intmax_t source = luaX_opt_integer_field_impl(L, arg, key, d);
       T target = 0;
-      if (luaX_cast_integer_impl<T>::apply(source, target, min, max)) {
+      if (luaX_integer_traits<T>::convert(source, target, min, max)) {
         return target;
       }
       return luaX_field_error(L, key, "out of bounds");
     }
 
-    inline size_t luaX_opt_range_i(lua_State* L, int n, size_t size) {
-      lua_Integer i = luaL_optinteger(L, n, 0);
+    inline void luaX_set_metatable(lua_State* L, const char* name) {
+#if LUA_VERSION_NUM+0 >= 502
+      return luaL_setmetatable(L, name);
+#else
+      luaL_getmetatable(L, name);
+      lua_setmetatable(L, -2);
+#endif
+    }
+
+    template <class T, class T_key>
+    inline void luaX_set_metafield(lua_State* L, const T_key& key, const T& value) {
+      if (!lua_getmetatable(L, -1)) {
+        lua_newtable(L);
+      }
+      luaX_set_field(L, -1, key, value);
+      lua_setmetatable(L, -2);
+    }
+
+    inline size_t luaX_opt_range_i(lua_State* L, int arg, size_t size) {
+      lua_Integer i = luaL_optinteger(L, arg, 0);
       if (i < 0) {
         i += size;
         if (i < 0) {
@@ -321,8 +389,8 @@ namespace dromozoa {
       return i;
     }
 
-    inline size_t luaX_opt_range_j(lua_State* L, int n, size_t size) {
-      lua_Integer j = luaL_optinteger(L, n, size);
+    inline size_t luaX_opt_range_j(lua_State* L, int arg, size_t size) {
+      lua_Integer j = luaL_optinteger(L, arg, size);
       if (j < 0) {
         j += size + 1;
       } else if (j > static_cast<lua_Integer>(size)) {
@@ -331,102 +399,161 @@ namespace dromozoa {
       return j;
     }
 
-    inline int luaX_closure(lua_State* L, lua_CFunction function) {
-      return function(L);
-    }
-
-    inline int luaX_closure(lua_State* L, void (*function)(lua_State*)) {
-      int top = lua_gettop(L);
-      function(L);
-      return lua_gettop(L) - top;
-    }
-
-    template <>
-    struct luaX_push_impl<luaX_nil_t> {
-      template <class U>
-      static void apply(lua_State* L, const U&) {
-        lua_pushnil(L);
-      }
+#define DROMOZOA_BIND_LUAX_TYPE(PP_lua_type, PP_cxx_type) \
+    template <> \
+    struct luaX_type<PP_cxx_type> { \
+      typedef PP_cxx_type decay; \
+      typedef PP_lua_type type; \
     };
+
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_nil, luaX_nil_t)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numflt, float)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numflt, double)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, long double)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, char)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, signed char)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, unsigned char)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, short)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, unsigned short)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, int)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, unsigned int)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, long)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, unsigned long)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, long long)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, unsigned long long)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_boolean, bool)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_string, char*)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_string, const char*)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_string, std::string)
+
+#undef DROMOZOA_BIND_LUAX_TYPE
 
     template <size_t T>
-    struct luaX_push_impl<char[T]> {
-      template <class U>
-      static void apply(lua_State* L, const U& value) {
+    struct luaX_type<char[T]> {
+      typedef const char* decay;
+      typedef luaX_type_string type;
+    };
+
+    template <class T>
+    struct luaX_type<T(lua_State* L)> {
+      typedef T (*decay)(lua_State* L);
+      typedef luaX_type_function type;
+    };
+
+    template <class T>
+    struct luaX_type_traits_impl<T, luaX_type_nil> {
+      static void push(lua_State* L, const T&) {
+        lua_pushnil(L);
+      }
+
+      static void quote(lua_State* L, const T&) {
+        luaX_push(L, "nil");
+      }
+    };
+
+    template <class T>
+    struct luaX_type_traits_impl<T, luaX_type_numflt> {
+      static void push(lua_State* L, const T& value) {
+        lua_pushnumber(L, value);
+      }
+
+      static void quote(lua_State* L, const T& value) {
+        luaX_push(L, value);
+      }
+    };
+
+    template <class T>
+    struct luaX_type_traits_impl<T, luaX_type_numint> {
+      static void push(lua_State* L, const T& value) {
+        lua_pushinteger(L, value);
+      }
+
+      static void quote(lua_State* L, const T& value) {
+        luaX_push(L, value);
+      }
+    };
+
+    template <class T>
+    struct luaX_type_traits_impl<T, luaX_type_boolean> {
+      static void push(lua_State* L, const T& value) {
+        lua_pushboolean(L, value);
+      }
+
+      static void quote(lua_State* L, const T& value) {
+        if (value) {
+          luaX_push(L, "true");
+        } else {
+          luaX_push(L, "false");
+        }
+      }
+    };
+
+    template <class T>
+    struct luaX_type_traits_impl<T, luaX_type_string> {
+      static void push(lua_State* L, const char* value) {
         lua_pushstring(L, value);
       }
-    };
 
-    template <>
-    struct luaX_push_impl<std::string> {
-      template <class U>
-      static void apply(lua_State* L, const U& value) {
+      static void push(lua_State* L, const std::string& value) {
         lua_pushlstring(L, value.data(), value.size());
+      }
+
+      static void quote(lua_State* L, const std::string& value) {
+        if (value.find_first_of("\"\\\n") == std::string::npos) {
+          luaX_push(L, "\"");
+          luaX_push(L, value);
+          luaX_push(L, "\"");
+          lua_concat(L, 3);
+        } else {
+          lua_getglobal(L, "string");
+          luaX_get_field(L, -1, "format");
+          luaX_push(L, "%q");
+          luaX_push(L, value);
+          lua_call(L, 2, 1);
+          lua_remove(L, lua_gettop(L) - 1);
+        }
       }
     };
 
-    template <class T_result, class T>
-    struct luaX_push_impl<T_result(T)> {
-      typedef T_result (*function_type)(T);
+    template <class T>
+    struct luaX_type_traits_impl<T, luaX_type_function> {
+      static int call(lua_State* L, lua_CFunction function) {
+        return function(L);
+      }
+
+      static int call(lua_State* L, void (*function)(lua_State*)) {
+        int top = lua_gettop(L);
+        function(L);
+        return lua_gettop(L) - top;
+      }
 
       static int closure(lua_State* L) {
         try {
-          return luaX_closure(L, reinterpret_cast<function_type>(lua_touserdata(L, lua_upvalueindex(1))));
+          return call(L, reinterpret_cast<T>(lua_touserdata(L, lua_upvalueindex(1))));
         } catch (const std::exception& e) {
           return luaL_error(L, "exception caught: %s", e.what());
         }
       }
 
-      template <class U>
-      static void apply(lua_State* L, const U& value) {
+      static void push(lua_State* L, const T& value) {
         lua_pushlightuserdata(L, reinterpret_cast<void*>(value));
         lua_pushcclosure(L, closure, 1);
       }
-    };
 
-#define DROMOZOA_BIND_LUAX_PUSH_IMPL(PP_lua_type, PP_cxx_type) \
-    template <> \
-    struct luaX_push_impl<PP_cxx_type> { \
-      template <class U> \
-      static void apply(lua_State* L, const U& value) { \
-        lua_push##PP_lua_type(L, value); \
-      } \
-    };
-
-    DROMOZOA_BIND_LUAX_PUSH_IMPL(boolean, bool)
-    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, char)
-    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, signed char)
-    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, unsigned char)
-    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, short)
-    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, unsigned short)
-    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, int)
-    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, unsigned int)
-    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, long)
-    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, unsigned long)
-    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, long long)
-    DROMOZOA_BIND_LUAX_PUSH_IMPL(integer, unsigned long long)
-    DROMOZOA_BIND_LUAX_PUSH_IMPL(string, char*)
-    DROMOZOA_BIND_LUAX_PUSH_IMPL(string, const char*)
-
-#undef DROMOZOA_BIND_LUAX_PUSH_IMPL
-
-    template <>
-    struct luaX_cast_integer_impl<bool, true, false> {
-      static bool apply(intmax_t source, bool& target) {
-        target = source;
-        return true;
+      static void quote(lua_State* L, const T& value) {
+        lua_pushfstring(L, "userdata: %p", value);
       }
     };
 
     template <class T>
-    struct luaX_cast_integer_impl<T, true, true> {
-      static T apply(intmax_t source, T& target) {
+    struct luaX_integer_traits_impl<T, true> {
+      static T convert(intmax_t source, T& target) {
         static const intmax_t min = std::numeric_limits<T>::min();
         static const intmax_t max = std::numeric_limits<T>::max();
-        return apply(source, target, min, max);
+        return convert(source, target, min, max);
       }
 
-      static T apply(intmax_t source, T& target, intmax_t min, intmax_t max) {
+      static T convert(intmax_t source, T& target, intmax_t min, intmax_t max) {
         if (min <= source && source <= max) {
           target = source;
           return true;
@@ -436,14 +563,14 @@ namespace dromozoa {
     };
 
     template <class T>
-    struct luaX_cast_integer_impl<T, true, false> {
-      static T apply(intmax_t source, T& target) {
+    struct luaX_integer_traits_impl<T, false> {
+      static T convert(intmax_t source, T& target) {
         static const uintmax_t min = std::numeric_limits<T>::min();
         static const uintmax_t max = std::numeric_limits<T>::max();
-        return apply(source, target, min, max);
+        return convert(source, target, min, max);
       }
 
-      static T apply(intmax_t source, T& target, uintmax_t min, uintmax_t max) {
+      static T convert(intmax_t source, T& target, uintmax_t min, uintmax_t max) {
         if (0 <= source) {
           uintmax_t value = source;
           if (min <= value && value <= max) {
@@ -456,9 +583,11 @@ namespace dromozoa {
     };
   }
 
+  using bind::luaX_abs_index;
   using bind::luaX_check_integer;
   using bind::luaX_check_udata;
   using bind::luaX_field_error;
+  using bind::luaX_get_field;
   using bind::luaX_new;
   using bind::luaX_nil;
   using bind::luaX_opt_integer;
