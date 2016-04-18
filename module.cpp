@@ -42,14 +42,14 @@ namespace dromozoa {
       luaX_push(L, luaX_nil);
     }
 
-    enum named_enum {
+    enum {
       ENUM1 = 42,
       ENUM2 = -42,
     };
 
     void impl_push_enum(lua_State* L) {
-      luaX_push(L, ENUM1);
-      luaX_push(L, ENUM2);
+      luaX_push<int>(L, ENUM1);
+      luaX_push<int>(L, ENUM2);
     }
 
     void impl_push_string(lua_State* L) {
