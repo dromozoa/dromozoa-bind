@@ -127,6 +127,7 @@ assert(not pcall(bind.opt_integer_field_range, { tv_usec = 1000000 }))
 
 print(pcall(bind.field_error1))
 print(pcall(bind.field_error2))
+print(pcall(bind.field_error3))
 
 assert(bind():get() == 0)
 assert(bind():set(42):get() == 42)

@@ -29,7 +29,6 @@ extern "C" {
 #include <exception>
 #include <limits>
 #include <new>
-#include <sstream>
 #include <string>
 
 namespace dromozoa {
@@ -280,12 +279,11 @@ namespace dromozoa {
 
     template <class T_key, class T>
     inline int luaX_field_error(lua_State* L, const T_key& key, const T& what) {
-      {
-        std::ostringstream out;
-        out << "field '" << key << "' " << what;
-        std::string message = out.str();
-        lua_pushlstring(L, message.data(), message.size());
-      }
+      luaX_push(L, "field ");
+      luaX_type_traits<T_key>::quote(L, key);
+      luaX_push(L, " ");
+      luaX_push(L, what);
+      lua_concat(L, 4);
       return lua_error(L);
     }
 
@@ -432,7 +430,7 @@ namespace dromozoa {
 
     template <size_t T>
     struct luaX_type<char[T]> {
-      typedef char* decay;
+      typedef const char* decay;
       typedef luaX_type_string type;
     };
 
@@ -447,12 +445,20 @@ namespace dromozoa {
       static void push(lua_State* L, const T&) {
         lua_pushnil(L);
       }
+
+      static void quote(lua_State* L, const T&) {
+        luaX_push(L, "nil");
+      }
     };
 
     template <class T>
     struct luaX_type_traits_impl<T, luaX_type_numflt> {
       static void push(lua_State* L, const T& value) {
         lua_pushnumber(L, value);
+      }
+
+      static void quote(lua_State* L, const T& value) {
+        luaX_push(L, value);
       }
     };
 
@@ -461,12 +467,24 @@ namespace dromozoa {
       static void push(lua_State* L, const T& value) {
         lua_pushinteger(L, value);
       }
+
+      static void quote(lua_State* L, const T& value) {
+        luaX_push(L, value);
+      }
     };
 
     template <class T>
     struct luaX_type_traits_impl<T, luaX_type_boolean> {
       static void push(lua_State* L, const T& value) {
         lua_pushboolean(L, value);
+      }
+
+      static void quote(lua_State* L, const T& value) {
+        if (value) {
+          luaX_push(L, "true");
+        } else {
+          luaX_push(L, "false");
+        }
       }
     };
 
@@ -478,6 +496,26 @@ namespace dromozoa {
 
       static void push(lua_State* L, const std::string& value) {
         lua_pushlstring(L, value.data(), value.size());
+      }
+
+      static void quote(lua_State* L, const std::string& value) {
+        if (value.find_first_of("\"\\\n") == std::string::npos) {
+          luaX_push(L, "\"");
+          luaX_push(L, value);
+          luaX_push(L, "\"");
+          lua_concat(L, 3);
+        } else {
+
+
+
+
+          lua_getglobal(L, "string");
+          luaX_get_field(L, -1, "format");
+          luaX_push(L, "%q");
+          luaX_push(L, value);
+          lua_call(L, 2, 1);
+          lua_remove(L, lua_gettop(L) - 1);
+        }
       }
     };
 
@@ -504,6 +542,10 @@ namespace dromozoa {
       static void push(lua_State* L, const T& value) {
         lua_pushlightuserdata(L, reinterpret_cast<void*>(value));
         lua_pushcclosure(L, closure, 1);
+      }
+
+      static void quote(lua_State* L, const T& value) {
+        lua_pushfstring(L, "userdata: %p", value);
       }
     };
 

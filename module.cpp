@@ -104,6 +104,10 @@ namespace dromozoa {
       luaX_field_error(L, impl_field_error2, "what");
     }
 
+    void impl_field_error3(lua_State* L) {
+      luaX_field_error(L, "foo\"bar\\baz", "what");
+    }
+
     void impl_new(lua_State* L) {
       if (lua_isnoneornil(L, 2)) {
         luaX_new<int>(L);
@@ -151,6 +155,7 @@ namespace dromozoa {
     luaX_set_field(L, -1, "opt_integer_field_range", impl_opt_integer_field_range);
     luaX_set_field(L, -1, "field_error1", impl_field_error1);
     luaX_set_field(L, -1, "field_error2", impl_field_error2);
+    luaX_set_field(L, -1, "field_error3", impl_field_error3);
 
     luaX_set_metafield(L, "__call", impl_new);
 
