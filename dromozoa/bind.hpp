@@ -168,6 +168,16 @@ namespace dromozoa {
       return luaL_argerror(L, arg, "out of bounds");
     }
 
+    template <class T>
+    inline T luaX_check_enum(lua_State* L, int arg) {
+      return static_cast<T>(luaL_checkinteger(L, arg));
+    }
+
+    template <class T>
+    inline T luaX_opt_enum(lua_State* L, int arg, lua_Integer d) {
+      return static_cast<T>(luaL_optinteger(L, arg, d));
+    }
+
     inline bool luaX_to_udata_impl(lua_State* L, const char* name) {
       luaL_getmetatable(L, name);
       bool result = lua_rawequal(L, -1, -2);
@@ -584,12 +594,14 @@ namespace dromozoa {
   }
 
   using bind::luaX_abs_index;
+  using bind::luaX_check_enum;
   using bind::luaX_check_integer;
   using bind::luaX_check_udata;
   using bind::luaX_field_error;
   using bind::luaX_get_field;
   using bind::luaX_new;
   using bind::luaX_nil;
+  using bind::luaX_opt_enum;
   using bind::luaX_opt_integer;
   using bind::luaX_opt_integer_field;
   using bind::luaX_opt_range_i;
