@@ -20,6 +20,11 @@
 #include "dromozoa/bind.hpp"
 
 namespace dromozoa {
+  enum enum_t {
+    ENUM42 = 42,
+    ENUM69 = 69,
+  };
+
   namespace {
     void impl_throw(lua_State*) {
       throw std::runtime_error("runtime_error");
@@ -97,6 +102,15 @@ namespace dromozoa {
       luaX_opt_integer<int>(L, 4, 0, 0, 255);
     }
 
+    void impl_check_enum(lua_State* L) {
+      luaX_check_enum<enum_t>(L, 1);
+    }
+
+    void impl_opt_enum(lua_State* L) {
+      enum_t value = luaX_opt_enum(L, 1, ENUM42);
+      luaX_push<int>(L, value);
+    }
+
     void impl_opt_integer_field(lua_State* L) {
       luaX_push(L, luaX_opt_integer_field<uint16_t>(L, 1, "foo", 0));
       luaX_push(L, luaX_opt_integer_field<uint16_t>(L, 1, 42, 0));
@@ -162,11 +176,16 @@ namespace dromozoa {
     luaX_set_field(L, -1, "opt_range", impl_opt_range);
     luaX_set_field(L, -1, "check_integer", impl_check_integer);
     luaX_set_field(L, -1, "opt_integer", impl_opt_integer);
+    luaX_set_field(L, -1, "check_enum", impl_check_enum);
+    luaX_set_field(L, -1, "opt_enum", impl_opt_enum);
     luaX_set_field(L, -1, "opt_integer_field", impl_opt_integer_field);
     luaX_set_field(L, -1, "opt_integer_field_range", impl_opt_integer_field_range);
     luaX_set_field(L, -1, "field_error1", impl_field_error1);
     luaX_set_field(L, -1, "field_error2", impl_field_error2);
     luaX_set_field(L, -1, "field_error3", impl_field_error3);
+
+    luaX_set_field<int>(L, -1, "ENUM42", ENUM42);
+    luaX_set_field<int>(L, -1, "ENUM69", ENUM69);
 
     luaX_set_metafield(L, "__call", impl_new);
 
