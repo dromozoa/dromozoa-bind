@@ -151,7 +151,7 @@ namespace dromozoa {
     }
 
     template <class T>
-    inline T luaX_opt_integer(lua_State* L, int arg, lua_Integer d) {
+    inline T luaX_opt_integer(lua_State* L, int arg, T d) {
       T target = 0;
       if (luaX_integer_traits<T>::convert(luaL_optinteger(L, arg, d), target)) {
         return target;
@@ -160,7 +160,7 @@ namespace dromozoa {
     }
 
     template <class T>
-    inline T luaX_opt_integer(lua_State* L, int arg, lua_Integer d, T min, T max) {
+    inline T luaX_opt_integer(lua_State* L, int arg, T d, T min, T max) {
       T target = 0;
       if (luaX_integer_traits<T>::convert(luaL_optinteger(L, arg, d), target, min, max)) {
         return target;
@@ -174,7 +174,7 @@ namespace dromozoa {
     }
 
     template <class T>
-    inline T luaX_opt_enum(lua_State* L, int arg, lua_Integer d) {
+    inline T luaX_opt_enum(lua_State* L, int arg, T d) {
       return static_cast<T>(luaL_optinteger(L, arg, d));
     }
 
@@ -325,8 +325,8 @@ namespace dromozoa {
 #endif
     }
 
-    template <class T_key>
-    inline intmax_t luaX_opt_integer_field_impl(lua_State* L, int arg, const T_key& key, lua_Integer d) {
+    template <class T, class T_key>
+    inline intmax_t luaX_opt_integer_field_impl(lua_State* L, int arg, const T_key& key, T d) {
       luaX_push(L, key);
 #if LUA_VERSION_NUM+0 >= 503
       bool is_nil = lua_gettable(L, arg) == LUA_TNIL;
@@ -349,7 +349,7 @@ namespace dromozoa {
     }
 
     template <class T, class T_key>
-    inline T luaX_opt_integer_field(lua_State* L, int arg, const T_key& key, lua_Integer d) {
+    inline T luaX_opt_integer_field(lua_State* L, int arg, const T_key& key, T d) {
       intmax_t source = luaX_opt_integer_field_impl(L, arg, key, d);
       T target = 0;
       if (luaX_integer_traits<T>::convert(source, target)) {
@@ -359,7 +359,7 @@ namespace dromozoa {
     }
 
     template <class T, class T_key>
-    inline T luaX_opt_integer_field(lua_State* L, int arg, const T_key& key, lua_Integer d, T min, T max) {
+    inline T luaX_opt_integer_field(lua_State* L, int arg, const T_key& key, T d, T min, T max) {
       intmax_t source = luaX_opt_integer_field_impl(L, arg, key, d);
       T target = 0;
       if (luaX_integer_traits<T>::convert(source, target, min, max)) {
