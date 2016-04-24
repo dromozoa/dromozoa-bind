@@ -539,13 +539,25 @@ namespace dromozoa {
 #endif
     }
 
+    // template <class T_key>
+    // inline void luaX_set_metafield(lua_State* L, const T_key& key) {
+    //   if (!lua_getmetatable(L, -2)) {
+    //     lua_newtable(L);
+    //   }
+    //   lua_pushvalue(L, -2);
+    //   luaX_set_field(L, -2, key);
+    //   lua_setmetatable(L, -3);
+    //   lua_pop(L, 2);
+    // }
+
     template <class T, class T_key>
-    inline void luaX_set_metafield(lua_State* L, const T_key& key, const T& value) {
-      if (!lua_getmetatable(L, -1)) {
+    inline void luaX_set_metafield(lua_State* L, int index, const T_key& key, const T& value) {
+      index = luaX_abs_index(L, index);
+      if (!lua_getmetatable(L, index)) {
         lua_newtable(L);
       }
       luaX_set_field(L, -1, key, value);
-      lua_setmetatable(L, -2);
+      lua_setmetatable(L, index);
     }
 
     inline size_t luaX_opt_range_i(lua_State* L, int arg, size_t size) {

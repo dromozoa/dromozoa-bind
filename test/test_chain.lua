@@ -17,19 +17,22 @@
 
 local bind = require "dromozoa.bind"
 
+assert(bind.chain_gc_count() == 0)
+
 do
   local a = bind.chain_new_a(42)
   assert(getmetatable(a))
-  print(a:get())
+  assert(a:get() == 42)
 end
 collectgarbage()
 collectgarbage()
+assert(bind.chain_gc_count() == 1)
 
 do
   local b = bind.chain_new_b(42)
   assert(getmetatable(b))
-  assert(getmetatable(b).__index)
-  print(b:get())
+  assert(b:get() == 42)
 end
 collectgarbage()
 collectgarbage()
+assert(bind.chain_gc_count() == 2)

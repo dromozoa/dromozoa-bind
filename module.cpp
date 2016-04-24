@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <iostream>
 #include <stdexcept>
 
 #include "dromozoa/bind.hpp"
@@ -164,12 +163,18 @@ namespace dromozoa {
       }
     }
 
+    int chain_gc_count = 0;
+
     void impl_chain_get(lua_State* L) {
       luaX_push(L, *luaX_check_udata<int>(L, 1, "dromozoa.bind.chain_b", "dromozoa.bind.chain_a"));
     }
 
     void impl_chain_gc(lua_State*) {
-      std::cerr << "impl_chain_gc\n";
+      ++chain_gc_count;
+    }
+
+    void impl_chain_gc_count(lua_State* L) {
+      luaX_push(L, chain_gc_count);
     }
 
     void impl_chain_new_a(lua_State* L) {
@@ -206,7 +211,7 @@ namespace dromozoa {
     luaX_set_field<int>(L, -1, "ENUM42", ENUM42);
     luaX_set_field<int>(L, -1, "ENUM69", ENUM69);
 
-    luaX_set_metafield(L, "__call", impl_new);
+    luaX_set_metafield(L, -1, "__call", impl_new);
 
     luaL_newmetatable(L, "dromozoa.bind.int");
     lua_newtable(L);
@@ -233,6 +238,7 @@ namespace dromozoa {
 
     luaX_set_field(L, -1, "chain_new_a", impl_chain_new_a);
     luaX_set_field(L, -1, "chain_new_b", impl_chain_new_b);
+    luaX_set_field(L, -1, "chain_gc_count", impl_chain_gc_count);
   }
 }
 
