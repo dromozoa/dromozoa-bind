@@ -81,7 +81,7 @@ namespace dromozoa {
     }
 
     void impl_opt_range(lua_State* L) {
-      size_t size = luaL_checkinteger(L, 1);
+      size_t size = luaX_check_integer<size_t>(L, 1);
       size_t i = luaX_opt_range_i(L, 2, size);
       size_t j = luaX_opt_range_j(L, 3, size);
       luaX_push(L, i);
@@ -132,17 +132,24 @@ namespace dromozoa {
       luaX_field_error(L, "foo\"bar\\baz", "what");
     }
 
+    void impl_set_metafield(lua_State* L) {
+      lua_newtable(L);
+      luaX_set_metafield(L, -1, "a", "a");
+      luaX_push(L, "b");
+      luaX_set_metafield(L, -2, "b");
+    }
+
     void impl_new(lua_State* L) {
       if (lua_isnoneornil(L, 2)) {
         luaX_new<int>(L);
       } else {
-        luaX_new<int>(L, luaL_checkinteger(L, 2));
+        luaX_new<int>(L, luaX_check_integer<int>(L, 2));
       }
       luaX_set_metatable(L, "dromozoa.bind.int");
     }
 
     void impl_set(lua_State* L) {
-      *luaX_check_udata<int>(L, 1, "dromozoa.bind.int") = luaL_checkinteger(L, 2);
+      *luaX_check_udata<int>(L, 1, "dromozoa.bind.int") = luaX_check_integer<int>(L, 2);
       luaX_push_success(L);
     }
 
@@ -161,6 +168,30 @@ namespace dromozoa {
       } else {
         luaX_push(L, luaX_nil);
       }
+    }
+
+    int chain_gc_count = 0;
+
+    void impl_chain_get(lua_State* L) {
+      luaX_push(L, *luaX_check_udata<int>(L, 1, "dromozoa.bind.chain_b", "dromozoa.bind.chain_a"));
+    }
+
+    void impl_chain_gc(lua_State*) {
+      ++chain_gc_count;
+    }
+
+    void impl_chain_gc_count(lua_State* L) {
+      luaX_push(L, chain_gc_count);
+    }
+
+    void impl_chain_new_a(lua_State* L) {
+      luaX_new<int>(L, luaX_opt_integer<int>(L, 1, 0));
+      luaX_set_metatable(L, "dromozoa.bind.chain_a");
+    }
+
+    void impl_chain_new_b(lua_State* L) {
+      luaX_new<int>(L, luaX_opt_integer<int>(L, 1, 0));
+      luaX_set_metatable(L, "dromozoa.bind.chain_b");
     }
   }
 
@@ -183,11 +214,12 @@ namespace dromozoa {
     luaX_set_field(L, -1, "field_error1", impl_field_error1);
     luaX_set_field(L, -1, "field_error2", impl_field_error2);
     luaX_set_field(L, -1, "field_error3", impl_field_error3);
+    luaX_set_field(L, -1, "set_metafield", impl_set_metafield);
 
     luaX_set_field<int>(L, -1, "ENUM42", ENUM42);
     luaX_set_field<int>(L, -1, "ENUM69", ENUM69);
 
-    luaX_set_metafield(L, "__call", impl_new);
+    luaX_set_metafield(L, -1, "__call", impl_new);
 
     luaL_newmetatable(L, "dromozoa.bind.int");
     lua_newtable(L);
@@ -196,6 +228,25 @@ namespace dromozoa {
     luaX_set_field(L, -1, "to", impl_to);
     luaX_set_field(L, -2, "__index");
     lua_pop(L, 1);
+
+    luaL_newmetatable(L, "dromozoa.bind.chain_a");
+    lua_newtable(L);
+    luaX_set_field(L, -1, "get", impl_chain_get);
+    luaX_set_field(L, -2, "__index");
+    luaX_set_field(L, -1, "__gc", impl_chain_gc);
+    lua_pop(L, 1);
+
+    luaL_newmetatable(L, "dromozoa.bind.chain_b");
+    luaL_getmetatable(L, "dromozoa.bind.chain_a");
+    luaX_get_field(L, -1, "__index");
+    luaX_set_field(L, -3, "__index");
+    luaX_get_field(L, -1, "__gc");
+    luaX_set_field(L, -3, "__gc");
+    lua_pop(L, 2);
+
+    luaX_set_field(L, -1, "chain_new_a", impl_chain_new_a);
+    luaX_set_field(L, -1, "chain_new_b", impl_chain_new_b);
+    luaX_set_field(L, -1, "chain_gc_count", impl_chain_gc_count);
   }
 }
 

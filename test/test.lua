@@ -142,6 +142,11 @@ assert(not pcall(bind.field_error1))
 assert(not pcall(bind.field_error2))
 assert(not pcall(bind.field_error3))
 
+local a, b = bind.set_metafield()
+assert(getmetatable(a).a == "a")
+assert(getmetatable(a).b == "b")
+assert(b == nil)
+
 assert(bind():get() == 0)
 assert(bind():set(42):get() == 42)
 assert(bind(42):get() == 42)
