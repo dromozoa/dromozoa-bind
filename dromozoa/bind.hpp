@@ -449,7 +449,7 @@ namespace dromozoa {
 #endif
     }
 
-    template <class T_key, class T>
+    template <class T, class T_key>
     inline int luaX_field_error(lua_State* L, const T_key& key, const T& what) {
       luaX_push(L, "field ");
       luaX_type_traits<T_key>::quote(L, key);
