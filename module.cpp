@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <iostream>
 #include <stdexcept>
 
 #include "dromozoa/bind.hpp"
@@ -81,7 +82,7 @@ namespace dromozoa {
     }
 
     void impl_opt_range(lua_State* L) {
-      size_t size = luaL_checkinteger(L, 1);
+      size_t size = luaX_check_integer<size_t>(L, 1);
       size_t i = luaX_opt_range_i(L, 2, size);
       size_t j = luaX_opt_range_j(L, 3, size);
       luaX_push(L, i);
@@ -136,13 +137,13 @@ namespace dromozoa {
       if (lua_isnoneornil(L, 2)) {
         luaX_new<int>(L);
       } else {
-        luaX_new<int>(L, luaL_checkinteger(L, 2));
+        luaX_new<int>(L, luaX_check_integer<int>(L, 2));
       }
       luaX_set_metatable(L, "dromozoa.bind.int");
     }
 
     void impl_set(lua_State* L) {
-      *luaX_check_udata<int>(L, 1, "dromozoa.bind.int") = luaL_checkinteger(L, 2);
+      *luaX_check_udata<int>(L, 1, "dromozoa.bind.int") = luaX_check_integer<int>(L, 2);
       luaX_push_success(L);
     }
 
@@ -161,6 +162,24 @@ namespace dromozoa {
       } else {
         luaX_push(L, luaX_nil);
       }
+    }
+
+    void impl_chain_get(lua_State* L) {
+      luaX_push(L, *luaX_check_udata<int>(L, 1, "dromozoa.bind.chain_b", "dromozoa.bind.chain_a"));
+    }
+
+    void impl_chain_gc(lua_State*) {
+      std::cerr << "impl_chain_gc\n";
+    }
+
+    void impl_chain_new_a(lua_State* L) {
+      luaX_new<int>(L, luaX_opt_integer<int>(L, 1, 0));
+      luaX_set_metatable(L, "dromozoa.bind.chain_a");
+    }
+
+    void impl_chain_new_b(lua_State* L) {
+      luaX_new<int>(L, luaX_opt_integer<int>(L, 1, 0));
+      luaX_set_metatable(L, "dromozoa.bind.chain_b");
     }
   }
 
@@ -196,6 +215,24 @@ namespace dromozoa {
     luaX_set_field(L, -1, "to", impl_to);
     luaX_set_field(L, -2, "__index");
     lua_pop(L, 1);
+
+    luaL_newmetatable(L, "dromozoa.bind.chain_a");
+    lua_newtable(L);
+    luaX_set_field(L, -1, "get", impl_chain_get);
+    luaX_set_field(L, -2, "__index");
+    luaX_set_field(L, -1, "__gc", impl_chain_gc);
+    lua_pop(L, 1);
+
+    luaL_newmetatable(L, "dromozoa.bind.chain_b");
+    luaL_getmetatable(L, "dromozoa.bind.chain_a");
+    luaX_get_field(L, -1, "__index");
+    luaX_set_field(L, -3, "__index");
+    luaX_get_field(L, -1, "__gc");
+    luaX_set_field(L, -3, "__gc");
+    lua_pop(L, 2);
+
+    luaX_set_field(L, -1, "chain_new_a", impl_chain_new_a);
+    luaX_set_field(L, -1, "chain_new_b", impl_chain_new_b);
   }
 }
 
