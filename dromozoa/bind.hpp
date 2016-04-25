@@ -26,6 +26,7 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
+#include <iostream>
 #include <exception>
 #include <limits>
 #include <new>
@@ -767,6 +768,49 @@ namespace dromozoa {
         return false;
       }
     };
+
+    typedef void (*unexpected_handler)(const char* what, const char* file, int line, const char* function);
+
+    inline void unexpected_noop(const char*, const char*, int, const char*) {}
+
+    inline void unexpected_cerr(const char* what, const char* file, int line, const char* function) {
+      std::cerr << "unexpected";
+      if (what) {
+        std::cerr << ": " << what;
+      }
+      if (file) {
+        std::cerr << " at " << file << ":" << line;
+      }
+      if (function) {
+        std::cerr << " in " << function;
+      }
+      std::cerr << std::endl;
+    }
+
+    inline unexpected_handler access_unexpected(bool set = false, unexpected_handler new_handler = 0) {
+      static unexpected_handler handler = unexpected_cerr;
+      if (set) {
+        unexpected_handler old_handler = handler;
+        handler = new_handler;
+        return old_handler;
+      } else {
+        return handler;
+      }
+    }
+
+    inline void set_unexpected(unexpected_handler handler) {
+      access_unexpected(true, handler);
+    }
+
+    inline void unexpected(const char* what, const char* file, int line, const char* function) {
+      if (unexpected_handler handler = access_unexpected()) {
+        handler(what, file, line, function);
+      }
+    }
+
+    inline void unexpected(const std::string& what, const char* file, int line, const char* function) {
+      unexpected(what.c_str(), file, line, function);
+    }
   }
 
   using bind::luaX_abs_index;
@@ -788,6 +832,14 @@ namespace dromozoa {
   using bind::luaX_set_metafield;
   using bind::luaX_set_metatable;
   using bind::luaX_to_udata;
+  using bind::set_unexpected;
+  using bind::unexpected;
+  using bind::unexpected_cerr;
+  using bind::unexpected_handler;
+  using bind::unexpected_noop;
 }
+
+#define DROMOZOA_UNEXPECTED(what) \
+  dromozoa::bind::unexpected(what, __FILE__, __LINE__, __func__)
 
 #endif
