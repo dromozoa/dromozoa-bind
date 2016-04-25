@@ -193,6 +193,10 @@ namespace dromozoa {
       luaX_new<int>(L, luaX_opt_integer<int>(L, 1, 0));
       luaX_set_metatable(L, "dromozoa.bind.chain_b");
     }
+
+    void impl_unexpected(lua_State*) {
+      DROMOZOA_UNEXPECTED("error");
+    }
   }
 
   void initialize(lua_State* L) {
@@ -247,6 +251,8 @@ namespace dromozoa {
     luaX_set_field(L, -1, "chain_new_a", impl_chain_new_a);
     luaX_set_field(L, -1, "chain_new_b", impl_chain_new_b);
     luaX_set_field(L, -1, "chain_gc_count", impl_chain_gc_count);
+
+    luaX_set_field(L, -1, "unexpected", impl_unexpected);
   }
 }
 
