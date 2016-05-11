@@ -126,6 +126,18 @@ assert(bind.opt_enum(bind.ENUM42) == bind.ENUM42)
 assert(bind.opt_enum(bind.ENUM69) == bind.ENUM69)
 assert(not pcall(bind.check_enum, "foo"))
 
+local a, b = assert(bind.check_integer_field({ foo = 42, [42] = "42" }))
+assert(a == 42)
+assert(b == 42)
+assert(not pcall(bind.check_integer_field, {}))
+assert(not pcall(bind.check_integer_field, { foo = "bar" }))
+assert(not pcall(bind.check_integer_field, { foo = 42 }))
+assert(not pcall(bind.check_integer_field, { foo = 42, [42] = "bar" }))
+
+assert(bind.check_integer_field_range({ nice = 0 }) == 0)
+assert(not pcall(bind.check_integer_field_range, { nice = 42 }))
+assert(not pcall(bind.check_integer_field_range, { nice = "bar" }))
+
 assert(bind.opt_integer_field({}) == 0)
 assert(bind.opt_integer_field({ foo = 42 }) == 42)
 assert(not pcall(bind.opt_integer_field, { foo = "bar" }))
