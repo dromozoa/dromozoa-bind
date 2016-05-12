@@ -111,6 +111,15 @@ namespace dromozoa {
       luaX_push<int>(L, value);
     }
 
+    void impl_check_integer_field(lua_State* L) {
+      luaX_push(L, luaX_check_integer_field<uint16_t>(L, 1, "foo"));
+      luaX_push(L, luaX_check_integer_field<uint16_t>(L, 1, 42));
+    }
+
+    void impl_check_integer_field_range(lua_State* L) {
+      luaX_push(L, luaX_check_integer_field<int>(L, 1, "nice", -20, 19));
+    }
+
     void impl_opt_integer_field(lua_State* L) {
       luaX_push(L, luaX_opt_integer_field<uint16_t>(L, 1, "foo", 0));
       luaX_push(L, luaX_opt_integer_field<uint16_t>(L, 1, 42, 0));
@@ -217,6 +226,8 @@ namespace dromozoa {
     luaX_set_field(L, -1, "opt_integer", impl_opt_integer);
     luaX_set_field(L, -1, "check_enum", impl_check_enum);
     luaX_set_field(L, -1, "opt_enum", impl_opt_enum);
+    luaX_set_field(L, -1, "check_integer_field", impl_check_integer_field);
+    luaX_set_field(L, -1, "check_integer_field_range", impl_check_integer_field_range);
     luaX_set_field(L, -1, "opt_integer_field", impl_opt_integer_field);
     luaX_set_field(L, -1, "opt_integer_field_range", impl_opt_integer_field_range);
     luaX_set_field(L, -1, "field_error1", impl_field_error1);

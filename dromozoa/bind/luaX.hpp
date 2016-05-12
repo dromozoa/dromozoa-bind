@@ -506,6 +506,40 @@ namespace dromozoa {
 #endif
     }
 
+    template <class T_key>
+    inline intmax_t luaX_check_integer_field_impl(lua_State* L, int arg, const T_key& key) {
+      luaX_push(L, key);
+      lua_gettable(L, arg);
+      if (lua_isnumber(L, -1)) {
+        intmax_t value = lua_tointeger(L, -1);
+        lua_pop(L, 1);
+        return value;
+      } else {
+        lua_pop(L, 1);
+        return luaX_field_error(L, key, "not an integer");
+      }
+    }
+
+    template <class T, class T_key>
+    inline T luaX_check_integer_field(lua_State* L, int arg, const T_key& key) {
+      intmax_t source = luaX_check_integer_field_impl(L, arg, key);
+      T target = 0;
+      if (luaX_integer_traits<T>::convert(source, target)) {
+        return target;
+      }
+      return luaX_field_error(L, key, "out of bounds");
+    }
+
+    template <class T, class T_key>
+    inline T luaX_check_integer_field(lua_State* L, int arg, const T_key& key, T min, T max) {
+      intmax_t source = luaX_check_integer_field_impl(L, arg, key);
+      T target = 0;
+      if (luaX_integer_traits<T>::convert(source, target, min, max)) {
+        return target;
+      }
+      return luaX_field_error(L, key, "out of bounds");
+    }
+
     template <class T, class T_key>
     inline intmax_t luaX_opt_integer_field_impl(lua_State* L, int arg, const T_key& key, T d) {
       luaX_push(L, key);
@@ -791,6 +825,7 @@ namespace dromozoa {
   using bind::luaX_abs_index;
   using bind::luaX_check_enum;
   using bind::luaX_check_integer;
+  using bind::luaX_check_integer_field;
   using bind::luaX_check_udata;
   using bind::luaX_field_error;
   using bind::luaX_get_field;
