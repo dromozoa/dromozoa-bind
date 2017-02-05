@@ -194,3 +194,18 @@ assert(bind(42):to("foo", "bar", "dromozoa.bind.int", "qux") == 42)
 assert(bind(42):to("foo", "bar", "baz", "dromozoa.bind.int") == 42)
 
 bind.unexpected()
+
+local sum = 0
+bind.set_callback(function (v)
+  sum = sum + v
+end)
+
+assert(sum == 0)
+bind.run_callback()
+assert(sum == 119)
+
+bind.set_callback()
+
+assert(sum == 119)
+bind.run_callback()
+assert(sum == 119)

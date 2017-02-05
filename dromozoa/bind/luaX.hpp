@@ -820,6 +820,48 @@ namespace dromozoa {
         return false;
       }
     };
+
+    class luaX_reference {
+    public:
+      explicit luaX_reference(lua_State* state = 0) : state_(state), ref_(LUA_NOREF) {
+        if (state_) {
+          ref_ = luaL_ref(state_, LUA_REGISTRYINDEX);
+        }
+      }
+
+      ~luaX_reference() {
+        if (state_) {
+          luaL_unref(state_, LUA_REGISTRYINDEX, ref_);
+        }
+      }
+
+      lua_State* state() const {
+        return state_;
+      }
+
+      int get() const {
+        return ref_;
+      }
+
+      int get_field() const {
+        return luaX_get_field(state_, LUA_REGISTRYINDEX, ref_);
+      }
+
+      void swap(luaX_reference& that) {
+        lua_State* state = state_;
+        state_ = that.state_;
+        that.state_ = state;
+        int ref = ref_;
+        ref_ = that.ref_;
+        that.ref_ = ref;
+      }
+
+    private:
+      lua_State* state_;
+      int ref_;
+      luaX_reference(const luaX_reference&);
+      luaX_reference& operator=(const luaX_reference&);
+    };
   }
 
   using bind::luaX_abs_index;
@@ -839,6 +881,7 @@ namespace dromozoa {
   using bind::luaX_opt_range_j;
   using bind::luaX_push;
   using bind::luaX_push_success;
+  using bind::luaX_reference;
   using bind::luaX_set_field;
   using bind::luaX_set_metafield;
   using bind::luaX_set_metatable;
