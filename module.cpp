@@ -1,4 +1,4 @@
-// Copyright (C) 2016 Tomoyuki Fujimori <moyu@dromozoa.com>
+// Copyright (C) 2016,2017 Tomoyuki Fujimori <moyu@dromozoa.com>
 //
 // This file is part of dromozoa-bind.
 //
@@ -317,6 +317,8 @@ namespace dromozoa {
 
     luaX_set_field(L, -1, "set_callback", impl_set_callback);
     luaX_set_field(L, -1, "run_callback", impl_run_callback);
+
+    luaX_set_field(L, -1, "sizeof_lua_integer", sizeof(lua_Integer));
   }
 }
 

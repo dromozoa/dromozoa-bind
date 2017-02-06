@@ -1,4 +1,4 @@
--- Copyright (C) 2016 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2016,2017 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-bind.
 --
@@ -168,9 +168,13 @@ assert(bind.is_integer(42))
 assert(bind.is_integer(42 / 2))
 assert(not bind.is_integer(1.25))
 assert(bind.is_integer(1.25e6))
-assert(bind.is_integer(1.25e12))
-assert(bind.is_integer(1.25e18))
-assert(not bind.is_integer(1.25e24))
+if bind.sizeof_lua_integer == 4 then
+  assert(not bind.is_integer(1.25e12))
+else
+  assert(bind.is_integer(1.25e12))
+  assert(bind.is_integer(1.25e18))
+  assert(not bind.is_integer(1.25e24))
+end
 
 assert(not bind.is_integer(DBL_MAX))
 assert(not bind.is_integer(DBL_DENORM_MIN))
