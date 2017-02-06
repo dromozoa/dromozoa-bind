@@ -317,6 +317,8 @@ namespace dromozoa {
 
     luaX_set_field(L, -1, "set_callback", impl_set_callback);
     luaX_set_field(L, -1, "run_callback", impl_run_callback);
+
+    luaX_set_field(L, -1, "sizeof_lua_integer", sizeof(lua_Integer));
   }
 }
 
