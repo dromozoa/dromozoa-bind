@@ -507,9 +507,10 @@ namespace dromozoa {
     }
 
     template <class T_key>
-    inline intmax_t luaX_check_integer_field_impl(lua_State* L, int arg, const T_key& key) {
+    inline intmax_t luaX_check_integer_field_impl(lua_State* L, int index, const T_key& key) {
+      index = luaX_abs_index(L, index);
       luaX_push(L, key);
-      lua_gettable(L, arg);
+      lua_gettable(L, index);
       if (lua_isnumber(L, -1)) {
         intmax_t value = lua_tointeger(L, -1);
         lua_pop(L, 1);
@@ -521,8 +522,8 @@ namespace dromozoa {
     }
 
     template <class T, class T_key>
-    inline T luaX_check_integer_field(lua_State* L, int arg, const T_key& key) {
-      intmax_t source = luaX_check_integer_field_impl(L, arg, key);
+    inline T luaX_check_integer_field(lua_State* L, int index, const T_key& key) {
+      intmax_t source = luaX_check_integer_field_impl(L, index, key);
       T target = 0;
       if (luaX_integer_traits<T>::convert(source, target)) {
         return target;
@@ -531,8 +532,8 @@ namespace dromozoa {
     }
 
     template <class T, class T_key>
-    inline T luaX_check_integer_field(lua_State* L, int arg, const T_key& key, T min, T max) {
-      intmax_t source = luaX_check_integer_field_impl(L, arg, key);
+    inline T luaX_check_integer_field(lua_State* L, int index, const T_key& key, T min, T max) {
+      intmax_t source = luaX_check_integer_field_impl(L, index, key);
       T target = 0;
       if (luaX_integer_traits<T>::convert(source, target, min, max)) {
         return target;
@@ -541,12 +542,13 @@ namespace dromozoa {
     }
 
     template <class T, class T_key>
-    inline intmax_t luaX_opt_integer_field_impl(lua_State* L, int arg, const T_key& key, T d) {
+    inline intmax_t luaX_opt_integer_field_impl(lua_State* L, int index, const T_key& key, T d) {
+      index = luaX_abs_index(L, index);
       luaX_push(L, key);
 #if LUA_VERSION_NUM+0 >= 503
-      bool is_nil = lua_gettable(L, arg) == LUA_TNIL;
+      bool is_nil = lua_gettable(L, index) == LUA_TNIL;
 #else
-      lua_gettable(L, arg);
+      lua_gettable(L, index);
       bool is_nil = lua_isnil(L, -1);
 #endif
       if (lua_isnumber(L, -1)) {
@@ -564,8 +566,8 @@ namespace dromozoa {
     }
 
     template <class T, class T_key>
-    inline T luaX_opt_integer_field(lua_State* L, int arg, const T_key& key, T d) {
-      intmax_t source = luaX_opt_integer_field_impl(L, arg, key, d);
+    inline T luaX_opt_integer_field(lua_State* L, int index, const T_key& key, T d) {
+      intmax_t source = luaX_opt_integer_field_impl(L, index, key, d);
       T target = 0;
       if (luaX_integer_traits<T>::convert(source, target)) {
         return target;
@@ -574,8 +576,8 @@ namespace dromozoa {
     }
 
     template <class T, class T_key>
-    inline T luaX_opt_integer_field(lua_State* L, int arg, const T_key& key, T d, T min, T max) {
-      intmax_t source = luaX_opt_integer_field_impl(L, arg, key, d);
+    inline T luaX_opt_integer_field(lua_State* L, int index, const T_key& key, T d, T min, T max) {
+      intmax_t source = luaX_opt_integer_field_impl(L, index, key, d);
       T target = 0;
       if (luaX_integer_traits<T>::convert(source, target, min, max)) {
         return target;
