@@ -255,6 +255,10 @@ namespace dromozoa {
       api_run_callback(37);
       api_run_callback(42);
     }
+
+    void impl_binder(lua_State* L) {
+      luaX_binder_reference<1> x(L, 1);
+    }
   }
 
   void initialize(lua_State* L) {
