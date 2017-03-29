@@ -228,6 +228,35 @@ local result, message = pcall(bind.get_field_without_state)
 print(result, message)
 assert(not result)
 
+local thread = coroutine.create(function ()
+  local thread = coroutine.create(function ()
+    local thread = coroutine.create(function ()
+      local thread = coroutine.create(function ()
+        bind.set_callback(print, print)
+        collectgarbage()
+        collectgarbage()
+      end)
+      assert(coroutine.resume(thread))
+      thread = nil
+      collectgarbage()
+      collectgarbage()
+    end)
+    assert(coroutine.resume(thread))
+    thread = nil
+    collectgarbage()
+    collectgarbage()
+  end)
+  assert(coroutine.resume(thread))
+  thread = nil
+  collectgarbage()
+  collectgarbage()
+end)
+assert(coroutine.resume(thread))
+thread = nil
+collectgarbage()
+collectgarbage()
 
-
-
+bind.run_callback_s("foo")
+bind.run_callback_s("bar")
+bind.run_callback_s("baz")
+bind.run_destructor()
