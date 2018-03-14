@@ -1,4 +1,4 @@
-// Copyright (C) 2016,2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+// Copyright (C) 2016-2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 //
 // This file is part of dromozoa-bind.
 //
@@ -16,6 +16,7 @@
 // along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdexcept>
+#include <string>
 #include <iostream>
 
 #include "dromozoa/bind.hpp"
@@ -300,8 +301,10 @@ namespace dromozoa {
       reference.get_field(L);
     }
 
-    void impl_get_field_without_state(lua_State*) {
+    void impl_get_field_without_state(lua_State* L) {
+      std::cout << reference.state() << "\n";
       reference.get_field();
+      luaX_push(L, luaX_check_integer<int>(reference.state(), -1));
     }
 
     void impl_unref(lua_State*) {
