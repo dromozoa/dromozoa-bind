@@ -1,4 +1,4 @@
-// Copyright (C) 2016 Tomoyuki Fujimori <moyu@dromozoa.com>
+// Copyright (C) 2016,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 //
 // This file is part of dromozoa-bind.
 //
@@ -44,9 +44,8 @@ namespace dromozoa {
     inline unexpected_handler access_unexpected(bool set, unexpected_handler new_handler) {
       static unexpected_handler handler = unexpected_cerr;
       if (set) {
-        unexpected_handler old_handler = handler;
         handler = new_handler;
-        return old_handler;
+        return 0;
       } else {
         return handler;
       }

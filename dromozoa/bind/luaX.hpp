@@ -56,7 +56,7 @@ namespace dromozoa {
     template <class T>
     struct luaX_type_traits : luaX_type_traits_impl<typename luaX_type<T>::decay, typename luaX_type<T>::type> {};
 
-    template <class T, bool is_signed>
+    template <class T, bool T_is_signed>
     struct luaX_integer_traits_impl {};
 
     template <class T, class T_type = typename luaX_type<T>::type>
@@ -839,7 +839,7 @@ namespace dromozoa {
     public:
       virtual ~luaX_binder_impl() {
         if (state_) {
-          luaL_unref(state_, LUA_REGISTRYINDEX, state_reference_);
+          luaL_unref(state_, LUA_REGISTRYINDEX, reference_);
         }
       }
 
@@ -848,10 +848,10 @@ namespace dromozoa {
       }
 
     protected:
-      explicit luaX_binder_impl(lua_State* state) : state_(), state_reference_(LUA_NOREF) {
+      explicit luaX_binder_impl(lua_State* state) : state_(), reference_(LUA_NOREF) {
         if (state) {
           state_ = lua_newthread(state);
-          state_reference_ = luaL_ref(state, LUA_REGISTRYINDEX);
+          reference_ = luaL_ref(state, LUA_REGISTRYINDEX);
         }
       }
 
@@ -859,11 +859,12 @@ namespace dromozoa {
         lua_State* state = state_;
         state_ = that.state_;
         that.state_ = state;
+        // TODO how about reference_?
       }
 
     private:
       lua_State* state_;
-      int state_reference_;
+      int reference_;
     };
 
     template <size_t T>
