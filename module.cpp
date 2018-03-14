@@ -301,8 +301,10 @@ namespace dromozoa {
       reference.get_field(L);
     }
 
-    void impl_get_field_without_state(lua_State*) {
+    void impl_get_field_without_state(lua_State* L) {
+      std::cout << reference.state() << "\n";
       reference.get_field();
+      luaX_push(L, luaX_check_integer<int>(reference.state(), -1));
     }
 
     void impl_unref(lua_State*) {

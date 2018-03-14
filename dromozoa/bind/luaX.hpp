@@ -859,7 +859,9 @@ namespace dromozoa {
         lua_State* state = state_;
         state_ = that.state_;
         that.state_ = state;
-        // TODO how about reference_?
+        int reference = reference_;
+        reference_ = that.reference_;
+        that.reference_ = reference;
       }
 
     private:

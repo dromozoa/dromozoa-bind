@@ -1,4 +1,4 @@
--- Copyright (C) 2016,2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2016-2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-bind.
 --
@@ -218,6 +218,10 @@ bind.run_destructor()
 
 bind.ref(42)
 assert(bind.get_field_with_state() == 42)
+assert(bind.get_field_without_state() == 42)
+
+assert(bind.get_field_with_state() == 42)
+assert(bind.get_field_without_state() == 42)
 
 local thread = coroutine.create(function ()
   assert(bind.get_field_with_state() == 42)
@@ -225,6 +229,7 @@ end)
 assert(coroutine.resume(thread))
 
 bind.unref()
+
 local result, message = pcall(bind.get_field_without_state)
 print(result, message)
 assert(not result)
