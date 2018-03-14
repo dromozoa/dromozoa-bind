@@ -230,6 +230,8 @@ assert(coroutine.resume(thread))
 
 bind.unref()
 
+assert(bind.get_field_with_state() == nil)
+
 local result, message = pcall(bind.get_field_without_state)
 print(result, message)
 assert(not result)
