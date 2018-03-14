@@ -1,8 +1,8 @@
 package = "dromozoa-bind"
-version = "1.36-1"
+version = "1.37-1"
 source = {
-  url = "https://github.com/dromozoa/dromozoa-bind/archive/v1.36.tar.gz";
-  file = "dromozoa-bind-1.36.tar.gz";
+  url = "https://github.com/dromozoa/dromozoa-bind/archive/v1.37.tar.gz";
+  file = "dromozoa-bind-1.37.tar.gz";
 }
 description = {
   summary = "Helper library for creating bindings between C++ and Lua";
@@ -17,6 +17,7 @@ build = {
     LIBFLAG = "$(LIBFLAG)";
     LUA_INCDIR = "$(LUA_INCDIR)";
     LUA_LIBDIR = "$(LUA_LIBDIR)";
+    LUA = "$(LUA)";
   };
   install_variables = {
     LIBDIR = "$(LIBDIR)";
