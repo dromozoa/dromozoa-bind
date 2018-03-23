@@ -30,6 +30,7 @@ extern "C" {
 #include <exception>
 #include <limits>
 #include <new>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -742,19 +743,33 @@ namespace dromozoa {
       }
 
       static void quote(lua_State* L, const std::string& value) {
-        if (value.find_first_of("\"\\\n") == std::string::npos) {
-          luaX_push(L, "\"");
-          luaX_push(L, value);
-          luaX_push(L, "\"");
-          lua_concat(L, 3);
-        } else {
-          lua_getglobal(L, "string");
-          luaX_get_field(L, -1, "format");
-          luaX_push(L, "%q");
-          luaX_push(L, value);
-          lua_call(L, 2, 1);
-          lua_remove(L, lua_gettop(L) - 1);
+        std::ostringstream out;
+        out << "\"";
+        std::string::const_iterator i = value.begin();
+        std::string::const_iterator end = value.end();
+        for (; i != end; ++i) {
+          std::string::value_type c = *i;
+          switch (c) {
+            case '\a': out << "\\a"; break;
+            case '\b': out << "\\b"; break;
+            case '\f': out << "\\f"; break;
+            case '\n': out << "\\n"; break;
+            case '\r': out << "\\r"; break;
+            case '\t': out << "\\t"; break;
+            case '\v': out << "\\v"; break;
+            case '\\': out << "\\\\"; break;
+            case '\"': out << "\\\""; break;
+            case '\'': out << "\\'"; break;
+            default:
+              if ((0x00 <= c && c < 0x20) || c == 0x7F) {
+                out << "\\" << static_cast<int>(c);
+              } else {
+                out << c;
+              }
+          }
         }
+        out << "\"";
+        luaX_push(L, out.str());
       }
     };
 
@@ -877,19 +892,6 @@ namespace dromozoa {
         }
       }
 
-      int get_field(size_t i = 0) const {
-        if (lua_State* L = state()) {
-          if (i < T) {
-            return luaX_get_field(L, LUA_REGISTRYINDEX, references_[i]);
-          } else {
-            luaX_push(L, luaX_nil);
-            return LUA_TNIL;
-          }
-        } else {
-          throw std::logic_error("invalid state");
-        }
-      }
-
       int get_field(lua_State* L, size_t i = 0) const {
         if (i < T) {
           return luaX_get_field(L, LUA_REGISTRYINDEX, references_[i]);
@@ -923,7 +925,7 @@ namespace dromozoa {
     };
 
     template <size_t T = 1>
-    class luaX_reference;
+    class luaX_reference {};
 
     template <>
     class luaX_reference<1> : public luaX_reference_impl<1> {
