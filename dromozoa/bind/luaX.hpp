@@ -938,7 +938,7 @@ namespace dromozoa {
     };
 
     template <size_t T = 1>
-    class luaX_reference;
+    class luaX_reference {};
 
     template <>
     class luaX_reference<1> : public luaX_reference_impl<1> {
