@@ -254,7 +254,7 @@ namespace dromozoa {
       luaX_reference<2>* ref = static_cast<luaX_reference<2>*>(userdata);
       lua_State* L = ref->state();
       int top = lua_gettop(L);
-      ref->get_field();
+      ref->get_field(L);
       luaX_push(L, v);
       lua_pcall(L, 1, 1, 0);
       lua_settop(L, top);
@@ -264,7 +264,7 @@ namespace dromozoa {
       luaX_reference<2>* ref = static_cast<luaX_reference<2>*>(userdata);
       lua_State* L = ref->state();
       int top = lua_gettop(L);
-      ref->get_field(1);
+      ref->get_field(L, 1);
       luaX_push(L, v);
       lua_pcall(L, 1, 1, 0);
       lua_settop(L, top);
@@ -305,9 +305,13 @@ namespace dromozoa {
     }
 
     void impl_get_field_without_state(lua_State* L) {
-      std::cout << reference.state() << "\n";
-      reference.get_field();
-      luaX_push(L, luaX_check_integer<int>(reference.state(), -1));
+      if (lua_State* state = reference.state()) {
+        reference.get_field(state);
+        luaX_push(L, luaX_check_integer<int>(state, -1));
+        lua_pop(state, 1);
+      } else {
+        throw std::logic_error("invalid state");
+      }
     }
 
     void impl_unref(lua_State*) {
