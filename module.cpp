@@ -140,10 +140,7 @@ namespace dromozoa {
     }
 
     void impl_field_error3(lua_State* L) {
-      std::string key = "'foo\"bar\\baz'";
-      key += '\x00';
-      key += "\x01\x7Fqux\tあいうえお";
-      luaX_field_error(L, key, "what");
+      luaX_field_error(L, "'foo\"bar\\baz'\x01\x7Fqux\tあいうえお", "what");
     }
 
     void impl_set_metafield(lua_State* L) {
