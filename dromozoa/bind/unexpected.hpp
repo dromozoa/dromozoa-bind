@@ -74,6 +74,6 @@ namespace dromozoa {
 }
 
 #define DROMOZOA_UNEXPECTED(what) \
-  dromozoa::bind::unexpected(what, __FILE__, __LINE__, __func__)
+  dromozoa::bind::unexpected((what), __FILE__, __LINE__, __func__)
 
 #endif
