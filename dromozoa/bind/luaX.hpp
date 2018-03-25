@@ -789,11 +789,8 @@ namespace dromozoa {
         try {
           return call(L, reinterpret_cast<T>(lua_touserdata(L, lua_upvalueindex(1))));
         } catch (const std::exception& e) {
-          luaX_push(L, "exception caught: ");
-          luaX_push(L, e.what());
-          lua_concat(L, 2);
+          return luaL_error(L, "exception caught: %s", e.what());
         }
-        return lua_error(L);
       }
 
       static void push(lua_State* L, const T& value) {
