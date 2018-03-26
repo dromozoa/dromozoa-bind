@@ -17,32 +17,6 @@
 
 local bind = require "dromozoa.bind"
 
-local a, b, c = bind.result_int()
-assert(a == true)
-assert(b == 42)
-assert(c == "foo")
-
-local a, b, c = bind.result_void()
-assert(a == true)
-assert(b == 42)
-assert(c == "foo")
-
-assert(bind.push_nil() == nil)
-
-local a, b = bind.push_enum()
-assert(a == 42)
-assert(b == -42)
-
-local a, b, c, d, e = bind.push_string()
-assert(a == "foo")
-assert(b == "foo")
-assert(c == "foo")
-assert(d == "foo")
-assert(e == "foo")
-
-assert(bind.push_success() == true)
-assert(bind.push_success(42) == 42)
-
 local t = {}
 bind.set_field(t)
 assert(t[1] == 17)
@@ -187,8 +161,6 @@ assert(bind(42):to("dromozoa.bind.int", "bar", "baz", "qux") == 42)
 assert(bind(42):to("foo", "dromozoa.bind.int", "baz", "qux") == 42)
 assert(bind(42):to("foo", "bar", "dromozoa.bind.int", "qux") == 42)
 assert(bind(42):to("foo", "bar", "baz", "dromozoa.bind.int") == 42)
-
-bind.unexpected()
 
 local sum = 0
 bind.set_callback(function (v) print(sum, v) sum = sum + v end, print)

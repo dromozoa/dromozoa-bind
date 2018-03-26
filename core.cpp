@@ -23,6 +23,42 @@
 
 namespace dromozoa {
   namespace {
+    enum { _42 = 42 };
+
+    int impl_result_int(lua_State* L) {
+      luaX_push(L, luaX_nil, 0.25, 42, true, "foo");
+      return 5;
+    }
+
+    void impl_result_void(lua_State* L) {
+      luaX_push(L, luaX_nil, 0.25, 42, true, "foo");
+    }
+
+    void impl_push_none(lua_State*) {}
+
+    void impl_push_nil(lua_State* L) {
+      luaX_push(L, luaX_nil);
+    }
+
+    void impl_push_enum(lua_State* L) {
+      luaX_push<int>(L, _42);
+    }
+
+    void impl_push_string(lua_State* L) {
+      std::string s = "あいうえお";
+      char b[256] = { 0 };
+      std::copy(s.begin(), s.end(), b);
+      luaX_push(L, "あいうえお", b, static_cast<char*>(b), static_cast<const char*>(b), s);
+    }
+
+    void impl_push_success(lua_State* L) {
+      luaX_push_success(L);
+    }
+
+    void impl_unexpected(lua_State*) {
+      DROMOZOA_UNEXPECTED("error");
+    }
+
     void impl_throw(lua_State*) {
       throw std::runtime_error("runtime_error");
     }
@@ -36,23 +72,31 @@ namespace dromozoa {
     }
 
     void impl_field_error3(lua_State* L) {
-      char buffer[256] = { 0 };
+      char b[256] = { 0 };
       {
         std::ostringstream out;
         for (int i = 1; i <= 127; ++i) {
           out << static_cast<char>(i);
         }
         out << "あいうえお";
-        std::string key = out.str();
-        std::copy(key.begin(), key.end(), buffer);
+        std::string s = out.str();
+        std::copy(s.begin(), s.end(), b);
       }
-      luaX_field_error(L, buffer, "not an integer");
+      luaX_field_error(L, b, "not an integer");
     }
   }
 
   void initialize_core(lua_State* L) {
     lua_newtable(L);
     {
+      luaX_set_field(L, -1, "result_int", impl_result_int);
+      luaX_set_field(L, -1, "result_void", impl_result_void);
+      luaX_set_field(L, -1, "push_none", impl_push_none);
+      luaX_set_field(L, -1, "push_nil", impl_push_nil);
+      luaX_set_field(L, -1, "push_enum", impl_push_enum);
+      luaX_set_field(L, -1, "push_string", impl_push_string);
+      luaX_set_field(L, -1, "push_success", impl_push_success);
+      luaX_set_field(L, -1, "unexpected", impl_unexpected);
       luaX_set_field(L, -1, "throw", impl_throw);
       luaX_set_field(L, -1, "field_error1", impl_field_error1);
       luaX_set_field(L, -1, "field_error2", impl_field_error2);

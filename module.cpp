@@ -28,46 +28,6 @@ namespace dromozoa {
   };
 
   namespace {
-    int impl_result_int(lua_State* L) {
-      luaX_push(L, true);
-      luaX_push(L, 42);
-      luaX_push(L, "foo");
-      return 3;
-    }
-
-    void impl_result_void(lua_State* L) {
-      luaX_push(L, true);
-      luaX_push(L, 42);
-      luaX_push(L, "foo");
-    }
-
-    void impl_push_nil(lua_State* L) {
-      luaX_push(L, luaX_nil);
-    }
-
-    enum {
-      ENUM1 = 42,
-      ENUM2 = -42,
-    };
-
-    void impl_push_enum(lua_State* L) {
-      luaX_push<int>(L, ENUM1);
-      luaX_push<int>(L, ENUM2);
-    }
-
-    void impl_push_string(lua_State* L) {
-      char data[] = { 'f', 'o', 'o', 0 };
-      luaX_push(L, "foo");
-      luaX_push(L, data);
-      luaX_push(L, static_cast<char*>(data));
-      luaX_push(L, static_cast<const char*>(data));
-      luaX_push(L, std::string("foo"));
-    }
-
-    void impl_push_success(lua_State* L) {
-      luaX_push_success(L);
-    }
-
     void impl_set_field(lua_State* L) {
       luaX_set_field(L, -1, 1, 17);
       luaX_set_field(L, -1, 2, 23);
@@ -167,10 +127,6 @@ namespace dromozoa {
       } else {
         luaX_push(L, luaX_nil);
       }
-    }
-
-    void impl_unexpected(lua_State*) {
-      DROMOZOA_UNEXPECTED("error");
     }
 
     typedef void (*api_callback_i_type)(int v, void* userdata);
@@ -280,12 +236,6 @@ namespace dromozoa {
   void initialize_handle(lua_State* L);
 
   void initialize(lua_State* L) {
-    luaX_set_field(L, -1, "result_int", impl_result_int);
-    luaX_set_field(L, -1, "result_void", impl_result_void);
-    luaX_set_field(L, -1, "push_nil", impl_push_nil);
-    luaX_set_field(L, -1, "push_enum", impl_push_enum);
-    luaX_set_field(L, -1, "push_string", impl_push_string);
-    luaX_set_field(L, -1, "push_success", impl_push_success);
     luaX_set_field(L, -1, "set_field", impl_set_field);
     luaX_set_field(L, -1, "opt_range", impl_opt_range);
     luaX_set_field(L, -1, "check_integer", impl_check_integer);
@@ -311,8 +261,6 @@ namespace dromozoa {
     luaX_set_field(L, -1, "to", impl_to);
     luaX_set_field(L, -2, "__index");
     lua_pop(L, 1);
-
-    luaX_set_field(L, -1, "unexpected", impl_unexpected);
 
     luaX_set_field(L, -1, "set_callback", impl_set_callback);
     luaX_set_field(L, -1, "run_callback_i", impl_run_callback_i);
