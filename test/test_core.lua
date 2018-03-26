@@ -26,6 +26,7 @@ local function check_error(fn, expect)
   end
 end
 
+bind.core.unexpected()
 check_error(bind.core.throw, "exception caught: runtime_error")
 check_error(bind.core.field_error1, "field nil not an integer")
 check_error(bind.core.field_error2, "field userdata:")

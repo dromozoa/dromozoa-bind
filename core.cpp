@@ -23,6 +23,10 @@
 
 namespace dromozoa {
   namespace {
+    void impl_unexpected(lua_State*) {
+      DROMOZOA_UNEXPECTED("error");
+    }
+
     void impl_throw(lua_State*) {
       throw std::runtime_error("runtime_error");
     }
@@ -53,6 +57,7 @@ namespace dromozoa {
   void initialize_core(lua_State* L) {
     lua_newtable(L);
     {
+      luaX_set_field(L, -1, "unexpected", impl_unexpected);
       luaX_set_field(L, -1, "throw", impl_throw);
       luaX_set_field(L, -1, "field_error1", impl_field_error1);
       luaX_set_field(L, -1, "field_error2", impl_field_error2);

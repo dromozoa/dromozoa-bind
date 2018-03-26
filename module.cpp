@@ -169,10 +169,6 @@ namespace dromozoa {
       }
     }
 
-    void impl_unexpected(lua_State*) {
-      DROMOZOA_UNEXPECTED("error");
-    }
-
     typedef void (*api_callback_i_type)(int v, void* userdata);
     typedef void (*api_callback_s_type)(const std::string& v, void* userdata);
     typedef void (*api_destructor_type)(void* userdata);
@@ -311,8 +307,6 @@ namespace dromozoa {
     luaX_set_field(L, -1, "to", impl_to);
     luaX_set_field(L, -2, "__index");
     lua_pop(L, 1);
-
-    luaX_set_field(L, -1, "unexpected", impl_unexpected);
 
     luaX_set_field(L, -1, "set_callback", impl_set_callback);
     luaX_set_field(L, -1, "run_callback_i", impl_run_callback_i);
