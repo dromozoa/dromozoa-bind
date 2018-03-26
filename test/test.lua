@@ -17,20 +17,6 @@
 
 local bind = require "dromozoa.bind"
 
-local a, b = bind.push_enum()
-assert(a == 42)
-assert(b == -42)
-
-local a, b, c, d, e = bind.push_string()
-assert(a == "foo")
-assert(b == "foo")
-assert(c == "foo")
-assert(d == "foo")
-assert(e == "foo")
-
-assert(bind.push_success() == true)
-assert(bind.push_success(42) == 42)
-
 local t = {}
 bind.set_field(t)
 assert(t[1] == 17)

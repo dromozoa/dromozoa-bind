@@ -28,29 +28,6 @@ namespace dromozoa {
   };
 
   namespace {
-    enum {
-      ENUM1 = 42,
-      ENUM2 = -42,
-    };
-
-    void impl_push_enum(lua_State* L) {
-      luaX_push<int>(L, ENUM1);
-      luaX_push<int>(L, ENUM2);
-    }
-
-    void impl_push_string(lua_State* L) {
-      char data[] = { 'f', 'o', 'o', 0 };
-      luaX_push(L, "foo");
-      luaX_push(L, data);
-      luaX_push(L, static_cast<char*>(data));
-      luaX_push(L, static_cast<const char*>(data));
-      luaX_push(L, std::string("foo"));
-    }
-
-    void impl_push_success(lua_State* L) {
-      luaX_push_success(L);
-    }
-
     void impl_set_field(lua_State* L) {
       luaX_set_field(L, -1, 1, 17);
       luaX_set_field(L, -1, 2, 23);
@@ -259,9 +236,6 @@ namespace dromozoa {
   void initialize_handle(lua_State* L);
 
   void initialize(lua_State* L) {
-    luaX_set_field(L, -1, "push_enum", impl_push_enum);
-    luaX_set_field(L, -1, "push_string", impl_push_string);
-    luaX_set_field(L, -1, "push_success", impl_push_success);
     luaX_set_field(L, -1, "set_field", impl_set_field);
     luaX_set_field(L, -1, "opt_range", impl_opt_range);
     luaX_set_field(L, -1, "check_integer", impl_check_integer);
