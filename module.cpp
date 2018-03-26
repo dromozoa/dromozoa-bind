@@ -28,10 +28,6 @@ namespace dromozoa {
   };
 
   namespace {
-    void impl_throw(lua_State*) {
-      throw std::runtime_error("runtime_error");
-    }
-
     int impl_result_int(lua_State* L) {
       luaX_push(L, true);
       luaX_push(L, 42);
@@ -185,30 +181,6 @@ namespace dromozoa {
       }
     }
 
-    int chain_gc_count = 0;
-
-    void impl_chain_get(lua_State* L) {
-      luaX_push(L, *luaX_check_udata<int>(L, 1, "dromozoa.bind.chain_b", "dromozoa.bind.chain_a"));
-    }
-
-    void impl_chain_gc(lua_State*) {
-      ++chain_gc_count;
-    }
-
-    void impl_chain_gc_count(lua_State* L) {
-      luaX_push(L, chain_gc_count);
-    }
-
-    void impl_chain_new_a(lua_State* L) {
-      luaX_new<int>(L, luaX_opt_integer<int>(L, 1, 0));
-      luaX_set_metatable(L, "dromozoa.bind.chain_a");
-    }
-
-    void impl_chain_new_b(lua_State* L) {
-      luaX_new<int>(L, luaX_opt_integer<int>(L, 1, 0));
-      luaX_set_metatable(L, "dromozoa.bind.chain_b");
-    }
-
     void impl_unexpected(lua_State*) {
       DROMOZOA_UNEXPECTED("error");
     }
@@ -316,10 +288,10 @@ namespace dromozoa {
     }
   }
 
+  void initialize_core(lua_State* L);
   void initialize_handle(lua_State* L);
 
   void initialize(lua_State* L) {
-    luaX_set_field(L, -1, "throw", impl_throw);
     luaX_set_field(L, -1, "result_int", impl_result_int);
     luaX_set_field(L, -1, "result_void", impl_result_void);
     luaX_set_field(L, -1, "push_nil", impl_push_nil);
@@ -355,25 +327,6 @@ namespace dromozoa {
     luaX_set_field(L, -2, "__index");
     lua_pop(L, 1);
 
-    luaL_newmetatable(L, "dromozoa.bind.chain_a");
-    lua_newtable(L);
-    luaX_set_field(L, -1, "get", impl_chain_get);
-    luaX_set_field(L, -2, "__index");
-    luaX_set_field(L, -1, "__gc", impl_chain_gc);
-    lua_pop(L, 1);
-
-    luaL_newmetatable(L, "dromozoa.bind.chain_b");
-    luaL_getmetatable(L, "dromozoa.bind.chain_a");
-    luaX_get_field(L, -1, "__index");
-    luaX_set_field(L, -3, "__index");
-    luaX_get_field(L, -1, "__gc");
-    luaX_set_field(L, -3, "__gc");
-    lua_pop(L, 2);
-
-    luaX_set_field(L, -1, "chain_new_a", impl_chain_new_a);
-    luaX_set_field(L, -1, "chain_new_b", impl_chain_new_b);
-    luaX_set_field(L, -1, "chain_gc_count", impl_chain_gc_count);
-
     luaX_set_field(L, -1, "unexpected", impl_unexpected);
 
     luaX_set_field(L, -1, "set_callback", impl_set_callback);
@@ -388,6 +341,7 @@ namespace dromozoa {
 
     luaX_set_field(L, -1, "sizeof_lua_integer", sizeof(lua_Integer));
 
+    initialize_core(L);
     initialize_handle(L);
   }
 }
