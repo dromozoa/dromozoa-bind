@@ -17,7 +17,16 @@
 
 local bind = require "dromozoa.bind"
 
-local result, message = pcall(bind.core.throw)
-print(message);
-assert(not result)
-assert(message == "exception caught: runtime_error")
+local function check_error(fn, expect)
+  local result, message = pcall(fn)
+  print(result, message)
+  assert(not result)
+  if expect then
+    assert(message:find(expect, 1, true))
+  end
+end
+
+check_error(bind.core.throw, "exception caught: runtime_error")
+check_error(bind.core.field_error1, "field nil not an integer")
+check_error(bind.core.field_error2, "field userdata:")
+check_error(bind.core.field_error3, [[field "\1\2\3\4\5\6\a\b\t\n\v\f\r\14\15\16]])

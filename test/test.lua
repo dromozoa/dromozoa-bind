@@ -145,10 +145,6 @@ assert(not pcall(bind.opt_integer_field_range, { tv_usec = "foo" }))
 assert(not pcall(bind.opt_integer_field_range, { tv_usec = -1 }))
 assert(not pcall(bind.opt_integer_field_range, { tv_usec = 1000000 }))
 
-assert(not pcall(bind.field_error1))
-assert(not pcall(bind.field_error2))
-assert(not pcall(bind.field_error3))
-
 local a, b = bind.set_metafield()
 assert(getmetatable(a).a == "a")
 assert(getmetatable(a).b == "b")
