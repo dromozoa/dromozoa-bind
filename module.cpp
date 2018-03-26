@@ -127,18 +127,6 @@ namespace dromozoa {
       luaX_push(L, luaX_opt_integer_field<int32_t>(L, 1, "tv_usec", 0, 0, 999999));
     }
 
-    void impl_field_error1(lua_State* L) {
-      luaX_field_error(L, luaX_nil, "what");
-    }
-
-    void impl_field_error2(lua_State* L) {
-      luaX_field_error(L, impl_field_error2, "what");
-    }
-
-    void impl_field_error3(lua_State* L) {
-      luaX_field_error(L, "'foo\"bar\\baz'\x01\x7Fqux\tあいうえお", "what");
-    }
-
     void impl_set_metafield(lua_State* L) {
       lua_newtable(L);
       luaX_set_metafield(L, -1, "a", "a");
@@ -308,9 +296,6 @@ namespace dromozoa {
     luaX_set_field(L, -1, "check_integer_field_range", impl_check_integer_field_range);
     luaX_set_field(L, -1, "opt_integer_field", impl_opt_integer_field);
     luaX_set_field(L, -1, "opt_integer_field_range", impl_opt_integer_field_range);
-    luaX_set_field(L, -1, "field_error1", impl_field_error1);
-    luaX_set_field(L, -1, "field_error2", impl_field_error2);
-    luaX_set_field(L, -1, "field_error3", impl_field_error3);
     luaX_set_field(L, -1, "set_metafield", impl_set_metafield);
     luaX_set_field(L, -1, "is_integer", impl_is_integer);
 
