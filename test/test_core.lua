@@ -17,9 +17,13 @@
 
 local bind = require "dromozoa.bind"
 
+local verbose = false
+
 local function check_error(fn, expect)
   local result, message = pcall(fn)
-  print(result, message)
+  if verbose then
+    print(result, message)
+  end
   assert(not result)
   if expect then
     assert(message:find(expect, 1, true))
