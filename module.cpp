@@ -316,6 +316,8 @@ namespace dromozoa {
     }
   }
 
+  void initialize_handle(lua_State* L);
+
   void initialize(lua_State* L) {
     luaX_set_field(L, -1, "throw", impl_throw);
     luaX_set_field(L, -1, "result_int", impl_result_int);
@@ -385,6 +387,8 @@ namespace dromozoa {
     luaX_set_field(L, -1, "unref", impl_unref);
 
     luaX_set_field(L, -1, "sizeof_lua_integer", sizeof(lua_Integer));
+
+    initialize_handle(L);
   }
 }
 
