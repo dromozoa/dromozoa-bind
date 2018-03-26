@@ -28,10 +28,6 @@ namespace dromozoa {
   };
 
   namespace {
-    void impl_throw(lua_State*) {
-      throw std::runtime_error("runtime_error");
-    }
-
     int impl_result_int(lua_State* L) {
       luaX_push(L, true);
       luaX_push(L, 42);
@@ -292,10 +288,10 @@ namespace dromozoa {
     }
   }
 
+  void initialize_core(lua_State* L);
   void initialize_handle(lua_State* L);
 
   void initialize(lua_State* L) {
-    luaX_set_field(L, -1, "throw", impl_throw);
     luaX_set_field(L, -1, "result_int", impl_result_int);
     luaX_set_field(L, -1, "result_void", impl_result_void);
     luaX_set_field(L, -1, "push_nil", impl_push_nil);
@@ -345,6 +341,7 @@ namespace dromozoa {
 
     luaX_set_field(L, -1, "sizeof_lua_integer", sizeof(lua_Integer));
 
+    initialize_core(L);
     initialize_handle(L);
   }
 }

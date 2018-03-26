@@ -473,11 +473,12 @@ namespace dromozoa {
 
     template <class T, class T_key>
     inline int luaX_field_error(lua_State* L, const T_key& key, const T& what) {
+      luaL_where(L, 1);
       luaX_push(L, "field ");
       luaX_type_traits<T_key>::quote(L, key);
       luaX_push(L, " ");
       luaX_push(L, what);
-      lua_concat(L, 4);
+      lua_concat(L, 5);
       return lua_error(L);
     }
 
@@ -789,9 +790,10 @@ namespace dromozoa {
         try {
           return call(L, reinterpret_cast<T>(lua_touserdata(L, lua_upvalueindex(1))));
         } catch (const std::exception& e) {
+          luaL_where(L, 1);
           luaX_push(L, "exception caught: ");
           luaX_push(L, e.what());
-          lua_concat(L, 2);
+          lua_concat(L, 3);
         }
         return lua_error(L);
       }
