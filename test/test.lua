@@ -17,18 +17,6 @@
 
 local bind = require "dromozoa.bind"
 
-local a, b, c = bind.result_int()
-assert(a == true)
-assert(b == 42)
-assert(c == "foo")
-
-local a, b, c = bind.result_void()
-assert(a == true)
-assert(b == 42)
-assert(c == "foo")
-
-assert(bind.push_nil() == nil)
-
 local a, b = bind.push_enum()
 assert(a == 42)
 assert(b == -42)

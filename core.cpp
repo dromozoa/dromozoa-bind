@@ -23,6 +23,21 @@
 
 namespace dromozoa {
   namespace {
+    int impl_result_int(lua_State* L) {
+      luaX_push(L, luaX_nil, 0.25, 42, true, "foo");
+      return 5;
+    }
+
+    void impl_result_void(lua_State* L) {
+      luaX_push(L, luaX_nil, 0.25, 42, true, "foo");
+    }
+
+    void impl_push_none(lua_State*) {}
+
+    void impl_push_nil(lua_State* L) {
+      luaX_push(L, luaX_nil);
+    }
+
     void impl_unexpected(lua_State*) {
       DROMOZOA_UNEXPECTED("error");
     }
@@ -57,6 +72,10 @@ namespace dromozoa {
   void initialize_core(lua_State* L) {
     lua_newtable(L);
     {
+      luaX_set_field(L, -1, "result_int", impl_result_int);
+      luaX_set_field(L, -1, "result_void", impl_result_void);
+      luaX_set_field(L, -1, "push_none", impl_push_none);
+      luaX_set_field(L, -1, "push_nil", impl_push_nil);
       luaX_set_field(L, -1, "unexpected", impl_unexpected);
       luaX_set_field(L, -1, "throw", impl_throw);
       luaX_set_field(L, -1, "field_error1", impl_field_error1);

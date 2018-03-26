@@ -17,7 +17,31 @@
 
 local bind = require "dromozoa.bind"
 
-local verbose = false
+local verbose = true
+
+local function check_result(...)
+  assert(select("#", ...) == 5)
+  local a, b, c, d, e = ...
+  if verbose then
+    print(a, b, c, d, e)
+  end
+  assert(a == nil)
+  assert(b == 0.25)
+  assert(c == 42)
+  assert(d == true)
+  assert(e == "foo")
+end
+
+check_result(bind.core.result_int())
+check_result(bind.core.result_void())
+
+local function check_none_or_nil(n, ...)
+  assert(select("#", ...) == n)
+  assert(... == nil)
+end
+
+check_none_or_nil(0, bind.core.push_none())
+check_none_or_nil(1, bind.core.push_nil())
 
 local function check_error(fn, expect)
   local result, message = pcall(fn)
