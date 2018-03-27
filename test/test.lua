@@ -35,31 +35,6 @@ assert(t[4] == 42)
 assert(t[5] == nil)
 assert(t.s == "foo")
 
-local function test_opt_range(a, b, i, j)
-  assert(a == i)
-  assert(b == j)
-end
-
-test_opt_range(0, 3, bind.opt_range(3))
-test_opt_range(3, 3, bind.opt_range(3, 4))
-test_opt_range(2, 3, bind.opt_range(3, 3))
-test_opt_range(1, 3, bind.opt_range(3, 2))
-test_opt_range(0, 3, bind.opt_range(3, 1))
-test_opt_range(0, 3, bind.opt_range(3, 0))
-test_opt_range(2, 3, bind.opt_range(3, -1))
-test_opt_range(1, 3, bind.opt_range(3, -2))
-test_opt_range(0, 3, bind.opt_range(3, -3))
-test_opt_range(0, 3, bind.opt_range(3, -4))
-test_opt_range(0, 3, bind.opt_range(3, 1, 4))
-test_opt_range(0, 3, bind.opt_range(3, 1, 3))
-test_opt_range(0, 2, bind.opt_range(3, 1, 2))
-test_opt_range(0, 1, bind.opt_range(3, 1, 1))
-test_opt_range(0, 0, bind.opt_range(3, 1, 0))
-test_opt_range(0, 3, bind.opt_range(3, 1, -1))
-test_opt_range(0, 2, bind.opt_range(3, 1, -2))
-test_opt_range(0, 1, bind.opt_range(3, 1, -3))
-test_opt_range(0, 0, bind.opt_range(3, 1, -4))
-
 bind.check_integer(0, 0, 0, 0)
 assert(not pcall(bind.check_integer))
 assert(not pcall(bind.check_integer, 0))
@@ -123,31 +98,3 @@ local a, b = bind.set_metafield()
 assert(getmetatable(a).a == "a")
 assert(getmetatable(a).b == "b")
 assert(b == nil)
-
-local DBL_MAX = 1.7976931348623157e+308
-local DBL_DENORM_MIN = 4.9406564584124654e-324
-local DBL_MIN = 2.2250738585072014e-308
-local DBL_EPSILON = 2.2204460492503131e-16
-
-assert(bind.is_integer(42))
-assert(bind.is_integer(42 / 2))
-assert(not bind.is_integer(1.25))
-assert(bind.is_integer(1.25e6))
-if bind.sizeof_lua_integer == 4 then
-  assert(not bind.is_integer(1.25e12))
-else
-  assert(bind.is_integer(1.25e12))
-  assert(bind.is_integer(1.25e18))
-  assert(not bind.is_integer(1.25e24))
-end
-
-assert(not bind.is_integer(DBL_MAX))
-assert(not bind.is_integer(DBL_DENORM_MIN))
-assert(not bind.is_integer(DBL_MIN))
-assert(not bind.is_integer(DBL_EPSILON))
-assert(not bind.is_integer(math.pi))
-
-assert(bind.is_integer(-1 / math.huge)) -- -0
-assert(not bind.is_integer(math.huge))  -- inf
-assert(not bind.is_integer(-math.huge)) -- -inf
-assert(not bind.is_integer(0 / 0))      -- nan

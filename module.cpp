@@ -38,14 +38,6 @@ namespace dromozoa {
       luaX_set_field(L, -2, "s");
     }
 
-    void impl_opt_range(lua_State* L) {
-      size_t size = luaX_check_integer<size_t>(L, 1);
-      size_t i = luaX_opt_range_i(L, 2, size);
-      size_t j = luaX_opt_range_j(L, 3, size);
-      luaX_push(L, i);
-      luaX_push(L, j);
-    }
-
     void impl_check_integer(lua_State* L) {
       luaX_check_integer<int16_t>(L, 1);
       luaX_check_integer<uint16_t>(L, 2);
@@ -93,19 +85,15 @@ namespace dromozoa {
       luaX_push(L, "b");
       luaX_set_metafield(L, -2, "b");
     }
-
-    void impl_is_integer(lua_State* L) {
-      luaX_push(L, luaX_is_integer(L, 1));
-    }
   }
 
   void initialize_callback(lua_State* L);
   void initialize_core(lua_State* L);
   void initialize_handle(lua_State* L);
+  void initialize_util(lua_State* L);
 
   void initialize(lua_State* L) {
     luaX_set_field(L, -1, "set_field", impl_set_field);
-    luaX_set_field(L, -1, "opt_range", impl_opt_range);
     luaX_set_field(L, -1, "check_integer", impl_check_integer);
     luaX_set_field(L, -1, "opt_integer", impl_opt_integer);
     luaX_set_field(L, -1, "check_enum", impl_check_enum);
@@ -115,16 +103,14 @@ namespace dromozoa {
     luaX_set_field(L, -1, "opt_integer_field", impl_opt_integer_field);
     luaX_set_field(L, -1, "opt_integer_field_range", impl_opt_integer_field_range);
     luaX_set_field(L, -1, "set_metafield", impl_set_metafield);
-    luaX_set_field(L, -1, "is_integer", impl_is_integer);
 
     luaX_set_field<int>(L, -1, "ENUM42", ENUM42);
     luaX_set_field<int>(L, -1, "ENUM69", ENUM69);
 
-    luaX_set_field(L, -1, "sizeof_lua_integer", sizeof(lua_Integer));
-
     initialize_callback(L);
     initialize_core(L);
     initialize_handle(L);
+    initialize_util(L);
   }
 }
 
