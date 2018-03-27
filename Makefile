@@ -15,10 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
-CPPFLAGS = -I$(LUA_INCDIR)
-CXXFLAGS = -Wall -W $(CFLAGS)
-LDFLAGS = -L$(LUA_LIBDIR) $(LIBFLAG)
-LDLIBS = -ldl
+CPPFLAGS += -I$(LUA_INCDIR)
+CXXFLAGS += -Wall -W $(CFLAGS)
+LDFLAGS += -L$(LUA_LIBDIR) $(LIBFLAG)
+LDLIBS += -ldl
 
 OBJS = \
 	callback.o \
