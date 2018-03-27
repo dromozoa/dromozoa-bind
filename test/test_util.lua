@@ -17,7 +17,7 @@
 
 local bind = require "dromozoa.bind"
 
-local verbose = true
+local verbose = os.getenv "VERBOSE" == "1"
 
 --
 -- is_integer

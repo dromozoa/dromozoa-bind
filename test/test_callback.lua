@@ -17,7 +17,7 @@
 
 local bind = require "dromozoa.bind"
 
-local verbose = true
+local verbose = os.getenv "VERBOSE" == "1"
 
 assert(not bind.handle.is_destructed(42))
 bind.callback.set(function (handle)
