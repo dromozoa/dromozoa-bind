@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2018 Tomoyuki Fujimori <moyu@dromozoa.com>
+// Copyright (C) 2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 //
 // This file is part of dromozoa-bind.
 //
@@ -18,21 +18,33 @@
 #include "dromozoa/bind.hpp"
 
 namespace dromozoa {
-  void initialize_callback(lua_State* L);
-  void initialize_core(lua_State* L);
-  void initialize_handle(lua_State* L);
-  void initialize_util(lua_State* L);
+  namespace {
+    luaX_reference<2> ref_;
 
-  void initialize(lua_State* L) {
-    initialize_callback(L);
-    initialize_core(L);
-    initialize_handle(L);
-    initialize_util(L);
+    void impl_set(lua_State* L) {
+      luaX_reference<2>(L, 1, 2).swap(ref_);
+    }
+
+    void impl_run(lua_State* L) {
+      lua_State* state = 0;
+      if (lua_toboolean(L, 1)) {
+        state = L;
+      } else {
+        state = ref_.state();
+      }
+      ref_.get_field(state, 0);
+      ref_.get_field(state, 1);
+      int r = lua_pcall(state, 1, 1, 0);
+      luaX_push(L, r);
+    }
   }
-}
 
-extern "C" int luaopen_dromozoa_bind(lua_State* L) {
-  lua_newtable(L);
-  dromozoa::initialize(L);
-  return 1;
+  void initialize_callback(lua_State* L) {
+    lua_newtable(L);
+    {
+      luaX_set_field(L, -1, "set", impl_set);
+      luaX_set_field(L, -1, "run", impl_run);
+    }
+    luaX_set_field(L, -2, "callback");
+  }
 }

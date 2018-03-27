@@ -17,33 +17,46 @@
 
 local bind = require "dromozoa.bind"
 
-local ma
-local mb
+local verbose = true
 
 assert(not bind.handle.is_destructed(42))
-do
-  local a = bind.handle(42)
-  assert(not bind.handle.is_destructed(42))
-  assert(a:get() == 42)
-  assert(bind.handle.get(a) == 42)
-  ma = getmetatable(a)
-end
+bind.callback.set(function (handle)
+  if verbose then
+    print(handle)
+    print(handle:get())
+    print(coroutine.running())
+  end
+  assert(handle:get() == 42)
+end, bind.handle(42))
 collectgarbage()
 collectgarbage()
+assert(not bind.handle.is_destructed(42))
+
+bind.callback.run(true)
+bind.callback.run(false)
+
+local thread = coroutine.create(function ()
+  bind.callback.set(function (handle)
+    if verbose then
+      print(handle)
+      print(handle:get())
+      print(coroutine.running())
+    end
+    assert(handle:get() == 69)
+  end, bind.handle(69))
+end)
+
+assert(not bind.handle.is_destructed(69))
+assert(coroutine.resume(thread))
+collectgarbage()
+collectgarbage()
+assert(not bind.handle.is_destructed(69))
 assert(bind.handle.is_destructed(42))
 
-assert(not bind.handle.is_destructed(69))
-do
-  local b = bind.handle_ref(69)
-  assert(not bind.handle.is_destructed(69))
-  assert(b:get() == 69)
-  assert(bind.handle.get(b) == 69)
-  mb = getmetatable(b)
-end
-collectgarbage()
-collectgarbage()
-assert(not bind.handle.is_destructed(69))
+bind.callback.run(true)
+bind.callback.run(false)
 
-assert(ma ~= mb)
-assert(ma.__index == bind.handle)
-assert(mb.__index == bind.handle)
+bind.callback.set(nil, nil)
+collectgarbage()
+collectgarbage()
+assert(bind.handle.is_destructed(69))

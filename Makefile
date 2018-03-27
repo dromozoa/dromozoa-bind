@@ -21,9 +21,11 @@ LDFLAGS = -L$(LUA_LIBDIR) $(LIBFLAG)
 LDLIBS = -ldl
 
 OBJS = \
+	callback.o \
 	core.o \
 	module.o \
-	handle.o
+	handle.o \
+	util.o
 TARGET = bind.so
 
 all: $(TARGET)

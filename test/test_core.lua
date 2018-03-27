@@ -19,6 +19,10 @@ local bind = require "dromozoa.bind"
 
 local verbose = true
 
+--
+-- result
+--
+
 local function check_result(...)
   assert(select("#", ...) == 5)
   if verbose then
@@ -40,6 +44,10 @@ local function check_none_or_nil(n, ...)
   assert(... == nil)
 end
 
+--
+-- push
+--
+
 check_none_or_nil(0, bind.core.push_none())
 check_none_or_nil(1, bind.core.push_nil())
 
@@ -60,6 +68,10 @@ check_string(bind.core.push_string())
 assert(bind.core.push_success() == true)
 assert(bind.core.push_success(42) == 42)
 
+--
+-- error
+--
+
 local function check_error(fn, expect)
   local result, message = pcall(fn)
   if verbose then
@@ -76,3 +88,19 @@ check_error(bind.core.throw, "exception caught: runtime_error")
 check_error(bind.core.field_error1, "field nil not an integer")
 check_error(bind.core.field_error2, "field userdata:")
 check_error(bind.core.field_error3, [[field "\1\2\3\4\5\6\a\b\t\n\v\f\r\14\15\16]])
+
+--
+-- field
+--
+
+local t = bind.core.set_field(16)
+assert(#t == 16)
+for i = 1, 16 do
+  assert(t[i] == i)
+end
+assert(t.foo == "bar")
+assert(t.baz == "qux")
+
+local t = bind.core.set_metafield()
+assert(getmetatable(t)["dromozoa.bind.a"] == 42)
+assert(getmetatable(t)["dromozoa.bind.b"] == "あいうえお")

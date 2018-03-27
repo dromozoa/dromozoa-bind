@@ -84,6 +84,24 @@ namespace dromozoa {
       }
       luaX_field_error(L, b, "not an integer");
     }
+
+    void impl_set_field(lua_State* L) {
+      int n = luaX_check_integer<int>(L, 1);
+      lua_newtable(L);
+      for (int i = 1; i <= n; ++i) {
+        luaX_set_field(L, -1, i, i);
+      }
+      luaX_set_field(L, -1, "foo", "bar");
+      luaX_push(L, "qux");
+      luaX_set_field(L, -2, "baz");
+    }
+
+    void impl_set_metafield(lua_State* L) {
+      lua_newtable(L);
+      luaX_set_metafield(L, -1, "dromozoa.bind.a", 42);
+      luaX_push(L, "あいうえお");
+      luaX_set_metafield(L, -2, "dromozoa.bind.b");
+    }
   }
 
   void initialize_core(lua_State* L) {
@@ -101,6 +119,8 @@ namespace dromozoa {
       luaX_set_field(L, -1, "field_error1", impl_field_error1);
       luaX_set_field(L, -1, "field_error2", impl_field_error2);
       luaX_set_field(L, -1, "field_error3", impl_field_error3);
+      luaX_set_field(L, -1, "set_field", impl_set_field);
+      luaX_set_field(L, -1, "set_metafield", impl_set_metafield);
     }
     luaX_set_field(L, -2, "core");
   }
