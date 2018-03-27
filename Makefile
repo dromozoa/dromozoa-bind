@@ -21,6 +21,7 @@ LDFLAGS = -L$(LUA_LIBDIR) $(LIBFLAG)
 LDLIBS = -ldl
 
 OBJS = \
+	callback.o \
 	core.o \
 	module.o \
 	handle.o

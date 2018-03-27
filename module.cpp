@@ -232,6 +232,7 @@ namespace dromozoa {
     }
   }
 
+  void initialize_callback(lua_State* L);
   void initialize_core(lua_State* L);
   void initialize_handle(lua_State* L);
 
@@ -274,6 +275,7 @@ namespace dromozoa {
 
     luaX_set_field(L, -1, "sizeof_lua_integer", sizeof(lua_Integer));
 
+    initialize_callback(L);
     initialize_core(L);
     initialize_handle(L);
   }
