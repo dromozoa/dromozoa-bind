@@ -15,37 +15,39 @@
 // You should have received a copy of the GNU General Public License
 // along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <set>
+
 #include "dromozoa/bind.hpp"
 
 namespace dromozoa {
   namespace {
-    int count = 0;
+    std::set<int> set_;
 
     class handle {
     public:
-      handle(int value) : value_(value) {}
+      handle(int key) : key_(key) {}
 
       ~handle() {
-        ++count;
+        set_.insert(key_);
       }
 
       int get() {
-        return value_;
+        return key_;
       }
 
     private:
-      int value_;
+      int key_;
       handle(const handle&);
       handle& operator=(const handle&);
     };
 
-    void new_handle_ref(lua_State* L, int value) {
-      luaX_new<handle>(L, value);
+    void new_handle_ref(lua_State* L, int key) {
+      luaX_new<handle>(L, key);
       luaX_set_metatable(L, "dromozoa.bind.handle_ref");
     }
 
-    void new_handle(lua_State* L, int value) {
-      luaX_new<handle>(L, value);
+    void new_handle(lua_State* L, int key) {
+      luaX_new<handle>(L, key);
       luaX_set_metatable(L, "dromozoa.bind.handle");
     }
 
@@ -54,8 +56,8 @@ namespace dromozoa {
     }
 
     void impl_call(lua_State* L) {
-      int value = luaX_check_integer<int>(L, 2);
-      new_handle(L, value);
+      int key = luaX_check_integer<int>(L, 2);
+      new_handle(L, key);
     }
 
     void impl_gc(lua_State* L) {
@@ -66,13 +68,14 @@ namespace dromozoa {
       luaX_push(L, check_handle(L, 1)->get());
     }
 
-    void impl_get_count(lua_State* L) {
-      luaX_push(L, count);
+    void impl_is_destructed(lua_State* L) {
+      int key = luaX_check_integer<int>(L, 1);
+      luaX_push(L, set_.find(key) != set_.end());
     }
 
     void impl_handle_ref(lua_State* L) {
-      int value = luaX_check_integer<int>(L, 1);
-      new_handle_ref(L, value);
+      int key = luaX_check_integer<int>(L, 1);
+      new_handle_ref(L, key);
     }
   }
 
@@ -92,7 +95,7 @@ namespace dromozoa {
 
       luaX_set_metafield(L, -1, "__call", impl_call);
       luaX_set_field(L, -1, "get", impl_get);
-      luaX_set_field(L, -1, "get_count", impl_get_count);
+      luaX_set_field(L, -1, "is_destructed", impl_is_destructed);
     }
     luaX_set_field(L, -2, "handle");
 

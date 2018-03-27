@@ -20,29 +20,29 @@ local bind = require "dromozoa.bind"
 local ma
 local mb
 
-assert(bind.handle.get_count() == 0)
+assert(not bind.handle.is_destructed(42))
 do
   local a = bind.handle(42)
-  assert(bind.handle.get_count() == 0)
+  assert(not bind.handle.is_destructed(42))
   assert(a:get() == 42)
   assert(bind.handle.get(a) == 42)
   ma = getmetatable(a)
 end
 collectgarbage()
 collectgarbage()
-assert(bind.handle.get_count() == 1)
+assert(bind.handle.is_destructed(42))
 
-assert(bind.handle.get_count() == 1)
+assert(not bind.handle.is_destructed(69))
 do
-  local b = bind.handle_ref(42)
-  assert(bind.handle.get_count() == 1)
-  assert(b:get() == 42)
-  assert(bind.handle.get(b) == 42)
+  local b = bind.handle_ref(69)
+  assert(not bind.handle.is_destructed(69))
+  assert(b:get() == 69)
+  assert(bind.handle.get(b) == 69)
   mb = getmetatable(b)
 end
 collectgarbage()
 collectgarbage()
-assert(bind.handle.get_count() == 1)
+assert(not bind.handle.is_destructed(69))
 
 assert(ma ~= mb)
 assert(ma.__index == bind.handle)
