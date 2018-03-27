@@ -57,17 +57,19 @@ assert(not bind.util.is_integer(0 / 0))      -- nan
 
 local function check_integer(fn, source, expect)
   local status, result = pcall(fn, source)
+  if verbose then
+    print(result)
+  end
   if status then
-    assert(not expect)
-    assert(result == tonumber(source))
+    if not expect then
+      assert(result == source)
+    else
+      assert(type(expect) == "number")
+      assert(result == expect)
+    end
   else
-    if verbose then
-      print(result)
-    end
-    assert(expect)
-    if type(expect) == "string" then
-      assert(result:find(expect, 1, true))
-    end
+    assert(type(expect) == "string")
+    assert(result:find(expect, 1, true))
   end
 end
 
@@ -76,22 +78,44 @@ check_integer(bind.util.check_int16, -32768)
 check_integer(bind.util.check_int16, 0)
 check_integer(bind.util.check_int16, 32767)
 check_integer(bind.util.check_int16, 32768, "out of bounds")
-check_integer(bind.util.check_int16, 0.25, true)
-check_integer(bind.util.check_int16, "42")
+check_integer(bind.util.check_int16, "69", 69)
+check_integer(bind.util.check_int16, nil, "number expected, got nil")
 
 check_integer(bind.util.check_uint16, -1, "out of bounds")
 check_integer(bind.util.check_uint16, 0)
 check_integer(bind.util.check_uint16, 65535)
 check_integer(bind.util.check_uint16, 65536, "out of bounds")
-check_integer(bind.util.check_uint16, 0.25, true)
-check_integer(bind.util.check_uint16, "42")
+check_integer(bind.util.check_uint16, "69", 69)
+check_integer(bind.util.check_uint16, nil, "number expected, got nil")
 
 check_integer(bind.util.check_int_range, -1, "out of bounds")
 check_integer(bind.util.check_int_range, 0)
 check_integer(bind.util.check_int_range, 255)
 check_integer(bind.util.check_int_range, 256, "out of bounds")
-check_integer(bind.util.check_int_range, 0.25, true)
-check_integer(bind.util.check_int_range, "42")
+check_integer(bind.util.check_int_range, "69", 69)
+check_integer(bind.util.check_int_range, nil, "number expected, got nil")
+
+check_integer(bind.util.opt_int16, -32769, "out of bounds")
+check_integer(bind.util.opt_int16, -32768)
+check_integer(bind.util.opt_int16, 0)
+check_integer(bind.util.opt_int16, 32767)
+check_integer(bind.util.opt_int16, 32768, "out of bounds")
+check_integer(bind.util.opt_int16, "69", 69)
+check_integer(bind.util.opt_int16, nil, 42)
+
+check_integer(bind.util.opt_uint16, -1, "out of bounds")
+check_integer(bind.util.opt_uint16, 0)
+check_integer(bind.util.opt_uint16, 65535)
+check_integer(bind.util.opt_uint16, 65536, "out of bounds")
+check_integer(bind.util.opt_uint16, "69", 69)
+check_integer(bind.util.opt_uint16, nil, 42)
+
+check_integer(bind.util.opt_int_range, -1, "out of bounds")
+check_integer(bind.util.opt_int_range, 0)
+check_integer(bind.util.opt_int_range, 255)
+check_integer(bind.util.opt_int_range, 256, "out of bounds")
+check_integer(bind.util.opt_int_range, "69", 69)
+check_integer(bind.util.opt_int_range, nil, 42)
 
 --
 -- opt_range

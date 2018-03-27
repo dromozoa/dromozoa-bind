@@ -38,20 +38,6 @@ namespace dromozoa {
       luaX_set_field(L, -2, "s");
     }
 
-    void impl_check_integer(lua_State* L) {
-      luaX_check_integer<int16_t>(L, 1);
-      luaX_check_integer<uint16_t>(L, 2);
-      luaX_check_integer<size_t>(L, 3);
-      luaX_check_integer<int>(L, 4, 0, 255);
-    }
-
-    void impl_opt_integer(lua_State* L) {
-      luaX_opt_integer<int16_t>(L, 1, 0);
-      luaX_opt_integer<uint16_t>(L, 2, 0);
-      luaX_opt_integer<size_t>(L, 3, 0);
-      luaX_opt_integer<int>(L, 4, 0, 0, 255);
-    }
-
     void impl_check_enum(lua_State* L) {
       luaX_check_enum<enum_t>(L, 1);
     }
@@ -94,8 +80,6 @@ namespace dromozoa {
 
   void initialize(lua_State* L) {
     luaX_set_field(L, -1, "set_field", impl_set_field);
-    luaX_set_field(L, -1, "check_integer", impl_check_integer);
-    luaX_set_field(L, -1, "opt_integer", impl_opt_integer);
     luaX_set_field(L, -1, "check_enum", impl_check_enum);
     luaX_set_field(L, -1, "opt_enum", impl_opt_enum);
     luaX_set_field(L, -1, "check_integer_field", impl_check_integer_field);
