@@ -18,7 +18,8 @@
 #ifndef DROMOZOA_BIND_UNEXPECTED_HPP
 #define DROMOZOA_BIND_UNEXPECTED_HPP
 
-#include <iostream>
+#include <stdio.h>
+
 #include <string>
 
 namespace dromozoa {
@@ -28,17 +29,18 @@ namespace dromozoa {
     inline void unexpected_noop(const char*, const char*, int, const char*) {}
 
     inline void unexpected_cerr(const char* what, const char* file, int line, const char* function) {
-      std::cerr << "unexpected";
+      fprintf(stderr, "unexpected");
       if (what) {
-        std::cerr << ": " << what;
+        fprintf(stderr, ": %s", what);
       }
       if (file) {
-        std::cerr << " at " << file << ":" << line;
+        fprintf(stderr, " at %s:%d", file, line);
       }
       if (function) {
-        std::cerr << " in " << function;
+        fprintf(stderr, " in %s", function);
       }
-      std::cerr << std::endl;
+      fprintf(stderr, "\n");
+      fflush(stderr);
     }
 
     inline unexpected_handler access_unexpected(bool set, unexpected_handler new_handler) {
