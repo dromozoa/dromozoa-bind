@@ -31,7 +31,6 @@ extern "C" {
 #include <limits>
 #include <new>
 #include <sstream>
-#include <stdexcept>
 #include <string>
 #include <utility>
 
