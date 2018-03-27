@@ -151,13 +151,3 @@ assert(bind.is_integer(-1 / math.huge)) -- -0
 assert(not bind.is_integer(math.huge))  -- inf
 assert(not bind.is_integer(-math.huge)) -- -inf
 assert(not bind.is_integer(0 / 0))      -- nan
-
-assert(bind():get() == 0)
-assert(bind():set(42):get() == 42)
-assert(bind(42):get() == 42)
-assert(bind(42):to() == nil)
-assert(bind(42):to("foo", "bar", "baz", "qux") == nil)
-assert(bind(42):to("dromozoa.bind.int", "bar", "baz", "qux") == 42)
-assert(bind(42):to("foo", "dromozoa.bind.int", "baz", "qux") == 42)
-assert(bind(42):to("foo", "bar", "dromozoa.bind.int", "qux") == 42)
-assert(bind(42):to("foo", "bar", "baz", "dromozoa.bind.int") == 42)

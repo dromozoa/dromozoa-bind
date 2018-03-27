@@ -97,37 +97,6 @@ namespace dromozoa {
     void impl_is_integer(lua_State* L) {
       luaX_push(L, luaX_is_integer(L, 1));
     }
-
-    void impl_new(lua_State* L) {
-      if (lua_isnoneornil(L, 2)) {
-        luaX_new<int>(L);
-      } else {
-        luaX_new<int>(L, luaX_check_integer<int>(L, 2));
-      }
-      luaX_set_metatable(L, "dromozoa.bind.int");
-    }
-
-    void impl_set(lua_State* L) {
-      *luaX_check_udata<int>(L, 1, "dromozoa.bind.int") = luaX_check_integer<int>(L, 2);
-      luaX_push_success(L);
-    }
-
-    void impl_get(lua_State* L) {
-      luaX_push(L, *luaX_check_udata<int>(L, 1, "dromozoa.bind.int"));
-    }
-
-    void impl_to(lua_State* L) {
-      int* data = luaX_to_udata<int>(L, 1,
-          luaL_optstring(L, 2, "dromozoa.bind.none"),
-          luaL_optstring(L, 3, "dromozoa.bind.none"),
-          luaL_optstring(L, 4, "dromozoa.bind.none"),
-          luaL_optstring(L, 5, "dromozoa.bind.none"));
-      if (data) {
-        luaX_push(L, *data);
-      } else {
-        luaX_push(L, luaX_nil);
-      }
-    }
   }
 
   void initialize_callback(lua_State* L);
@@ -150,16 +119,6 @@ namespace dromozoa {
 
     luaX_set_field<int>(L, -1, "ENUM42", ENUM42);
     luaX_set_field<int>(L, -1, "ENUM69", ENUM69);
-
-    luaX_set_metafield(L, -1, "__call", impl_new);
-
-    luaL_newmetatable(L, "dromozoa.bind.int");
-    lua_newtable(L);
-    luaX_set_field(L, -1, "set", impl_set);
-    luaX_set_field(L, -1, "get", impl_get);
-    luaX_set_field(L, -1, "to", impl_to);
-    luaX_set_field(L, -2, "__index");
-    lua_pop(L, 1);
 
     luaX_set_field(L, -1, "sizeof_lua_integer", sizeof(lua_Integer));
 
