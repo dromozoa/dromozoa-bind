@@ -52,30 +52,72 @@ assert(not bind.util.is_integer(-math.huge)) -- -inf
 assert(not bind.util.is_integer(0 / 0))      -- nan
 
 --
+-- check_integer
+--
+
+local function check_integer(fn, source, expect)
+  local status, result = pcall(fn, source)
+  if status then
+    assert(not expect)
+    assert(result == tonumber(source))
+  else
+    if verbose then
+      print(result)
+    end
+    assert(expect)
+    if type(expect) == "string" then
+      assert(result:find(expect, 1, true))
+    end
+  end
+end
+
+check_integer(bind.util.check_int16, -32769, "out of bounds")
+check_integer(bind.util.check_int16, -32768)
+check_integer(bind.util.check_int16, 0)
+check_integer(bind.util.check_int16, 32767)
+check_integer(bind.util.check_int16, 32768, "out of bounds")
+check_integer(bind.util.check_int16, 0.25, true)
+check_integer(bind.util.check_int16, "42")
+
+check_integer(bind.util.check_uint16, -1, "out of bounds")
+check_integer(bind.util.check_uint16, 0)
+check_integer(bind.util.check_uint16, 65535)
+check_integer(bind.util.check_uint16, 65536, "out of bounds")
+check_integer(bind.util.check_uint16, 0.25, true)
+check_integer(bind.util.check_uint16, "42")
+
+check_integer(bind.util.check_int_range, -1, "out of bounds")
+check_integer(bind.util.check_int_range, 0)
+check_integer(bind.util.check_int_range, 255)
+check_integer(bind.util.check_int_range, 256, "out of bounds")
+check_integer(bind.util.check_int_range, 0.25, true)
+check_integer(bind.util.check_int_range, "42")
+
+--
 -- opt_range
 --
 
-local function test_opt_range(a, b, i, j)
+local function check_opt_range(a, b, i, j)
   assert(a == i)
   assert(b == j)
 end
 
-test_opt_range(0, 3, bind.util.opt_range(3))
-test_opt_range(3, 3, bind.util.opt_range(3, 4))
-test_opt_range(2, 3, bind.util.opt_range(3, 3))
-test_opt_range(1, 3, bind.util.opt_range(3, 2))
-test_opt_range(0, 3, bind.util.opt_range(3, 1))
-test_opt_range(0, 3, bind.util.opt_range(3, 0))
-test_opt_range(2, 3, bind.util.opt_range(3, -1))
-test_opt_range(1, 3, bind.util.opt_range(3, -2))
-test_opt_range(0, 3, bind.util.opt_range(3, -3))
-test_opt_range(0, 3, bind.util.opt_range(3, -4))
-test_opt_range(0, 3, bind.util.opt_range(3, 1, 4))
-test_opt_range(0, 3, bind.util.opt_range(3, 1, 3))
-test_opt_range(0, 2, bind.util.opt_range(3, 1, 2))
-test_opt_range(0, 1, bind.util.opt_range(3, 1, 1))
-test_opt_range(0, 0, bind.util.opt_range(3, 1, 0))
-test_opt_range(0, 3, bind.util.opt_range(3, 1, -1))
-test_opt_range(0, 2, bind.util.opt_range(3, 1, -2))
-test_opt_range(0, 1, bind.util.opt_range(3, 1, -3))
-test_opt_range(0, 0, bind.util.opt_range(3, 1, -4))
+check_opt_range(0, 3, bind.util.opt_range(3))
+check_opt_range(3, 3, bind.util.opt_range(3, 4))
+check_opt_range(2, 3, bind.util.opt_range(3, 3))
+check_opt_range(1, 3, bind.util.opt_range(3, 2))
+check_opt_range(0, 3, bind.util.opt_range(3, 1))
+check_opt_range(0, 3, bind.util.opt_range(3, 0))
+check_opt_range(2, 3, bind.util.opt_range(3, -1))
+check_opt_range(1, 3, bind.util.opt_range(3, -2))
+check_opt_range(0, 3, bind.util.opt_range(3, -3))
+check_opt_range(0, 3, bind.util.opt_range(3, -4))
+check_opt_range(0, 3, bind.util.opt_range(3, 1, 4))
+check_opt_range(0, 3, bind.util.opt_range(3, 1, 3))
+check_opt_range(0, 2, bind.util.opt_range(3, 1, 2))
+check_opt_range(0, 1, bind.util.opt_range(3, 1, 1))
+check_opt_range(0, 0, bind.util.opt_range(3, 1, 0))
+check_opt_range(0, 3, bind.util.opt_range(3, 1, -1))
+check_opt_range(0, 2, bind.util.opt_range(3, 1, -2))
+check_opt_range(0, 1, bind.util.opt_range(3, 1, -3))
+check_opt_range(0, 0, bind.util.opt_range(3, 1, -4))

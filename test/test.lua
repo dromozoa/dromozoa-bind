@@ -35,19 +35,6 @@ assert(t[4] == 42)
 assert(t[5] == nil)
 assert(t.s == "foo")
 
-bind.check_integer(0, 0, 0, 0)
-assert(not pcall(bind.check_integer))
-assert(not pcall(bind.check_integer, 0))
-assert(not pcall(bind.check_integer, 0, 0))
-assert(not pcall(bind.check_integer, 0, 0, 0))
-assert(not pcall(bind.check_integer, 32768, 0, 0, 0));
-assert(not pcall(bind.check_integer, -32769, 0, 0, 0));
-assert(not pcall(bind.check_integer, 0, -1, 0, 0));
-assert(not pcall(bind.check_integer, 0, 65536, 0, 0));
-assert(not pcall(bind.check_integer, 0, 0, -1, 0));
-assert(not pcall(bind.check_integer, 0, 0, 0, -1));
-assert(not pcall(bind.check_integer, 0, 0, 0, 256));
-
 bind.opt_integer()
 bind.opt_integer(0)
 bind.opt_integer(0, 0)
