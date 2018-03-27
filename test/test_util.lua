@@ -52,7 +52,7 @@ assert(not bind.util.is_integer(-math.huge)) -- -inf
 assert(not bind.util.is_integer(0 / 0))      -- nan
 
 --
--- check_integer
+-- check_integer / opt_integer
 --
 
 local function check_integer(fn, source, expect)
@@ -116,6 +116,18 @@ check_integer(bind.util.opt_int_range, 255)
 check_integer(bind.util.opt_int_range, 256, "out of bounds")
 check_integer(bind.util.opt_int_range, "69", 69)
 check_integer(bind.util.opt_int_range, nil, 42)
+
+check_integer(bind.util.check_int_field, {}, "not an integer")
+check_integer(bind.util.check_int_field, { nice = 0 }, 0)
+check_integer(bind.util.check_int_field, { nice = 19 }, 19)
+check_integer(bind.util.check_int_field, { nice = 20 }, "out of bounds")
+check_integer(bind.util.check_int_field, { nice = "foo" }, "not an integer")
+
+check_integer(bind.util.opt_int32_field, {}, 0)
+check_integer(bind.util.opt_int32_field, { tv_nsec = -1 }, "out of bounds")
+check_integer(bind.util.opt_int32_field, { tv_nsec = 42 }, 42)
+check_integer(bind.util.opt_int32_field, { tv_nsec = 1000000000}, "out of bounds")
+check_integer(bind.util.opt_int32_field, { tv_nsec = "foo" }, "not an integer")
 
 --
 -- opt_range

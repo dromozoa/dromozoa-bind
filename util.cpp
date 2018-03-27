@@ -55,12 +55,21 @@ namespace dromozoa {
       luaX_push(L, v);
     }
 
+    void impl_check_int_field(lua_State* L) {
+      int v = luaX_check_integer_field<int>(L, 1, "nice", -20, 19);
+      luaX_push(L, v);
+    }
+
+    void impl_opt_int32_field(lua_State* L) {
+      int v = luaX_opt_integer_field<int32_t>(L, 1, "tv_nsec", 0, 0, 999999999);
+      luaX_push(L, v);
+    }
+
     void impl_opt_range(lua_State* L) {
       size_t size = luaX_check_integer<size_t>(L, 1);
       size_t i = luaX_opt_range_i(L, 2, size);
       size_t j = luaX_opt_range_j(L, 3, size);
-      luaX_push(L, i);
-      luaX_push(L, j);
+      luaX_push(L, i, j);
     }
   }
 
@@ -74,6 +83,8 @@ namespace dromozoa {
       luaX_set_field(L, -1, "opt_int16", impl_opt_int16);
       luaX_set_field(L, -1, "opt_uint16", impl_opt_uint16);
       luaX_set_field(L, -1, "opt_int_range", impl_opt_int_range);
+      luaX_set_field(L, -1, "check_int_field", impl_check_int_field);
+      luaX_set_field(L, -1, "opt_int32_field", impl_opt_int32_field);
       luaX_set_field(L, -1, "opt_range", impl_opt_range);
 
       luaX_set_field(L, -1, "sizeof_integer", sizeof(lua_Integer));

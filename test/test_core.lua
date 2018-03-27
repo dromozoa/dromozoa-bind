@@ -88,3 +88,19 @@ check_error(bind.core.throw, "exception caught: runtime_error")
 check_error(bind.core.field_error1, "field nil not an integer")
 check_error(bind.core.field_error2, "field userdata:")
 check_error(bind.core.field_error3, [[field "\1\2\3\4\5\6\a\b\t\n\v\f\r\14\15\16]])
+
+--
+-- field
+--
+
+local t = bind.core.set_field(16)
+assert(#t == 16)
+for i = 1, 16 do
+  assert(t[i] == i)
+end
+assert(t.foo == "bar")
+assert(t.baz == "qux")
+
+local t = bind.core.set_metafield()
+assert(getmetatable(t)["dromozoa.bind.a"] == 42)
+assert(getmetatable(t)["dromozoa.bind.b"] == "あいうえお")
