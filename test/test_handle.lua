@@ -1,4 +1,4 @@
--- Copyright (C) 2016 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-bind.
 --
@@ -17,22 +17,33 @@
 
 local bind = require "dromozoa.bind"
 
-assert(bind.chain_gc_count() == 0)
+local ma
+local mb
 
+assert(not bind.handle.is_destructed(42))
 do
-  local a = bind.chain_new_a(42)
-  assert(getmetatable(a))
+  local a = bind.handle(42)
+  assert(not bind.handle.is_destructed(42))
   assert(a:get() == 42)
+  assert(bind.handle.get(a) == 42)
+  ma = getmetatable(a)
 end
 collectgarbage()
 collectgarbage()
-assert(bind.chain_gc_count() == 1)
+assert(bind.handle.is_destructed(42))
 
+assert(not bind.handle.is_destructed(69))
 do
-  local b = bind.chain_new_b(42)
-  assert(getmetatable(b))
-  assert(b:get() == 42)
+  local b = bind.handle_ref(69)
+  assert(not bind.handle.is_destructed(69))
+  assert(b:get() == 69)
+  assert(bind.handle.get(b) == 69)
+  mb = getmetatable(b)
 end
 collectgarbage()
 collectgarbage()
-assert(bind.chain_gc_count() == 2)
+assert(not bind.handle.is_destructed(69))
+
+assert(ma ~= mb)
+assert(ma.__index == bind.handle)
+assert(mb.__index == bind.handle)

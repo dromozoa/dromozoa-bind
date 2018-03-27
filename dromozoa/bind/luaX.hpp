@@ -30,7 +30,7 @@ extern "C" {
 #include <exception>
 #include <limits>
 #include <new>
-#include <stdexcept>
+#include <sstream>
 #include <string>
 #include <utility>
 
@@ -472,11 +472,12 @@ namespace dromozoa {
 
     template <class T, class T_key>
     inline int luaX_field_error(lua_State* L, const T_key& key, const T& what) {
+      luaL_where(L, 1);
       luaX_push(L, "field ");
       luaX_type_traits<T_key>::quote(L, key);
       luaX_push(L, " ");
       luaX_push(L, what);
-      lua_concat(L, 4);
+      lua_concat(L, 5);
       return lua_error(L);
     }
 
@@ -742,19 +743,33 @@ namespace dromozoa {
       }
 
       static void quote(lua_State* L, const std::string& value) {
-        if (value.find_first_of("\"\\\n") == std::string::npos) {
-          luaX_push(L, "\"");
-          luaX_push(L, value);
-          luaX_push(L, "\"");
-          lua_concat(L, 3);
-        } else {
-          lua_getglobal(L, "string");
-          luaX_get_field(L, -1, "format");
-          luaX_push(L, "%q");
-          luaX_push(L, value);
-          lua_call(L, 2, 1);
-          lua_remove(L, lua_gettop(L) - 1);
+        std::ostringstream out;
+        out << "\"";
+        std::string::const_iterator i = value.begin();
+        std::string::const_iterator end = value.end();
+        for (; i != end; ++i) {
+          std::string::value_type c = *i;
+          switch (c) {
+            case '\a': out << "\\a"; break;
+            case '\b': out << "\\b"; break;
+            case '\f': out << "\\f"; break;
+            case '\n': out << "\\n"; break;
+            case '\r': out << "\\r"; break;
+            case '\t': out << "\\t"; break;
+            case '\v': out << "\\v"; break;
+            case '\\': out << "\\\\"; break;
+            case '\"': out << "\\\""; break;
+            case '\'': out << "\\'"; break;
+            default:
+              if ((0x00 <= c && c < 0x20) || c == 0x7F) {
+                out << "\\" << static_cast<int>(c);
+              } else {
+                out << c;
+              }
+          }
         }
+        out << "\"";
+        luaX_push(L, out.str());
       }
     };
 
@@ -774,8 +789,12 @@ namespace dromozoa {
         try {
           return call(L, reinterpret_cast<T>(lua_touserdata(L, lua_upvalueindex(1))));
         } catch (const std::exception& e) {
-          return luaL_error(L, "exception caught: %s", e.what());
+          luaL_where(L, 1);
+          luaX_push(L, "exception caught: ");
+          luaX_push(L, e.what());
+          lua_concat(L, 3);
         }
+        return lua_error(L);
       }
 
       static void push(lua_State* L, const T& value) {
@@ -839,18 +858,31 @@ namespace dromozoa {
     class luaX_binder_impl : public luaX_binder {
     public:
       virtual ~luaX_binder_impl() {
-        if (state_) {
-          luaL_unref(state_, LUA_REGISTRYINDEX, reference_);
+        if (lua_State* L = state()) {
+          luaL_unref(L, LUA_REGISTRYINDEX, reference_);
         }
       }
 
       virtual lua_State* state() const {
-        return state_;
+        if (status() == 2) {
+          return 0;
+        } else {
+          return state_;
+        }
       }
 
     protected:
       explicit luaX_binder_impl(lua_State* L) : state_(), reference_(LUA_NOREF) {
         if (L) {
+          if (status() == 0) {
+            set_status(1);
+            luaL_newmetatable(L, "dromozoa.bind.binder_impl");
+            luaX_set_field(L, -1, "__gc", close);
+            lua_pop(L, 1);
+            luaX_new<int>(L, 0);
+            luaX_set_metatable(L, "dromozoa.bind.binder_impl");
+            luaL_ref(L, LUA_REGISTRYINDEX);
+          }
           state_ = lua_newthread(L);
           reference_ = luaL_ref(L, LUA_REGISTRYINDEX);
         }
@@ -864,6 +896,28 @@ namespace dromozoa {
     private:
       lua_State* state_;
       int reference_;
+
+      static int access_status(bool set, int new_status) {
+        static int status = 0;
+        if (set) {
+          status = new_status;
+          return 0;
+        } else {
+          return status;
+        }
+      }
+
+      static void set_status(int new_status) {
+        access_status(true, new_status);
+      }
+
+      static int status() {
+        return access_status(false, 0);
+      }
+
+      static void close(lua_State*) {
+        set_status(2);
+      }
     };
 
     template <size_t T>
@@ -874,19 +928,6 @@ namespace dromozoa {
           for (size_t i = 0; i < T; ++i) {
             luaL_unref(L, LUA_REGISTRYINDEX, references_[i]);
           }
-        }
-      }
-
-      int get_field(size_t i = 0) const {
-        if (lua_State* L = state()) {
-          if (i < T) {
-            return luaX_get_field(L, LUA_REGISTRYINDEX, references_[i]);
-          } else {
-            luaX_push(L, luaX_nil);
-            return LUA_TNIL;
-          }
-        } else {
-          throw std::logic_error("invalid state");
         }
       }
 
@@ -923,7 +964,7 @@ namespace dromozoa {
     };
 
     template <size_t T = 1>
-    class luaX_reference;
+    class luaX_reference {};
 
     template <>
     class luaX_reference<1> : public luaX_reference_impl<1> {
