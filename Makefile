@@ -33,6 +33,9 @@ all: $(TARGET)
 clean:
 	rm -f *.o $(TARGET)
 
+check:
+	./test.sh
+
 bind.so: $(OBJS)
 	$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
