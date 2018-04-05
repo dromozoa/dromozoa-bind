@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <sstream>
+#include <string>
 #include <stdexcept>
 
 #include "dromozoa/bind.hpp"

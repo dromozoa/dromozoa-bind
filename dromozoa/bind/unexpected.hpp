@@ -29,17 +29,16 @@ namespace dromozoa {
     inline void unexpected_noop(const char*, const char*, int, const char*) {}
 
     inline void unexpected_cerr(const char* what, const char* file, int line, const char* function) {
-      fprintf(stderr, "unexpected");
-      if (what) {
-        fprintf(stderr, ": %s", what);
+      if (!what) {
+        what = "(null)";
       }
-      if (file) {
-        fprintf(stderr, " at %s:%d", file, line);
+      if (!file) {
+        file = "(null)";
       }
-      if (function) {
-        fprintf(stderr, " in %s", function);
+      if (!function) {
+        function = "(null)";
       }
-      fprintf(stderr, "\n");
+      fprintf(stderr, "unexpected: %s at %s:%d in %s\n", what, file, line, function);
       fflush(stderr);
     }
 

@@ -17,15 +17,10 @@
 # You should have received a copy of the GNU General Public License
 # along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
-case x$1 in
-  x) lua=lua;;
-  *) lua=$1;;
-esac
-
-LUA_PATH="?.lua;;"
-export LUA_PATH
-
 for i in test/test*.lua
 do
-  "$lua" "$i"
+  case X$# in
+    X0) lua "$i";;
+    *) "$@" "$i";;
+  esac
 done
