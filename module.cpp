@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <iostream>
+
 #include "dromozoa/bind.hpp"
 
 namespace dromozoa {
@@ -24,6 +26,9 @@ namespace dromozoa {
   void initialize_util(lua_State* L);
 
   void initialize(lua_State* L) {
+    static int count = 0;
+    luaX_set_field(L, -1, "count", ++count);
+
     initialize_callback(L);
     initialize_core(L);
     initialize_handle(L);

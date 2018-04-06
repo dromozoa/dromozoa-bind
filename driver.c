@@ -73,7 +73,6 @@ int main(int argc, char* argv[]) {
   run(L2);
 
   run(L1);
-  run(L2);
   lua_close(L1);
 
   run(L2);

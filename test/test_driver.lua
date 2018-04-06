@@ -15,8 +15,12 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
-print "initialized"
+local bind = require "dromozoa.bind"
 
+print("driver start", bind.count)
+
+local count = 0
 return function ()
-  print "called"
+  count = count + 1
+  print("driver hook", bind.count, count)
 end
