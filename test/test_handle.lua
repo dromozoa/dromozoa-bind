@@ -20,6 +20,8 @@ local bind = require "dromozoa.bind"
 local ma
 local mb
 
+bind.handle.clear_destructed()
+
 assert(not bind.handle.is_destructed(42))
 do
   local a = bind.handle(42)
