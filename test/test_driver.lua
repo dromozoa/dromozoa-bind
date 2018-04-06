@@ -15,37 +15,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
-local bind = require "dromozoa.bind"
+print "initialized"
 
-local ma
-local mb
-
-bind.handle.clear_destructed()
-
-assert(not bind.handle.is_destructed(42))
-do
-  local a = bind.handle(42)
-  assert(not bind.handle.is_destructed(42))
-  assert(a:get() == 42)
-  assert(bind.handle.get(a) == 42)
-  ma = getmetatable(a)
+return function ()
+  print "called"
 end
-collectgarbage()
-collectgarbage()
-assert(bind.handle.is_destructed(42))
-
-assert(not bind.handle.is_destructed(69))
-do
-  local b = bind.handle_ref(69)
-  assert(not bind.handle.is_destructed(69))
-  assert(b:get() == 69)
-  assert(bind.handle.get(b) == 69)
-  mb = getmetatable(b)
-end
-collectgarbage()
-collectgarbage()
-assert(not bind.handle.is_destructed(69))
-
-assert(ma ~= mb)
-assert(ma.__index == bind.handle)
-assert(mb.__index == bind.handle)

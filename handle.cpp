@@ -21,14 +21,14 @@
 
 namespace dromozoa {
   namespace {
-    std::set<int> set_;
+    std::set<int> destructed_;
 
     class handle {
     public:
       handle(int key) : key_(key) {}
 
       ~handle() {
-        set_.insert(key_);
+        destructed_.insert(key_);
       }
 
       int get() {
@@ -68,9 +68,13 @@ namespace dromozoa {
       luaX_push(L, check_handle(L, 1)->get());
     }
 
+    void impl_clear_destructed(lua_State*) {
+      destructed_.clear();
+    }
+
     void impl_is_destructed(lua_State* L) {
       int key = luaX_check_integer<int>(L, 1);
-      luaX_push(L, set_.find(key) != set_.end());
+      luaX_push(L, destructed_.find(key) != destructed_.end());
     }
 
     void impl_handle_ref(lua_State* L) {
@@ -95,6 +99,7 @@ namespace dromozoa {
 
       luaX_set_metafield(L, -1, "__call", impl_call);
       luaX_set_field(L, -1, "get", impl_get);
+      luaX_set_field(L, -1, "clear_destructed", impl_clear_destructed);
       luaX_set_field(L, -1, "is_destructed", impl_is_destructed);
     }
     luaX_set_field(L, -2, "handle");
