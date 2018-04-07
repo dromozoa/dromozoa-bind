@@ -39,7 +39,7 @@ namespace dromozoa {
 
 extern "C" int luaopen_dromozoa_bind(lua_State* L) {
   if (dromozoa::verbose()) {
-    std::cout << "[CALL] luaopen_dromozoa_bind\n";
+    std::cout << "[VERBOSE] luaopen_dromozoa_bind\n";
   }
   lua_newtable(L);
   dromozoa::initialize(L);

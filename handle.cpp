@@ -29,13 +29,13 @@ namespace dromozoa {
     public:
       explicit handle(int key) : key_(key) {
         if (verbose()) {
-          std::cout << "[CALL] " << this << " handle(" << key << ")\n";
+          std::cout << "[VERBOSE] " << this << " handle(" << key << ")\n";
         }
       }
 
       ~handle() {
         if (verbose()) {
-          std::cout << "[CALL] " << this << " ~handle()\n";
+          std::cout << "[VERBOSE] " << this << " ~handle()\n";
         }
         destructed_.insert(key_);
       }
