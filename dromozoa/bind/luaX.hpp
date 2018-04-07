@@ -864,25 +864,12 @@ namespace dromozoa {
       }
 
       virtual lua_State* state() const {
-        if (status() == 2) {
-          return 0;
-        } else {
-          return state_;
-        }
+        return state_;
       }
 
     protected:
       explicit luaX_binder_impl(lua_State* L) : state_(), reference_(LUA_NOREF) {
         if (L) {
-          if (status() == 0) {
-            set_status(1);
-            luaL_newmetatable(L, "dromozoa.bind.binder_impl");
-            luaX_set_field(L, -1, "__gc", close);
-            lua_pop(L, 1);
-            luaX_new<int>(L, 0);
-            luaX_set_metatable(L, "dromozoa.bind.binder_impl");
-            luaL_ref(L, LUA_REGISTRYINDEX);
-          }
           state_ = lua_newthread(L);
           reference_ = luaL_ref(L, LUA_REGISTRYINDEX);
         }
@@ -896,28 +883,6 @@ namespace dromozoa {
     private:
       lua_State* state_;
       int reference_;
-
-      static int access_status(bool set, int new_status) {
-        static int status = 0;
-        if (set) {
-          status = new_status;
-          return 0;
-        } else {
-          return status;
-        }
-      }
-
-      static void set_status(int new_status) {
-        access_status(true, new_status);
-      }
-
-      static int status() {
-        return access_status(false, 0);
-      }
-
-      static void close(lua_State*) {
-        set_status(2);
-      }
     };
 
     template <size_t T>
