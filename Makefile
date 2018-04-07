@@ -22,6 +22,7 @@ LDLIBS += -ldl
 
 OBJS = \
 	callback.o \
+	common.o \
 	core.o \
 	module.o \
 	handle.o \

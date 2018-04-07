@@ -15,9 +15,11 @@
 // You should have received a copy of the GNU General Public License
 // along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <iostream>
 #include <set>
 
 #include "dromozoa/bind.hpp"
+#include "common.hpp"
 
 namespace dromozoa {
   namespace {
@@ -25,9 +27,16 @@ namespace dromozoa {
 
     class handle {
     public:
-      handle(int key) : key_(key) {}
+      explicit handle(int key) : key_(key) {
+        if (verbose()) {
+          std::cout << "[VERBOSE] " << this << " handle(" << key << ")\n";
+        }
+      }
 
       ~handle() {
+        if (verbose()) {
+          std::cout << "[VERBOSE] " << this << " ~handle()\n";
+        }
         destructed_.insert(key_);
       }
 

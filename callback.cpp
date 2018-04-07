@@ -16,6 +16,7 @@
 // along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
+#include "common.hpp"
 
 #include "dromozoa/bind.hpp"
 
@@ -23,7 +24,17 @@ namespace dromozoa {
   namespace {
     class callback {
     public:
-      callback(lua_State* L, int index0, int index1) : ref_(L, index0, index1) {}
+      callback(lua_State* L, int index0, int index1) : ref_(L, index0, index1) {
+        if (verbose()) {
+          std::cout << "[VERBOSE] " << this << " callback(" << index0 << ", " << index1 << ")\n";
+        }
+      }
+
+      ~callback() {
+        if (verbose()) {
+          std::cout << "[VERBOSE] " << this << " ~callback()\n";
+        }
+      }
 
       void run(lua_State* L, bool use_current) {
         lua_State* state = 0;
@@ -36,7 +47,9 @@ namespace dromozoa {
         ref_.get_field(state, 1);
         int r = lua_pcall(state, 1, 0, 0);
         if (r != LUA_OK) {
-          std::cerr << lua_tostring(state, -1) << "\n";
+          if (verbose()) {
+            std::cout << "[VERBOSE] lua_pcall error: " << lua_tostring(state, -1) << "\n";
+          }
           lua_pop(state, 1);
         }
         luaX_push(L, r);
