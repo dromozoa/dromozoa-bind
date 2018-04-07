@@ -17,10 +17,16 @@
 
 local bind = require "dromozoa.bind"
 
-print("driver start", bind.count)
+local verbose = os.getenv "VERBOSE" == "1"
 
-local count = 0
+local bind_count = bind.handle(bind.count)
+local hook_count = 0
+
+if verbose then
+  print("bind", bind_count, bind_count:get(), hook_count)
+end
+
 return function ()
-  count = count + 1
-  print("driver hook", bind.count, count)
+  hook_count = hook_count + 1
+  print("hook", bind_count, bind_count:get(), hook_count)
 end
