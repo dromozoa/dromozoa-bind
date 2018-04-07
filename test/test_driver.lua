@@ -17,35 +17,22 @@
 
 local bind = require "dromozoa.bind"
 
-local ma
-local mb
+local verbose = os.getenv "VERBOSE" == "1"
 
-bind.handle.clear_destructed()
+local bind_count = bind.handle(bind.count)
+local hook_count = 0
 
-assert(not bind.handle.is_destructed(42))
-do
-  local a = bind.handle(42)
-  assert(not bind.handle.is_destructed(42))
-  assert(a:get() == 42)
-  assert(bind.handle.get(a) == 42)
-  ma = getmetatable(a)
+if verbose then
+  print("bind", bind_count, bind_count:get(), hook_count)
 end
-collectgarbage()
-collectgarbage()
-assert(bind.handle.is_destructed(42))
 
-assert(not bind.handle.is_destructed(69))
-do
-  local b = bind.handle_ref(69)
-  assert(not bind.handle.is_destructed(69))
-  assert(b:get() == 69)
-  assert(bind.handle.get(b) == 69)
-  mb = getmetatable(b)
+bind = nil
+collectgarbage()
+collectgarbage()
+
+return function ()
+  hook_count = hook_count + 1
+  if verbose then
+    print("hook", bind_count, bind_count:get(), hook_count)
+  end
 end
-collectgarbage()
-collectgarbage()
-assert(not bind.handle.is_destructed(69))
-
-assert(ma ~= mb)
-assert(ma.__index == bind.handle)
-assert(mb.__index == bind.handle)

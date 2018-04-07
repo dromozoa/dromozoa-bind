@@ -19,8 +19,10 @@ local bind = require "dromozoa.bind"
 
 local verbose = os.getenv "VERBOSE" == "1"
 
+bind.handle.clear_destructed()
+
 assert(not bind.handle.is_destructed(42))
-bind.callback.set(function (handle)
+local cb = bind.callback(function (handle)
   if verbose then
     print(handle)
     print(handle:get())
@@ -32,11 +34,12 @@ collectgarbage()
 collectgarbage()
 assert(not bind.handle.is_destructed(42))
 
-bind.callback.run(true)
-bind.callback.run(false)
+cb:run(true)
+cb:run(false)
 
+assert(not bind.handle.is_destructed(69))
 local thread = coroutine.create(function ()
-  bind.callback.set(function (handle)
+  cb = bind.callback(function (handle)
     if verbose then
       print(handle)
       print(handle:get())
@@ -45,18 +48,30 @@ local thread = coroutine.create(function ()
     assert(handle:get() == 69)
   end, bind.handle(69))
 end)
+assert(not bind.handle.is_destructed(69))
 
+assert(not bind.handle.is_destructed(42))
 assert(not bind.handle.is_destructed(69))
 assert(coroutine.resume(thread))
+thread = nil
 collectgarbage()
 collectgarbage()
-assert(not bind.handle.is_destructed(69))
 assert(bind.handle.is_destructed(42))
+assert(not bind.handle.is_destructed(69))
 
-bind.callback.run(true)
-bind.callback.run(false)
+cb:run(true)
+cb:run(false)
 
-bind.callback.set(nil, nil)
+assert(not bind.handle.is_destructed(69))
+cb = nil
 collectgarbage()
 collectgarbage()
 assert(bind.handle.is_destructed(69))
+
+assert(not bind.handle.is_destructed(105))
+cb = bind.callback(nil, bind.handle(105))
+assert(not bind.handle.is_destructed(105))
+cb:run(true)
+assert(not bind.handle.is_destructed(105))
+cb:run(false)
+assert(not bind.handle.is_destructed(105))

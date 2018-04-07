@@ -15,20 +15,29 @@
 // You should have received a copy of the GNU General Public License
 // along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <iostream>
 #include <set>
 
 #include "dromozoa/bind.hpp"
+#include "common.hpp"
 
 namespace dromozoa {
   namespace {
-    std::set<int> set_;
+    std::set<int> destructed_;
 
     class handle {
     public:
-      handle(int key) : key_(key) {}
+      explicit handle(int key) : key_(key) {
+        if (verbose()) {
+          std::cout << "[VERBOSE] " << this << " handle(" << key << ")\n";
+        }
+      }
 
       ~handle() {
-        set_.insert(key_);
+        if (verbose()) {
+          std::cout << "[VERBOSE] " << this << " ~handle()\n";
+        }
+        destructed_.insert(key_);
       }
 
       int get() {
@@ -68,9 +77,13 @@ namespace dromozoa {
       luaX_push(L, check_handle(L, 1)->get());
     }
 
+    void impl_clear_destructed(lua_State*) {
+      destructed_.clear();
+    }
+
     void impl_is_destructed(lua_State* L) {
       int key = luaX_check_integer<int>(L, 1);
-      luaX_push(L, set_.find(key) != set_.end());
+      luaX_push(L, destructed_.find(key) != destructed_.end());
     }
 
     void impl_handle_ref(lua_State* L) {
@@ -95,6 +108,7 @@ namespace dromozoa {
 
       luaX_set_metafield(L, -1, "__call", impl_call);
       luaX_set_field(L, -1, "get", impl_get);
+      luaX_set_field(L, -1, "clear_destructed", impl_clear_destructed);
       luaX_set_field(L, -1, "is_destructed", impl_is_destructed);
     }
     luaX_set_field(L, -2, "handle");
