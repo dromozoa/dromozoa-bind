@@ -32,5 +32,7 @@ collectgarbage()
 
 return function ()
   hook_count = hook_count + 1
-  print("hook", bind_count, bind_count:get(), hook_count)
+  if verbose then
+    print("hook", bind_count, bind_count:get(), hook_count)
+  end
 end
