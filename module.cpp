@@ -21,12 +21,25 @@
 #include "common.hpp"
 
 namespace dromozoa {
+  namespace {
+    void impl_gc(lua_State*) {
+      if (verbose()) {
+        std::cout << "[VERBOSE] close dromozoa.bind\n";
+      }
+    }
+  }
+
   void initialize_callback(lua_State* L);
   void initialize_core(lua_State* L);
   void initialize_handle(lua_State* L);
   void initialize_util(lua_State* L);
 
   void initialize(lua_State* L) {
+    luaL_newmetatable(L, "dromozoa.bind");
+    luaX_set_field(L, -1, "__gc", impl_gc);
+    lua_pop(L, 1);
+    luaX_set_metatable(L, "dromozoa.bind");
+
     static int count = 0;
     luaX_set_field(L, -1, "count", ++count);
 
@@ -39,7 +52,7 @@ namespace dromozoa {
 
 extern "C" int luaopen_dromozoa_bind(lua_State* L) {
   if (dromozoa::verbose()) {
-    std::cout << "[VERBOSE] luaopen_dromozoa_bind\n";
+    std::cout << "[VERBOSE] open dromozoa.bind\n";
   }
   lua_newtable(L);
   dromozoa::initialize(L);
