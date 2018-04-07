@@ -26,6 +26,10 @@ if verbose then
   print("bind", bind_count, bind_count:get(), hook_count)
 end
 
+bind = nil
+collectgarbage()
+collectgarbage()
+
 return function ()
   hook_count = hook_count + 1
   print("hook", bind_count, bind_count:get(), hook_count)
