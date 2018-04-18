@@ -46,7 +46,7 @@ namespace dromozoa {
         ref_.get_field(state, 0);
         ref_.get_field(state, 1);
         int r = lua_pcall(state, 1, 0, 0);
-        if (r != LUA_OK) {
+        if (r != 0) {
           if (verbose()) {
             std::cout << "[VERBOSE] lua_pcall error: " << lua_tostring(state, -1) << "\n";
           }
