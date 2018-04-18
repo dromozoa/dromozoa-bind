@@ -34,11 +34,12 @@ void error(lua_State* L) {
 }
 
 void initialize(lua_State* L, const char* filename, int argc, char* argv[]) {
+  int i;
   luaL_openlibs(L);
   lua_pushboolean(L, 1);
   lua_setglobal(L, "dromozoa.bind.driver");
   lua_newtable(L);
-  for (int i = 0; i < argc; ++i) {
+  for (i = 0; i < argc; ++i) {
     lua_pushinteger(L, i - 1);
     lua_pushstring(L, argv[i]);
     lua_settable(L, -3);
@@ -47,7 +48,7 @@ void initialize(lua_State* L, const char* filename, int argc, char* argv[]) {
   if (luaL_loadfile(L, filename) != 0) {
     error(L);
   }
-  for (int i = 2; i < argc; ++i) {
+  for (i = 2; i < argc; ++i) {
     lua_pushstring(L, argv[i]);
   }
   if (lua_pcall(L, argc - 2, 1, 0) != 0) {
