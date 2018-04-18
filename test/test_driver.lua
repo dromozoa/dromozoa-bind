@@ -19,6 +19,13 @@ local bind = require "dromozoa.bind"
 
 local verbose = os.getenv "VERBOSE" == "1"
 
+if verbose then
+  print(select("#", ...))
+  for k, v in pairs(arg) do
+    print(k, v)
+  end
+end
+
 local bind_count = bind.handle(bind.count)
 local hook_count = 0
 
