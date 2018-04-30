@@ -26,6 +26,7 @@ OBJS = \
 	core.o \
 	module.o \
 	handle.o \
+	scoped_ptr.o \
 	util.o
 TARGET = bind.so
 

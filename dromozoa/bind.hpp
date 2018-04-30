@@ -1,4 +1,4 @@
-// Copyright (C) 2016 Tomoyuki Fujimori <moyu@dromozoa.com>
+// Copyright (C) 2016,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 //
 // This file is part of dromozoa-bind.
 //
@@ -19,6 +19,7 @@
 #define DROMOZOA_BIND_HPP
 
 #include "bind/luaX.hpp"
+#include "bind/scoped_ptr.hpp"
 #include "bind/unexpected.hpp"
 
 #endif
