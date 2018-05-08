@@ -976,6 +976,25 @@ namespace dromozoa {
         ref(L, 3, index3);
       }
     };
+
+    class luaX_top_saver {
+    public:
+      explicit luaX_top_saver(lua_State* L) : state_(L), top_(lua_gettop(L)) {}
+
+      ~luaX_top_saver() {
+        lua_settop(state_, top_);
+      }
+
+      int get() const {
+        return top_;
+      }
+
+    private:
+      lua_State* state_;
+      int top_;
+      luaX_top_saver(const luaX_top_saver&);
+      luaX_top_saver& operator=(const luaX_top_saver&);
+    };
   }
 
   using bind::luaX_abs_index;
@@ -1001,6 +1020,7 @@ namespace dromozoa {
   using bind::luaX_set_metafield;
   using bind::luaX_set_metatable;
   using bind::luaX_to_udata;
+  using bind::luaX_top_saver;
 }
 
 #endif

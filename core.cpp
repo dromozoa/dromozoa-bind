@@ -103,6 +103,18 @@ namespace dromozoa {
       luaX_push(L, "あいうえお");
       luaX_set_metafield(L, -2, "dromozoa.bind.b");
     }
+
+    void impl_top_saver(lua_State* L) {
+      int top1 = lua_gettop(L);
+      try {
+        luaX_top_saver save_top(L);
+        luaX_push(L, 42);
+        throw std::runtime_error("runtime_error");
+      } catch (...) {
+        int top2 = lua_gettop(L);
+        luaX_push(L, top2 - top1);
+      }
+    }
   }
 
   void initialize_core(lua_State* L) {
@@ -122,6 +134,7 @@ namespace dromozoa {
       luaX_set_field(L, -1, "field_error3", impl_field_error3);
       luaX_set_field(L, -1, "set_field", impl_set_field);
       luaX_set_field(L, -1, "set_metafield", impl_set_metafield);
+      luaX_set_field(L, -1, "top_saver", impl_top_saver);
     }
     luaX_set_field(L, -2, "core");
   }

@@ -104,3 +104,8 @@ assert(t.baz == "qux")
 local t = bind.core.set_metafield()
 assert(getmetatable(t)["dromozoa.bind.a"] == 42)
 assert(getmetatable(t)["dromozoa.bind.b"] == "あいうえお")
+
+-- top_saver
+
+local result = bind.core.top_saver()
+assert(result == 0)
