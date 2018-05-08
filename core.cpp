@@ -103,6 +103,50 @@ namespace dromozoa {
       luaX_push(L, "あいうえお");
       luaX_set_metafield(L, -2, "dromozoa.bind.b");
     }
+
+    void impl_top_saver(lua_State* L) {
+      int top1 = lua_gettop(L);
+      try {
+        luaX_top_saver save_top(L);
+        luaX_push(L, 42);
+        throw std::runtime_error("runtime_error");
+      } catch (...) {
+        int top2 = lua_gettop(L);
+        luaX_push(L, top2 - top1);
+      }
+    }
+
+    class failure1 : public luaX_failure<> {
+    public:
+      virtual ~failure1() throw() {}
+
+      virtual const char* what() const throw() {
+        return "failure1";
+      }
+    };
+
+    void impl_failure1(lua_State* L) {
+      luaX_push(L, 42);
+      throw failure1();
+    }
+
+    class failure2 : public luaX_failure<int> {
+    public:
+      virtual ~failure2() throw() {}
+
+      virtual const char* what() const throw() {
+        return "failure2";
+      }
+
+      virtual int code() const {
+        return 69;
+      }
+    };
+
+    void impl_failure2(lua_State* L) {
+      luaX_push(L, 42);
+      throw failure2();
+    }
   }
 
   void initialize_core(lua_State* L) {
@@ -122,6 +166,9 @@ namespace dromozoa {
       luaX_set_field(L, -1, "field_error3", impl_field_error3);
       luaX_set_field(L, -1, "set_field", impl_set_field);
       luaX_set_field(L, -1, "set_metafield", impl_set_metafield);
+      luaX_set_field(L, -1, "top_saver", impl_top_saver);
+      luaX_set_field(L, -1, "failure1", impl_failure1);
+      luaX_set_field(L, -1, "failure2", impl_failure2);
     }
     luaX_set_field(L, -2, "core");
   }
