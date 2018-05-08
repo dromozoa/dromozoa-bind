@@ -66,6 +66,15 @@ namespace dromozoa {
     template <class T>
     struct luaX_integer_traits<T, luaX_type_numint> : luaX_integer_traits_impl<T, std::numeric_limits<T>::is_signed> {};
 
+    template <class T = void>
+    class luaX_failure : public std::exception {};
+
+    template <>
+    class luaX_failure<int> : public std::exception {
+    public:
+      virtual int code() const = 0;
+    };
+
     template <class T>
     inline void luaX_push(lua_State* L, const T& value) {
       luaX_type_traits<T>::push(L, value);
@@ -775,20 +784,32 @@ namespace dromozoa {
 
     template <class T>
     struct luaX_type_traits_impl<T, luaX_type_function> {
-      static int call(lua_State* L, lua_CFunction function) {
+      static int call(lua_State* L, int, lua_CFunction function) {
         return function(L);
       }
 
-      static int call(lua_State* L, void (*function)(lua_State*)) {
-        int top = lua_gettop(L);
+      static int call(lua_State* L, int top, void (*function)(lua_State*)) {
         function(L);
         return lua_gettop(L) - top;
       }
 
       static int closure(lua_State* L) {
+        int top = lua_gettop(L);
         try {
-          return call(L, reinterpret_cast<T>(lua_touserdata(L, lua_upvalueindex(1))));
+          return call(L, top, reinterpret_cast<T>(lua_touserdata(L, lua_upvalueindex(1))));
+        } catch (const luaX_failure<>& e) {
+          lua_settop(L, top);
+          luaX_push(L, luaX_nil);
+          luaX_push(L, e.what());
+          return 2;
+        } catch (const luaX_failure<int>& e) {
+          lua_settop(L, top);
+          luaX_push(L, luaX_nil);
+          luaX_push(L, e.what());
+          luaX_push(L, e.code());
+          return 3;
         } catch (const std::exception& e) {
+          lua_settop(L, top);
           luaL_where(L, 1);
           luaX_push(L, "exception caught: ");
           luaX_push(L, e.what());
@@ -976,6 +997,25 @@ namespace dromozoa {
         ref(L, 3, index3);
       }
     };
+
+    class luaX_top_saver {
+    public:
+      explicit luaX_top_saver(lua_State* L) : state_(L), top_(lua_gettop(L)) {}
+
+      ~luaX_top_saver() {
+        lua_settop(state_, top_);
+      }
+
+      int get() const {
+        return top_;
+      }
+
+    private:
+      lua_State* state_;
+      int top_;
+      luaX_top_saver(const luaX_top_saver&);
+      luaX_top_saver& operator=(const luaX_top_saver&);
+    };
   }
 
   using bind::luaX_abs_index;
@@ -984,6 +1024,7 @@ namespace dromozoa {
   using bind::luaX_check_integer;
   using bind::luaX_check_integer_field;
   using bind::luaX_check_udata;
+  using bind::luaX_failure;
   using bind::luaX_field_error;
   using bind::luaX_get_field;
   using bind::luaX_is_integer;
@@ -1001,6 +1042,7 @@ namespace dromozoa {
   using bind::luaX_set_metafield;
   using bind::luaX_set_metatable;
   using bind::luaX_to_udata;
+  using bind::luaX_top_saver;
 }
 
 #endif
