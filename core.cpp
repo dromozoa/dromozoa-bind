@@ -147,6 +147,16 @@ namespace dromozoa {
       luaX_push(L, 42);
       throw failure2();
     }
+
+    void impl_failure3(lua_State* L) {
+      luaX_push(L, 42);
+      luaX_throw_failure("failure3");
+    }
+
+    void impl_failure4(lua_State* L) {
+      luaX_push(L, 42);
+      luaX_throw_failure("failure4", 69);
+    }
   }
 
   void initialize_core(lua_State* L) {
@@ -169,6 +179,8 @@ namespace dromozoa {
       luaX_set_field(L, -1, "top_saver", impl_top_saver);
       luaX_set_field(L, -1, "failure1", impl_failure1);
       luaX_set_field(L, -1, "failure2", impl_failure2);
+      luaX_set_field(L, -1, "failure3", impl_failure3);
+      luaX_set_field(L, -1, "failure4", impl_failure4);
     }
     luaX_set_field(L, -2, "core");
   }
