@@ -66,70 +66,6 @@ namespace dromozoa {
     template <class T>
     struct luaX_integer_traits<T, luaX_type_numint> : luaX_integer_traits_impl<T, std::numeric_limits<T>::is_signed> {};
 
-    template <class T = void>
-    class luaX_failure : public std::exception {};
-
-    template <>
-    class luaX_failure<int> : public std::exception {
-    public:
-      virtual int code() const = 0;
-    };
-
-    template <class T = void>
-    class luaX_failure_impl : public luaX_failure<T> {
-    public:
-      explicit luaX_failure_impl(const char* what) : what_(what) {}
-
-      explicit luaX_failure_impl(const std::string& what) : what_(what) {}
-
-      virtual ~luaX_failure_impl() throw() {}
-
-      virtual const char* what() const throw() {
-        return what_.c_str();
-      }
-
-    private:
-      std::string what_;
-    };
-
-    template <>
-    class luaX_failure_impl<int> : public luaX_failure<int> {
-    public:
-      luaX_failure_impl(const char* what, int code) : what_(what), code_(code) {}
-
-      luaX_failure_impl(const std::string& what, int code) : what_(what), code_(code) {}
-
-      virtual ~luaX_failure_impl() throw() {}
-
-      virtual const char* what() const throw() {
-        return what_.c_str();
-      }
-
-      virtual int code() const {
-        return code_;
-      }
-
-    private:
-      std::string what_;
-      int code_;
-    };
-
-    inline void luaX_throw_failure(const char* what) {
-      throw luaX_failure_impl<>(what);
-    }
-
-    inline void luaX_throw_failure(const std::string& what) {
-      throw luaX_failure_impl<>(what);
-    }
-
-    inline void luaX_throw_failure(const char* what, int code) {
-      throw luaX_failure_impl<int>(what, code);
-    }
-
-    inline void luaX_throw_failure(const std::string& what, int code) {
-      throw luaX_failure_impl<int>(what, code);
-    }
-
     template <class T>
     inline void luaX_push(lua_State* L, const T& value) {
       luaX_type_traits<T>::push(L, value);
@@ -267,6 +203,70 @@ namespace dromozoa {
       T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
       new(data) T(v1, v2, v3, v4, v5, v6, v7, v8);
       return data;
+    }
+
+    template <class T = void>
+    class luaX_failure : public std::exception {};
+
+    template <>
+    class luaX_failure<int> : public std::exception {
+    public:
+      virtual int code() const = 0;
+    };
+
+    template <class T = void>
+    class luaX_failure_impl : public luaX_failure<T> {
+    public:
+      explicit luaX_failure_impl(const char* what) : what_(what) {}
+
+      explicit luaX_failure_impl(const std::string& what) : what_(what) {}
+
+      virtual ~luaX_failure_impl() throw() {}
+
+      virtual const char* what() const throw() {
+        return what_.c_str();
+      }
+
+    private:
+      std::string what_;
+    };
+
+    template <>
+    class luaX_failure_impl<int> : public luaX_failure<int> {
+    public:
+      luaX_failure_impl(const char* what, int code) : what_(what), code_(code) {}
+
+      luaX_failure_impl(const std::string& what, int code) : what_(what), code_(code) {}
+
+      virtual ~luaX_failure_impl() throw() {}
+
+      virtual const char* what() const throw() {
+        return what_.c_str();
+      }
+
+      virtual int code() const {
+        return code_;
+      }
+
+    private:
+      std::string what_;
+      int code_;
+    };
+
+    inline void luaX_throw_failure(const char* what) {
+      throw luaX_failure_impl<>(what);
+    }
+
+    inline void luaX_throw_failure(const std::string& what) {
+      throw luaX_failure_impl<>(what);
+    }
+
+    inline void luaX_throw_failure(const char* what, int code) {
+      throw luaX_failure_impl<int>(what, code);
+    }
+
+    inline void luaX_throw_failure(const std::string& what, int code) {
+      throw luaX_failure_impl<int>(what, code);
     }
 
     inline bool luaX_is_integer(lua_State* L, int index) {
