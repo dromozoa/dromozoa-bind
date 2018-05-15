@@ -75,6 +75,61 @@ namespace dromozoa {
       virtual int code() const = 0;
     };
 
+    template <class T = void>
+    class luaX_failure_impl : public luaX_failure<T> {
+    public:
+      explicit luaX_failure_impl(const char* what) : what_(what) {}
+
+      explicit luaX_failure_impl(const std::string& what) : what_(what) {}
+
+      virtual ~luaX_failure_impl() throw() {}
+
+      virtual const char* what() const throw() {
+        return what_.c_str();
+      }
+
+    private:
+      std::string what_;
+    };
+
+    template <>
+    class luaX_failure_impl<int> : public luaX_failure<int> {
+    public:
+      luaX_failure_impl(const char* what, int code) : what_(what), code_(code) {}
+
+      luaX_failure_impl(const std::string& what, int code) : what_(what), code_(code) {}
+
+      virtual ~luaX_failure_impl() throw() {}
+
+      virtual const char* what() const throw() {
+        return what_.c_str();
+      }
+
+      virtual int code() const {
+        return code_;
+      }
+
+    private:
+      std::string what_;
+      int code_;
+    };
+
+    inline void luaX_throw_failure(const char* what) {
+      throw luaX_failure_impl<>(what);
+    }
+
+    inline void luaX_throw_failure(const std::string& what) {
+      throw luaX_failure_impl<>(what);
+    }
+
+    inline void luaX_throw_failure(const char* what, int code) {
+      throw luaX_failure_impl<int>(what, code);
+    }
+
+    inline void luaX_throw_failure(const std::string& what, int code) {
+      throw luaX_failure_impl<int>(what, code);
+    }
+
     template <class T>
     inline void luaX_push(lua_State* L, const T& value) {
       luaX_type_traits<T>::push(L, value);
@@ -1041,6 +1096,7 @@ namespace dromozoa {
   using bind::luaX_set_field;
   using bind::luaX_set_metafield;
   using bind::luaX_set_metatable;
+  using bind::luaX_throw_failure;
   using bind::luaX_to_udata;
   using bind::luaX_top_saver;
 }
