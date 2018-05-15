@@ -110,11 +110,21 @@ assert(getmetatable(t)["dromozoa.bind.b"] == "あいうえお")
 local result, message, code = bind.core.failure1()
 assert(not result)
 assert(message == "failure1")
-assert(code == nil)
+assert(not code)
 
 local result, message, code = bind.core.failure2()
 assert(not result)
 assert(message == "failure2")
+assert(code == 69)
+
+local result, message, code = bind.core.failure3()
+assert(not result)
+assert(message == "failure3")
+assert(not code)
+
+local result, message, code = bind.core.failure4()
+assert(not result)
+assert(message == "failure4")
 assert(code == 69)
 
 local result = bind.core.top_saver()
