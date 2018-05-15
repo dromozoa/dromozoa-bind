@@ -142,69 +142,6 @@ namespace dromozoa {
       }
     }
 
-    template <class T>
-    inline T* luaX_new(lua_State* L) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T();
-      return data;
-    }
-
-    template <class T, class T1>
-    inline T* luaX_new(lua_State* L, const T1& v1) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T(v1);
-      return data;
-    }
-
-    template <class T, class T1, class T2>
-    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T(v1, v2);
-      return data;
-    }
-
-    template <class T, class T1, class T2, class T3>
-    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T(v1, v2, v3);
-      return data;
-    }
-
-    template <class T, class T1, class T2, class T3, class T4>
-    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3, const T4& v4) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T(v1, v2, v3, v4);
-      return data;
-    }
-
-    template <class T, class T1, class T2, class T3, class T4, class T5>
-    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3, const T4& v4, const T5& v5) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T(v1, v2, v3, v4, v5);
-      return data;
-    }
-
-    template <class T, class T1, class T2, class T3, class T4, class T5, class T6>
-    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3, const T4& v4, const T5& v5, const T6& v6) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T(v1, v2, v3, v4, v5, v6);
-      return data;
-    }
-
-    template <class T, class T1, class T2, class T3, class T4, class T5, class T6, class T7>
-    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3, const T4& v4, const T5& v5, const T6& v6, const T7& v7) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T(v1, v2, v3, v4, v5, v6, v7);
-      return data;
-    }
-
-    template <class T, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8>
-    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3, const T4& v4, const T5& v5, const T6& v6, const T7& v7, const T8& v8) {
-      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-      new(data) T(v1, v2, v3, v4, v5, v6, v7, v8);
-      return data;
-    }
-
     template <class T = void>
     class luaX_failure : public std::exception {};
 
@@ -267,6 +204,69 @@ namespace dromozoa {
 
     inline void luaX_throw_failure(const std::string& what, int code) {
       throw luaX_failure_impl<int>(what, code);
+    }
+
+    template <class T>
+    inline T* luaX_new(lua_State* L) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T();
+      return data;
+    }
+
+    template <class T, class T1>
+    inline T* luaX_new(lua_State* L, const T1& v1) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1);
+      return data;
+    }
+
+    template <class T, class T1, class T2>
+    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1, v2);
+      return data;
+    }
+
+    template <class T, class T1, class T2, class T3>
+    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1, v2, v3);
+      return data;
+    }
+
+    template <class T, class T1, class T2, class T3, class T4>
+    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3, const T4& v4) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1, v2, v3, v4);
+      return data;
+    }
+
+    template <class T, class T1, class T2, class T3, class T4, class T5>
+    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3, const T4& v4, const T5& v5) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1, v2, v3, v4, v5);
+      return data;
+    }
+
+    template <class T, class T1, class T2, class T3, class T4, class T5, class T6>
+    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3, const T4& v4, const T5& v5, const T6& v6) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1, v2, v3, v4, v5, v6);
+      return data;
+    }
+
+    template <class T, class T1, class T2, class T3, class T4, class T5, class T6, class T7>
+    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3, const T4& v4, const T5& v5, const T6& v6, const T7& v7) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1, v2, v3, v4, v5, v6, v7);
+      return data;
+    }
+
+    template <class T, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8>
+    inline T* luaX_new(lua_State* L, const T1& v1, const T2& v2, const T3& v3, const T4& v4, const T5& v5, const T6& v6, const T7& v7, const T8& v8) {
+      T* data = static_cast<T*>(lua_newuserdata(L, sizeof(T)));
+      new(data) T(v1, v2, v3, v4, v5, v6, v7, v8);
+      return data;
     }
 
     inline bool luaX_is_true(lua_State* L, int index) {
