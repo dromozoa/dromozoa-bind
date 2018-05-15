@@ -105,7 +105,9 @@ local t = bind.core.set_metafield()
 assert(getmetatable(t)["dromozoa.bind.a"] == 42)
 assert(getmetatable(t)["dromozoa.bind.b"] == "あいうえお")
 
--- failure and top_saver
+--
+-- failure
+--
 
 local result, message, code = bind.core.failure1()
 assert(not result)
@@ -127,5 +129,23 @@ assert(not result)
 assert(message == "failure4")
 assert(code == 69)
 
+--
+-- top_saver
+--
+
 local result = bind.core.top_saver()
 assert(result == 0)
+
+-- is
+
+assert(bind.core.is_true(true))
+assert(not bind.core.is_true(false))
+assert(not bind.core.is_true(42))
+assert(not bind.core.is_true())
+assert(not bind.core.is_true(nil))
+
+assert(bind.core.is_false(false))
+assert(not bind.core.is_false(true))
+assert(not bind.core.is_false(42))
+assert(not bind.core.is_false())
+assert(not bind.core.is_false(nil))

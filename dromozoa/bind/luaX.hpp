@@ -269,6 +269,14 @@ namespace dromozoa {
       throw luaX_failure_impl<int>(what, code);
     }
 
+    inline bool luaX_is_true(lua_State* L, int index) {
+      return lua_isboolean(L, index) && lua_toboolean(L, index);
+    }
+
+    inline bool luaX_is_false(lua_State* L, int index) {
+      return lua_isboolean(L, index) && !lua_toboolean(L, index);
+    }
+
     inline bool luaX_is_integer(lua_State* L, int index) {
 #if LUA_VERSION_NUM+0 >= 503
       if (lua_isinteger(L, index)) {
@@ -1082,7 +1090,9 @@ namespace dromozoa {
   using bind::luaX_failure;
   using bind::luaX_field_error;
   using bind::luaX_get_field;
+  using bind::luaX_is_false;
   using bind::luaX_is_integer;
+  using bind::luaX_is_true;
   using bind::luaX_new;
   using bind::luaX_nil;
   using bind::luaX_opt_enum;
