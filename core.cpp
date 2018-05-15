@@ -50,6 +50,7 @@ namespace dromozoa {
       char b[256] = { 0 };
       std::copy(s.begin(), s.end(), b);
       luaX_push(L, "あいうえお", b, static_cast<char*>(b), static_cast<const char*>(b), s);
+      luaX_push(L, luaX_string_reference("foo\0bar\0baz", 11));
     }
 
     void impl_push_success(lua_State* L) {
@@ -84,6 +85,10 @@ namespace dromozoa {
         std::copy(s.begin(), s.end(), b);
       }
       luaX_field_error(L, b, "not an integer");
+    }
+
+    void impl_field_error4(lua_State* L) {
+      luaX_field_error(L, luaX_string_reference("foo\0bar\0baz", 11), "not an integer");
     }
 
     void impl_set_field(lua_State* L) {
@@ -174,6 +179,7 @@ namespace dromozoa {
       luaX_set_field(L, -1, "field_error1", impl_field_error1);
       luaX_set_field(L, -1, "field_error2", impl_field_error2);
       luaX_set_field(L, -1, "field_error3", impl_field_error3);
+      luaX_set_field(L, -1, "field_error4", impl_field_error4);
       luaX_set_field(L, -1, "set_field", impl_set_field);
       luaX_set_field(L, -1, "set_metafield", impl_set_metafield);
       luaX_set_field(L, -1, "top_saver", impl_top_saver);
