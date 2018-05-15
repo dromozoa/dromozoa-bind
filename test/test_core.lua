@@ -54,13 +54,14 @@ check_none_or_nil(1, bind.core.push_nil())
 assert(bind.core.push_enum() == 42)
 
 local function check_string(...)
-  assert(select("#", ...) == 5)
+  assert(select("#", ...) == 6)
   if verbose then
     print(...)
   end
   for i = 1, 5 do
     assert(select(i, ...) == "あいうえお")
   end
+  assert(select(6, ...) == "foo\0bar\0baz")
 end
 
 check_string(bind.core.push_string())
@@ -88,6 +89,7 @@ check_error(bind.core.throw, "exception caught: runtime_error")
 check_error(bind.core.field_error1, "field nil not an integer")
 check_error(bind.core.field_error2, "field userdata:")
 check_error(bind.core.field_error3, [[field "\1\2\3\4\5\6\a\b\t\n\v\f\r\14\15\16]])
+check_error(bind.core.field_error4, [[field "foo\0bar\0baz"]])
 
 --
 -- field
@@ -135,17 +137,3 @@ assert(code == 69)
 
 local result = bind.core.top_saver()
 assert(result == 0)
-
--- is
-
-assert(bind.core.is_true(true))
-assert(not bind.core.is_true(false))
-assert(not bind.core.is_true(42))
-assert(not bind.core.is_true())
-assert(not bind.core.is_true(nil))
-
-assert(bind.core.is_false(false))
-assert(not bind.core.is_false(true))
-assert(not bind.core.is_false(42))
-assert(not bind.core.is_false())
-assert(not bind.core.is_false(nil))

@@ -26,6 +26,7 @@ extern "C" {
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include <exception>
 #include <limits>
@@ -39,6 +40,35 @@ namespace dromozoa {
     struct luaX_nil_impl {};
     typedef int luaX_nil_impl::*luaX_nil_t;
     static const luaX_nil_t luaX_nil = 0;
+
+    class luaX_string_reference {
+    public:
+      typedef const char* (luaX_string_reference::*unspecified_bool_type)() const;
+
+      luaX_string_reference() : data_(), size_() {}
+
+      luaX_string_reference(const char* data, size_t size) : data_(data), size_(size) {}
+
+      const char* data() const {
+        return data_;
+      }
+
+      size_t size() const {
+        return size_;
+      }
+
+      operator unspecified_bool_type() const {
+        return data_ ? &luaX_string_reference::data : 0;
+      }
+
+      bool operator!() const {
+        return !data_;
+      }
+
+    private:
+      const char* data_;
+      size_t size_;
+    };
 
     struct luaX_type_nil {};
     struct luaX_type_number {};
@@ -339,6 +369,18 @@ namespace dromozoa {
     template <class T>
     inline T luaX_opt_enum(lua_State* L, int arg, T d) {
       return static_cast<T>(luaL_optinteger(L, arg, d));
+    }
+
+    inline luaX_string_reference luaX_to_string(lua_State* L, int index) {
+      size_t size = 0;
+      const char* data = lua_tolstring(L, index, &size);
+      return luaX_string_reference(data, size);
+    }
+
+    inline luaX_string_reference luaX_check_string(lua_State* L, int arg) {
+      size_t size = 0;
+      const char* data = luaL_checklstring(L, arg, &size);
+      return luaX_string_reference(data, size);
     }
 
     inline bool luaX_to_udata_impl(lua_State* L, const char* name) {
@@ -741,6 +783,7 @@ namespace dromozoa {
     DROMOZOA_BIND_LUAX_TYPE(luaX_type_string, char*)
     DROMOZOA_BIND_LUAX_TYPE(luaX_type_string, const char*)
     DROMOZOA_BIND_LUAX_TYPE(luaX_type_string, std::string)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_string, luaX_string_reference)
 
 #undef DROMOZOA_BIND_LUAX_TYPE
 
@@ -814,13 +857,15 @@ namespace dromozoa {
         lua_pushlstring(L, value.data(), value.size());
       }
 
-      static void quote(lua_State* L, const std::string& value) {
+      static void push(lua_State* L, const luaX_string_reference& value) {
+        lua_pushlstring(L, value.data(), value.size());
+      }
+
+      static void quote_impl(lua_State* L, const char* data, size_t size) {
         std::ostringstream out;
         out << "\"";
-        std::string::const_iterator i = value.begin();
-        std::string::const_iterator end = value.end();
-        for (; i != end; ++i) {
-          std::string::value_type c = *i;
+        for (size_t i = 0; i < size; ++i) {
+          char c = data[i];
           switch (c) {
             case '\a': out << "\\a"; break;
             case '\b': out << "\\b"; break;
@@ -842,6 +887,18 @@ namespace dromozoa {
         }
         out << "\"";
         luaX_push(L, out.str());
+      }
+
+      static void quote(lua_State* L, const char* value) {
+        quote_impl(L, value, strlen(value));
+      }
+
+      static void quote(lua_State* L, const std::string& value) {
+        quote_impl(L, value.data(), value.size());
+      }
+
+      static void quote(lua_State* L, const luaX_string_reference& value) {
+        quote_impl(L, value.data(), value.size());
       }
     };
 
@@ -1086,6 +1143,7 @@ namespace dromozoa {
   using bind::luaX_check_enum;
   using bind::luaX_check_integer;
   using bind::luaX_check_integer_field;
+  using bind::luaX_check_string;
   using bind::luaX_check_udata;
   using bind::luaX_failure;
   using bind::luaX_field_error;
@@ -1106,7 +1164,9 @@ namespace dromozoa {
   using bind::luaX_set_field;
   using bind::luaX_set_metafield;
   using bind::luaX_set_metatable;
+  using bind::luaX_string_reference;
   using bind::luaX_throw_failure;
+  using bind::luaX_to_string;
   using bind::luaX_to_udata;
   using bind::luaX_top_saver;
 }
