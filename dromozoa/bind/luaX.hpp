@@ -49,6 +49,10 @@ namespace dromozoa {
 
       luaX_string_reference(const char* data, size_t size) : data_(data), size_(size) {}
 
+      luaX_string_reference(const signed char* data, size_t size) : data_(reinterpret_cast<const char*>(data)), size_(size) {}
+
+      luaX_string_reference(const unsigned char* data, size_t size) : data_(reinterpret_cast<const char*>(data)), size_(size) {}
+
       const char* data() const {
         return data_;
       }
@@ -781,7 +785,11 @@ namespace dromozoa {
     DROMOZOA_BIND_LUAX_TYPE(luaX_type_numint, unsigned long long)
     DROMOZOA_BIND_LUAX_TYPE(luaX_type_boolean, bool)
     DROMOZOA_BIND_LUAX_TYPE(luaX_type_string, char*)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_string, signed char*)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_string, unsigned char*)
     DROMOZOA_BIND_LUAX_TYPE(luaX_type_string, const char*)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_string, const signed char*)
+    DROMOZOA_BIND_LUAX_TYPE(luaX_type_string, const unsigned char*)
     DROMOZOA_BIND_LUAX_TYPE(luaX_type_string, std::string)
     DROMOZOA_BIND_LUAX_TYPE(luaX_type_string, luaX_string_reference)
 
@@ -790,6 +798,18 @@ namespace dromozoa {
     template <size_t T>
     struct luaX_type<char[T]> {
       typedef const char* decay;
+      typedef luaX_type_string type;
+    };
+
+    template <size_t T>
+    struct luaX_type<signed char[T]> {
+      typedef const signed char* decay;
+      typedef luaX_type_string type;
+    };
+
+    template <size_t T>
+    struct luaX_type<unsigned char[T]> {
+      typedef const unsigned char* decay;
       typedef luaX_type_string type;
     };
 
@@ -849,8 +869,9 @@ namespace dromozoa {
 
     template <class T>
     struct luaX_type_traits_impl<T, luaX_type_string> {
-      static void push(lua_State* L, const char* value) {
-        lua_pushstring(L, value);
+      template <class T_char>
+      static void push(lua_State* L, const T_char* value) {
+        lua_pushstring(L, reinterpret_cast<const char*>(value));
       }
 
       static void push(lua_State* L, const std::string& value) {
@@ -889,8 +910,10 @@ namespace dromozoa {
         luaX_push(L, out.str());
       }
 
-      static void quote(lua_State* L, const char* value) {
-        quote_impl(L, value, strlen(value));
+      template <class T_char>
+      static void quote(lua_State* L, const T_char* value) {
+        const char* data = reinterpret_cast<const char*>(value);
+        quote_impl(L, data, strlen(data));
       }
 
       static void quote(lua_State* L, const std::string& value) {
