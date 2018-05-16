@@ -51,6 +51,10 @@ namespace dromozoa {
       std::copy(s.begin(), s.end(), b);
       luaX_push(L, "あいうえお", b, static_cast<char*>(b), static_cast<const char*>(b), s);
       luaX_push(L, luaX_string_reference("foo\0bar\0baz", 11));
+      signed char sb[] = { 0x66, 0x6F, 0x6F, 0x00 };
+      luaX_push(L, sb, static_cast<signed char*>(sb), static_cast<const signed char*>(sb), luaX_string_reference(sb, 3));
+      unsigned char ub[] = { 0x62, 0x61, 0x72, 0x00 };
+      luaX_push(L, ub, static_cast<unsigned char*>(ub), static_cast<const unsigned char*>(ub), luaX_string_reference(ub, 3));
     }
 
     void impl_push_success(lua_State* L) {

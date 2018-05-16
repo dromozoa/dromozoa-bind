@@ -54,7 +54,7 @@ check_none_or_nil(1, bind.core.push_nil())
 assert(bind.core.push_enum() == 42)
 
 local function check_string(...)
-  assert(select("#", ...) == 6)
+  assert(select("#", ...) == 14)
   if verbose then
     print(...)
   end
@@ -62,6 +62,12 @@ local function check_string(...)
     assert(select(i, ...) == "あいうえお")
   end
   assert(select(6, ...) == "foo\0bar\0baz")
+  for i = 7, 10 do
+    assert(select(i, ...) == "foo")
+  end
+  for i = 11, 14 do
+    assert(select(i, ...) == "bar")
+  end
 end
 
 check_string(bind.core.push_string())

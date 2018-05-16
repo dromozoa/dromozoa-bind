@@ -76,20 +76,20 @@ namespace dromozoa {
     }
 
     void impl_to_string(lua_State* L) {
-      if (luaX_string_reference ref = luaX_to_string(L, 1)) {
-        std::vector<char> buffer(ref.size());
-        for (size_t i = 0; i < ref.size(); ++i) {
-          buffer[i] = ref.data()[i] + 1;
+      if (luaX_string_reference source = luaX_to_string(L, 1)) {
+        std::vector<char> buffer(source.size());
+        for (size_t i = 0; i < source.size(); ++i) {
+          buffer[i] = source.data()[i] + 1;
         }
         luaX_push(L, luaX_string_reference(&buffer[0], buffer.size()));
       }
     }
 
     void impl_check_string(lua_State* L) {
-      luaX_string_reference ref = luaX_check_string(L, 1);
-      std::vector<char> buffer(ref.size());
-      for (size_t i = 0; i < ref.size(); ++i) {
-        buffer[i] = ref.data()[i] - 1;
+      luaX_string_reference source = luaX_check_string(L, 1);
+      std::vector<char> buffer(source.size());
+      for (size_t i = 0; i < source.size(); ++i) {
+        buffer[i] = source.data()[i] - 1;
       }
       luaX_push(L, luaX_string_reference(&buffer[0], buffer.size()));
     }
