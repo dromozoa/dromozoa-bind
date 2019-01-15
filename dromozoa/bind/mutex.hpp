@@ -106,6 +106,10 @@ namespace dromozoa {
         mutex_->unlock();
       }
 
+      T* mutex() const {
+        return mutex_;
+      }
+
     private:
       T* mutex_;
       lock_guard(const lock_guard&);
