@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2018 Tomoyuki Fujimori <moyu@dromozoa.com>
+# Copyright (C) 2016-2019 Tomoyuki Fujimori <moyu@dromozoa.com>
 #
 # This file is part of dromozoa-bind.
 #
@@ -27,6 +27,7 @@ OBJS = \
 	module.o \
 	handle.o \
 	scoped_ptr.o \
+	system_error.o \
 	util.o
 TARGET = bind.so
 
