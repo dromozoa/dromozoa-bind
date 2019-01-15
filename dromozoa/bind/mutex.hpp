@@ -96,29 +96,25 @@ namespace dromozoa {
     };
 
     template <class T = mutex>
-    class scoped_lock {
+    class lock_guard {
     public:
-      explicit scoped_lock(T& mutex) : mutex_(&mutex) {
+      explicit lock_guard(T& mutex) : mutex_(&mutex) {
         mutex_->lock();
       }
 
-      ~scoped_lock() {
+      ~lock_guard() {
         mutex_->unlock();
-      }
-
-      T* mutex() const {
-        return mutex_;
       }
 
     private:
       T* mutex_;
-      scoped_lock(const scoped_lock&);
-      scoped_lock& operator=(const scoped_lock&);
+      lock_guard(const lock_guard&);
+      lock_guard& operator=(const lock_guard&);
     };
   }
 
   using bind::mutex;
-  using bind::scoped_lock;
+  using bind::lock_guard;
 }
 
 #endif

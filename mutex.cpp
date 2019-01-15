@@ -26,7 +26,7 @@ namespace dromozoa {
     mutex m;
 
     void impl_test(lua_State* L) {
-      scoped_lock<> lock(m);
+      lock_guard<> lock(m);
       luaX_push_success(L);
     }
   }
