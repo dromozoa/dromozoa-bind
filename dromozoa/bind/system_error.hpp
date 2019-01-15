@@ -19,6 +19,7 @@
 #define DROMOZOA_BIND_SYSTEM_ERROR_HPP
 
 #include <errno.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <exception>
