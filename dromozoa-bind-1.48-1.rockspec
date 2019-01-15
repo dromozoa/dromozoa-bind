@@ -1,3 +1,4 @@
+rockspec_format = "3.0"
 package = "dromozoa-bind"
 version = "1.48-1"
 source = {
@@ -9,6 +10,10 @@ description = {
   license = "GPL-3";
   homepage = "https://github.com/dromozoa/dromozoa-bind/";
   maintainer = "Tomoyuki Fujimori <moyu@dromozoa.com>";
+}
+test = {
+  type = "command";
+  command = "./test.sh";
 }
 build = {
   type = "make";
