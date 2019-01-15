@@ -24,12 +24,18 @@
 namespace dromozoa {
   namespace {
     void impl_test_compat_strerror(lua_State* L) {
-      std::cout
-          << "strerror(ENOENT) " << compat_strerror(ENOENT) << "\n"
-          << "strerror(-1)     " << compat_strerror(-1)     << "\n"
-          << "strerror(0)      " << compat_strerror(0)      << "\n"
-          << "strerror(65535)  " << compat_strerror(65535)  << "\n";
+      if (verbose()) {
+        std::cout
+            << "strerror(ENOENT) " << compat_strerror(ENOENT) << "\n"
+            << "strerror(-1)     " << compat_strerror(-1)     << "\n"
+            << "strerror(0)      " << compat_strerror(0)      << "\n"
+            << "strerror(65535)  " << compat_strerror(65535)  << "\n";
+      }
       luaX_push_success(L);
+    }
+
+    void impl_test_system_error(lua_State*) {
+      throw system_error(ENOENT);
     }
   }
 
@@ -37,6 +43,7 @@ namespace dromozoa {
     lua_newtable(L);
     {
       luaX_set_field(L, -1, "test_compat_strerror", impl_test_compat_strerror);
+      luaX_set_field(L, -1, "test_system_error", impl_test_system_error);
     }
     luaX_set_field(L, -2, "system_error");
   }
