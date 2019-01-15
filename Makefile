@@ -25,6 +25,7 @@ OBJS = \
 	common.o \
 	core.o \
 	module.o \
+	mutex.o \
 	handle.o \
 	scoped_ptr.o \
 	system_error.o \

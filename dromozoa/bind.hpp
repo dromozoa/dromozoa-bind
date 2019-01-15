@@ -20,6 +20,7 @@
 
 #include "bind/luaX.hpp"
 #include "bind/scoped_ptr.hpp"
+#include "bind/system_error.hpp"
 #include "bind/unexpected.hpp"
 
 #endif

@@ -32,6 +32,7 @@ namespace dromozoa {
   void initialize_callback(lua_State* L);
   void initialize_core(lua_State* L);
   void initialize_handle(lua_State* L);
+  void initialize_mutex(lua_State* L);
   void initialize_scoped_ptr(lua_State* L);
   void initialize_system_error(lua_State* L);
   void initialize_util(lua_State* L);
@@ -48,6 +49,7 @@ namespace dromozoa {
     initialize_callback(L);
     initialize_core(L);
     initialize_handle(L);
+    initialize_mutex(L);
     initialize_scoped_ptr(L);
     initialize_system_error(L);
     initialize_util(L);

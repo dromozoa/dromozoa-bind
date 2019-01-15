@@ -18,32 +18,24 @@
 #include <iostream>
 
 #include "dromozoa/bind.hpp"
+#include "dromozoa/bind/mutex.hpp"
 #include "common.hpp"
 
 namespace dromozoa {
   namespace {
-    void impl_test_compat_strerror(lua_State* L) {
-      if (verbose()) {
-        std::cout
-            << "strerror(ENOENT) " << compat_strerror(ENOENT) << "\n"
-            << "strerror(-1)     " << compat_strerror(-1)     << "\n"
-            << "strerror(0)      " << compat_strerror(0)      << "\n"
-            << "strerror(65535)  " << compat_strerror(65535)  << "\n";
-      }
-      luaX_push_success(L);
-    }
+    mutex m;
 
-    void impl_test_system_error(lua_State*) {
-      throw system_error(ENOENT);
+    void impl_test(lua_State* L) {
+      scoped_lock<> lock(m);
+      luaX_push_success(L);
     }
   }
 
-  void initialize_system_error(lua_State* L) {
+  void initialize_mutex(lua_State* L) {
     lua_newtable(L);
     {
-      luaX_set_field(L, -1, "test_compat_strerror", impl_test_compat_strerror);
-      luaX_set_field(L, -1, "test_system_error", impl_test_system_error);
+      luaX_set_field(L, -1, "test", impl_test);
     }
-    luaX_set_field(L, -2, "system_error");
+    luaX_set_field(L, -2, "mutex");
   }
 }
