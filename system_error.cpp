@@ -22,6 +22,19 @@
 
 namespace dromozoa {
   namespace {
+    void impl_test_errno_saver(lua_State* L) {
+      errno = ENOENT;
+      DROMOZOA_CHECK(errno == ENOENT);
+      {
+        dromozoa::errno_saver save_errno;
+        DROMOZOA_CHECK(errno == ENOENT);
+        errno = EINTR;
+        DROMOZOA_CHECK(errno == EINTR);
+      }
+      DROMOZOA_CHECK(errno == ENOENT);
+      luaX_push_success(L);
+    }
+
     void impl_test_compat_strerror(lua_State* L) {
       if (verbose()) {
         std::cout
@@ -41,6 +54,7 @@ namespace dromozoa {
   void initialize_system_error(lua_State* L) {
     lua_newtable(L);
     {
+      luaX_set_field(L, -1, "test_errno_saver", impl_test_errno_saver);
       luaX_set_field(L, -1, "test_compat_strerror", impl_test_compat_strerror);
       luaX_set_field(L, -1, "test_system_error", impl_test_system_error);
     }

@@ -123,6 +123,7 @@ namespace dromozoa {
   }
 
   using bind::compat_strerror;
+  using bind::errno_saver;
   using bind::system_error;
 }
 
