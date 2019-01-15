@@ -19,6 +19,7 @@ local bind = require "dromozoa.bind"
 
 local verbose = os.getenv "VERBOSE" == "1"
 
+assert(bind.system_error.test_errno_saver())
 assert(bind.system_error.test_compat_strerror())
 local result, message = pcall(bind.system_error.test_system_error)
 if verbose then
