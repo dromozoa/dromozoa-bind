@@ -18,6 +18,7 @@
 #include <iostream>
 
 #include "dromozoa/bind.hpp"
+#include "dromozoa/bind/condition_variable.hpp"
 #include "dromozoa/bind/mutex.hpp"
 #include "common.hpp"
 
@@ -30,6 +31,12 @@ namespace dromozoa {
       if (verbose()) {
         std::cout << lock.mutex() << "\n";
       }
+
+      if (false) {
+        condition_variable cond;
+        cond.wait(lock);
+      }
+
       luaX_push_success(L);
     }
   }
