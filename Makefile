@@ -29,13 +29,14 @@ OBJS = \
 	handle.o \
 	scoped_ptr.o \
 	system_error.o \
+	thread.o \
 	util.o
 TARGET = bind.so
 
-all: $(TARGET)
+all: $(TARGET) driver
 
 clean:
-	rm -f *.o $(TARGET)
+	rm -f *.o $(TARGET) driver
 
 check:
 	./test.sh
@@ -45,6 +46,9 @@ bind.so: $(OBJS)
 
 .cpp.o:
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $<
+
+driver: driver.c
+	$(CC) $(CPPFLAGS) -Wall -W $(CFLAGS) -L$(LUA_LIBDIR) $< -llua -o $@
 
 install:
 	mkdir -p $(LIBDIR)/dromozoa
