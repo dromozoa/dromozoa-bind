@@ -15,62 +15,69 @@
 // You should have received a copy of the GNU General Public License
 // along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef DROMOZOA_BIND_CONDITION_VARIABLE_HPP
-#define DROMOZOA_BIND_CONDITION_VARIABLE_HPP
+#ifndef DROMOZOA_BIND_THREAD_HPP
+#define DROMOZOA_BIND_THREAD_HPP
 
 #include <pthread.h>
 
 #include <exception>
+#include <utility>
 
-#include "mutex.hpp"
 #include "system_error.hpp"
 
 namespace dromozoa {
   namespace bind {
-    class condition_variable {
+    class thread {
     public:
-      condition_variable() {
-        if (int result = pthread_cond_init(&cond_, 0)) {
+      thread(void* (*start_routine)(void*), void* arg) : thread_(), joinable_() {
+        if (int result = pthread_create(&thread_, 0, start_routine, arg)) {
           throw system_error(result);
         }
+        joinable_ = true;
       }
 
-      ~condition_variable() {
-        if (pthread_cond_destroy(&cond_)) {
+      ~thread() {
+        if (joinable_) {
           std::terminate();
         }
       }
 
-      void notify_one() {
-        if (int result = pthread_cond_signal(&cond_)) {
-          throw system_error(result);
-        }
+      bool joinable() const {
+        return joinable_;
       }
 
-      void notify_all() {
-        if (int result = pthread_cond_broadcast(&cond_)) {
+      void join() {
+        if (int result = pthread_join(thread_, 0)) {
           throw system_error(result);
         }
+        joinable_ = false;
       }
 
-      void wait(lock_guard<mutex>& lock) {
-        if (int result = pthread_cond_wait(&cond_, lock.mutex()->native_handle())) {
+      void detach() {
+        if (int result = pthread_detach(thread_)) {
           throw system_error(result);
         }
+        joinable_ = false;
       }
 
-      pthread_cond_t* native_handle() {
-        return &cond_;
+      pthread_t native_handle() {
+        return thread_;
+      }
+
+      void swap(thread& that) {
+        std::swap(thread_, that.thread_);
+        std::swap(joinable_, that.joinable_);
       }
 
     private:
-      pthread_cond_t cond_;
-      condition_variable(const condition_variable&);
-      condition_variable& operator=(const condition_variable&);
+      pthread_t thread_;
+      bool joinable_;
+      thread(const thread&);
+      thread& operator=(const thread&);
     };
   }
 
-  using bind::condition_variable;
+  using bind::thread;
 }
 
 #endif
