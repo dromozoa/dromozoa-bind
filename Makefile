@@ -36,7 +36,7 @@ TARGET = bind.so
 all: $(TARGET) driver
 
 clean:
-	rm -f *.o $(TARGET)
+	rm -f *.o $(TARGET) driver
 
 check:
 	./test.sh
@@ -48,7 +48,7 @@ bind.so: $(OBJS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $<
 
 driver: driver.c
-	$(CC) $(CPPFLAGS) -Wall -W $(CFLAGS) $(LDFLAGS) $< $(LDLIBS) -o $@
+	$(CC) $(CPPFLAGS) -Wall -W $(CFLAGS) -L$(LUA_LIBDIR) $< -llua -o $@
 
 install:
 	mkdir -p $(LIBDIR)/dromozoa
