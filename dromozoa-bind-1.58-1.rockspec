@@ -1,4 +1,3 @@
-rockspec_format = "3.0"
 package = "dromozoa-bind"
 version = "1.58-1"
 source = {
@@ -11,19 +10,14 @@ description = {
   homepage = "https://github.com/dromozoa/dromozoa-bind/";
   maintainer = "Tomoyuki Fujimori <moyu@dromozoa.com>";
 }
-test = {
-  type = "command";
-  command = "./test.sh";
-}
 build = {
   type = "make";
   build_variables = {
-    CFLAGS = "$(CFLAGS)";
-    LIBFLAG = "$(LIBFLAG)";
-    LUA_INCDIR = "$(LUA_INCDIR)";
-    LUA_LIBDIR = "$(LUA_LIBDIR)";
+    ROCK_CFLAGS = "$(CFLAGS)";
+    ROCK_LIBFLAG = "$(LIBFLAG)";
+    ROCK_LUA_INCDIR = "$(LUA_INCDIR)";
   };
   install_variables = {
-    LIBDIR = "$(LIBDIR)";
+    ROCK_LIBDIR = "$(LIBDIR)";
   };
 }

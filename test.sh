@@ -17,6 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
+mkdir -p .test/dromozoa
+(cd .test/dromozoa && ln -f -s ../../bind.so)
+
+LUA_CPATH=".test/?.so;;"
+export LUA_CPATH
+
 for i in test/test*.lua
 do
   case X$# in
