@@ -1,6 +1,6 @@
 #! /bin/sh -e
 
-# Copyright (C) 2016,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
+# Copyright (C) 2016,2018,2024 Tomoyuki Fujimori <moyu@dromozoa.com>
 #
 # This file is part of dromozoa-bind.
 #
@@ -16,6 +16,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
+
+mkdir -p .test/dromozoa
+(cd .test/dromozoa && ln -f -s ../../bind.so)
+
+LUA_CPATH=".test/?.so;;"
+export LUA_CPATH
 
 for i in test/test*.lua
 do

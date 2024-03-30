@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2019 Tomoyuki Fujimori <moyu@dromozoa.com>
+# Copyright (C) 2016-2019,2022,2024 Tomoyuki Fujimori <moyu@dromozoa.com>
 #
 # This file is part of dromozoa-bind.
 #
@@ -15,9 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
-CPPFLAGS += -I$(LUA_INCDIR)
-CXXFLAGS += -Wall -W $(CFLAGS)
-LDFLAGS += -L$(LUA_LIBDIR)
+CPPFLAGS += -I$(ROCK_LUA_INCDIR)
+CXXFLAGS += -Wall -W $(ROCK_CFLAGS)
 LDLIBS += -lpthread -ldl
 
 OBJS = \
@@ -42,15 +41,15 @@ clean:
 check:
 	./test.sh
 
+install:
+	mkdir -p $(ROCK_LIBDIR)/dromozoa
+	cp $(TARGET) $(ROCK_LIBDIR)/dromozoa
+
 bind.so: $(OBJS)
-	$(CXX) $(LDFLAGS) $(LIBFLAG) $^ $(LDLIBS) -o $@
+	$(CXX) $(LDFLAGS) $(ROCK_LIBFLAG) $^ $(LDLIBS) -o $@
+
+driver: driver.c
+	$(CC) $(CPPFLAGS) -Wall -W $(CXXFLAGS) $(LDFLAGS) $< -llua -o $@
 
 .cpp.o:
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $<
-
-driver: driver.c
-	$(CC) $(CPPFLAGS) -Wall -W $(CFLAGS) $(LDFLAGS) $< -llua -o $@
-
-install:
-	mkdir -p $(LIBDIR)/dromozoa
-	cp $(TARGET) $(LIBDIR)/dromozoa
