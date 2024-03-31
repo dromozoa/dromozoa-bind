@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Tomoyuki Fujimori <moyu@dromozoa.com>
+// Copyright (C) 2018,2024 Tomoyuki Fujimori <moyu@dromozoa.com>
 //
 // This file is part of dromozoa-bind.
 //
@@ -17,6 +17,8 @@
 
 #include <stdlib.h>
 
+#include "common.hpp"
+
 namespace dromozoa {
   bool verbose() {
     if (const char* p = getenv("VERBOSE")) {
@@ -26,5 +28,12 @@ namespace dromozoa {
       }
     }
     return false;
+  }
+
+  bool failure_policy_is_error(lua_State* L) {
+    lua_getglobal(L, "dromozoa_failure_policy_is_error");
+    bool result = lua_toboolean(L, -1);
+    lua_pop(L, 1);
+    return result;
   }
 }

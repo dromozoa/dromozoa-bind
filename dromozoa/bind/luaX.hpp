@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2019 Tomoyuki Fujimori <moyu@dromozoa.com>
+// Copyright (C) 2016-2019,2024 Tomoyuki Fujimori <moyu@dromozoa.com>
 //
 // This file is part of dromozoa-bind.
 //
@@ -17,6 +17,10 @@
 
 #ifndef DROMOZOA_BIND_LUAX_HPP
 #define DROMOZOA_BIND_LUAX_HPP
+
+#ifndef DROMOZOA_FAILURE_POLICY_IS_ERROR
+#define DROMOZOA_FAILURE_POLICY_IS_ERROR(L) false
+#endif
 
 extern "C" {
 #include <lua.h>
@@ -941,16 +945,32 @@ namespace dromozoa {
         try {
           return call(L, top, reinterpret_cast<T>(lua_touserdata(L, lua_upvalueindex(1))));
         } catch (const luaX_failure<>& e) {
-          lua_settop(L, top);
-          luaX_push(L, luaX_nil);
-          luaX_push(L, e.what());
-          return 2;
+          if (DROMOZOA_FAILURE_POLICY_IS_ERROR(L)) {
+            lua_settop(L, top);
+            luaL_where(L, 1);
+            luaX_push(L, "exception caught: ");
+            luaX_push(L, e.what());
+            lua_concat(L, 3);
+          } else {
+            lua_settop(L, top);
+            luaX_push(L, luaX_nil);
+            luaX_push(L, e.what());
+            return 2;
+          }
         } catch (const luaX_failure<int>& e) {
-          lua_settop(L, top);
-          luaX_push(L, luaX_nil);
-          luaX_push(L, e.what());
-          luaX_push(L, e.code());
-          return 3;
+          if (DROMOZOA_FAILURE_POLICY_IS_ERROR(L)) {
+            lua_settop(L, top);
+            luaL_where(L, 1);
+            luaX_push(L, "exception caught: ");
+            luaX_push(L, e.what());
+            lua_concat(L, 3);
+          } else {
+            lua_settop(L, top);
+            luaX_push(L, luaX_nil);
+            luaX_push(L, e.what());
+            luaX_push(L, e.code());
+            return 3;
+          }
         } catch (const std::exception& e) {
           lua_settop(L, top);
           luaL_where(L, 1);

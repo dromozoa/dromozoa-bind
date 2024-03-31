@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Tomoyuki Fujimori <moyu@dromozoa.com>
+// Copyright (C) 2019,2024 Tomoyuki Fujimori <moyu@dromozoa.com>
 //
 // This file is part of dromozoa-bind.
 //
@@ -17,8 +17,8 @@
 
 #include <iostream>
 
-#include "dromozoa/bind.hpp"
 #include "common.hpp"
+#include "dromozoa/bind.hpp"
 
 namespace dromozoa {
   namespace {
