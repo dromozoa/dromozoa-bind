@@ -18,9 +18,16 @@
 #ifndef DROMOZOA_COMMON_HPP
 #define DROMOZOA_COMMON_HPP
 
+extern "C" {
+#include <lua.h>
+}
+
 namespace dromozoa {
   bool verbose();
+  bool runtime_error_policy_is_error(lua_State*);
 }
+
+#define DROMOZOA_RUNTIME_ERROR_POLICY_IS_ERROR(L) runtime_error_policy_is_error(L)
 
 #define DROMOZOA_CHECK(expr) \
   do { \

@@ -17,6 +17,8 @@
 
 #include <stdlib.h>
 
+#include "common.hpp"
+
 namespace dromozoa {
   bool verbose() {
     if (const char* p = getenv("VERBOSE")) {
@@ -26,5 +28,12 @@ namespace dromozoa {
       }
     }
     return false;
+  }
+
+  bool runtime_error_policy_is_error(lua_State* L) {
+    lua_getglobal(L, "dromozoa_runtime_error_policy_is_error");
+    bool result = lua_toboolean(L, -1);
+    lua_pop(L, 1);
+    return result;
   }
 }
