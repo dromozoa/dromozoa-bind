@@ -20,6 +20,7 @@
 #include <string>
 #include <stdexcept>
 
+#include "common.hpp"
 #include "dromozoa/bind.hpp"
 
 namespace dromozoa {

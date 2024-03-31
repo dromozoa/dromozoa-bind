@@ -18,8 +18,8 @@
 #include <iostream>
 #include <set>
 
-#include "dromozoa/bind.hpp"
 #include "common.hpp"
+#include "dromozoa/bind.hpp"
 
 namespace dromozoa {
   namespace {

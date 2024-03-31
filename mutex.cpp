@@ -17,10 +17,10 @@
 
 #include <iostream>
 
+#include "common.hpp"
 #include "dromozoa/bind.hpp"
 #include "dromozoa/bind/condition_variable.hpp"
 #include "dromozoa/bind/mutex.hpp"
-#include "common.hpp"
 
 namespace dromozoa {
   namespace {

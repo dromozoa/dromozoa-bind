@@ -17,10 +17,10 @@
 
 #include <iostream>
 
+#include "common.hpp"
 #include "dromozoa/bind.hpp"
 #include "dromozoa/bind/atomic.hpp"
 #include "dromozoa/bind/thread.hpp"
-#include "common.hpp"
 
 namespace dromozoa {
   namespace {

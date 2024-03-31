@@ -16,8 +16,8 @@
 // along with dromozoa-bind.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
-#include "common.hpp"
 
+#include "common.hpp"
 #include "dromozoa/bind.hpp"
 
 namespace dromozoa {

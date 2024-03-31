@@ -18,9 +18,9 @@
 #include <iostream>
 #include <sstream>
 
+#include "common.hpp"
 #include "dromozoa/bind.hpp"
 #include "dromozoa/bind/thread.hpp"
-#include "common.hpp"
 
 namespace dromozoa {
   namespace {
