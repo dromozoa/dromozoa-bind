@@ -24,10 +24,10 @@ extern "C" {
 
 namespace dromozoa {
   bool verbose();
-  bool runtime_error_policy_is_error(lua_State*);
+  bool failure_policy_is_error(lua_State*);
 }
 
-#define DROMOZOA_RUNTIME_ERROR_POLICY_IS_ERROR(L) runtime_error_policy_is_error(L)
+#define DROMOZOA_FAILURE_POLICY_IS_ERROR(L) failure_policy_is_error(L)
 
 #define DROMOZOA_CHECK(expr) \
   do { \

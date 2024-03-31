@@ -18,8 +18,8 @@
 #ifndef DROMOZOA_BIND_LUAX_HPP
 #define DROMOZOA_BIND_LUAX_HPP
 
-#ifndef DROMOZOA_RUNTIME_ERROR_POLICY_IS_ERROR
-#define DROMOZOA_RUNTIME_ERROR_POLICY_IS_ERROR(L) false
+#ifndef DROMOZOA_FAILURE_POLICY_IS_ERROR
+#define DROMOZOA_FAILURE_POLICY_IS_ERROR(L) false
 #endif
 
 extern "C" {
@@ -945,7 +945,7 @@ namespace dromozoa {
         try {
           return call(L, top, reinterpret_cast<T>(lua_touserdata(L, lua_upvalueindex(1))));
         } catch (const luaX_failure<>& e) {
-          if (DROMOZOA_RUNTIME_ERROR_POLICY_IS_ERROR(L)) {
+          if (DROMOZOA_FAILURE_POLICY_IS_ERROR(L)) {
             lua_settop(L, top);
             luaL_where(L, 1);
             luaX_push(L, "exception caught: ");
@@ -958,7 +958,7 @@ namespace dromozoa {
             return 2;
           }
         } catch (const luaX_failure<int>& e) {
-          if (DROMOZOA_RUNTIME_ERROR_POLICY_IS_ERROR(L)) {
+          if (DROMOZOA_FAILURE_POLICY_IS_ERROR(L)) {
             lua_settop(L, top);
             luaL_where(L, 1);
             luaX_push(L, "exception caught: ");

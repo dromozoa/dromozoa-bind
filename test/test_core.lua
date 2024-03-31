@@ -145,12 +145,12 @@ local result = bind.core.top_saver()
 assert(result == 0)
 
 --
--- DROMOZOA_RUNTIME_ERROR_POLICY_IS_ERROR
+-- DROMOZOA_FAILURE_POLICY_IS_ERROR
 --
 
-assert(not dromozoa_runtime_error_policy_is_error)
+assert(not dromozoa_failure_policy_is_error)
 
-dromozoa_runtime_error_policy_is_error = true
+dromozoa_failure_policy_is_error = true
 
 local result, message = pcall(bind.core.failure1)
 if verbose then print(message) end

@@ -30,8 +30,8 @@ namespace dromozoa {
     return false;
   }
 
-  bool runtime_error_policy_is_error(lua_State* L) {
-    lua_getglobal(L, "dromozoa_runtime_error_policy_is_error");
+  bool failure_policy_is_error(lua_State* L) {
+    lua_getglobal(L, "dromozoa_failure_policy_is_error");
     bool result = lua_toboolean(L, -1);
     lua_pop(L, 1);
     return result;
