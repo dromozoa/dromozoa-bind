@@ -1,4 +1,4 @@
-// Copyright (C) 2018,2019 Tomoyuki Fujimori <moyu@dromozoa.com>
+// Copyright (C) 2018,2019,2024 Tomoyuki Fujimori <moyu@dromozoa.com>
 //
 // This file is part of dromozoa-bind.
 //
@@ -18,9 +18,16 @@
 #ifndef DROMOZOA_COMMON_HPP
 #define DROMOZOA_COMMON_HPP
 
+extern "C" {
+#include <lua.h>
+}
+
 namespace dromozoa {
   bool verbose();
+  bool failure_policy_is_error(lua_State*);
 }
+
+#define DROMOZOA_FAILURE_POLICY_IS_ERROR(L) failure_policy_is_error(L)
 
 #define DROMOZOA_CHECK(expr) \
   do { \

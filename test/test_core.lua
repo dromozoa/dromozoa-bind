@@ -1,4 +1,4 @@
--- Copyright (C) 2018 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2018,2024 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-bind.
 --
@@ -143,3 +143,31 @@ assert(code == 69)
 
 local result = bind.core.top_saver()
 assert(result == 0)
+
+--
+-- DROMOZOA_FAILURE_POLICY_IS_ERROR
+--
+
+assert(not dromozoa_failure_policy_is_error)
+
+dromozoa_failure_policy_is_error = true
+
+local result, message = pcall(bind.core.failure1)
+if verbose then print(message) end
+assert(not result)
+assert(message:find "failure1$")
+
+local result, message = pcall(bind.core.failure2)
+if verbose then print(message) end
+assert(not result)
+assert(message:find "failure2$")
+
+local result, message = pcall(bind.core.failure3)
+if verbose then print(message) end
+assert(not result)
+assert(message:find "failure3$")
+
+local result, message = pcall(bind.core.failure4)
+if verbose then print(message) end
+assert(not result)
+assert(message:find "failure4$")
